@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, Gamepad2, Music, MessageSquare } from 'lucide-react';
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export default function Header() {
   return (
@@ -13,7 +14,7 @@ export default function Header() {
             </div>
             <span className="text-lg font-semibold">HAZEL</span>
           </div>
-          
+
           {/* Navigation Links */}
           <div className="flex items-center gap-1">
             <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
@@ -40,10 +41,21 @@ export default function Header() {
 
           {/* User Profile */}
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition">
-              Login
-            </button>
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm">U</div>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition cursor-pointer">
+                  Login
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="px-4 py-2 rounded-full bg-[#6c47ff] text-white text-sm hover:bg-[#5b3bdb] transition cursor-pointer">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </div>
