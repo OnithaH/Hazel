@@ -6,6 +6,8 @@ import { BrainCircuit } from 'lucide-react';
 
 const FocusTrackingSettings = () => {
     const [sensitivity, setSensitivity] = useState('Medium');
+    const [autoSuggestBreaks, setAutoSuggestBreaks] = useState(true);
+    const [breakInterval, setBreakInterval] = useState(25);
 
     return (
         <SectionWrapper title="Focus Tracking" icon={BrainCircuit}>
@@ -30,15 +32,23 @@ const FocusTrackingSettings = () => {
 
                 <div>
                     <label className="block text-xs text-gray-400 mb-3 ml-1">Break Interval (minutes)</label>
-                    <div className="bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-300">
-                        25
-                    </div>
+                    <input
+                        type="number"
+                        min="5"
+                        max="120"
+                        value={breakInterval}
+                        onChange={(e) => setBreakInterval(Number(e.target.value))}
+                        className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
+                    />
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                <div
+                    className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 cursor-pointer"
+                    onClick={() => setAutoSuggestBreaks(!autoSuggestBreaks)}
+                >
                     <span className="text-sm text-gray-300">Auto-suggest breaks</span>
-                    <div className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                    <div className="relative inline-flex items-center cursor-pointer pointer-events-none">
+                        <input type="checkbox" className="sr-only peer" checked={autoSuggestBreaks} readOnly />
                         <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                     </div>
                 </div>

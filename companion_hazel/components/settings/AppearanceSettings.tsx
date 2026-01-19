@@ -6,6 +6,7 @@ import { Palette, Moon, Sun, Smartphone } from 'lucide-react';
 
 const AppearanceSettings = () => {
     const [activeTheme, setActiveTheme] = useState('dark');
+    const [brightness, setBrightness] = useState(80);
 
     const themes = [
         { id: 'dark', label: 'Dark', icon: Moon },
@@ -36,9 +37,13 @@ const AppearanceSettings = () => {
                 </div>
 
                 <div>
-                    <label className="block text-xs text-gray-400 mb-3 ml-1">App Brightness</label>
+                    <label className="block text-xs text-gray-400 mb-3 ml-1">App Brightness: {brightness}%</label>
                     <input
                         type="range"
+                        min="0"
+                        max="100"
+                        value={brightness}
+                        onChange={(e) => setBrightness(Number(e.target.value))}
                         className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-purple-500"
                     />
                 </div>
