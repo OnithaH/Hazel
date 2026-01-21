@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { 
   Clock, 
   TrendingUp, 
@@ -167,7 +168,7 @@ export default function DashboardPage() {
       <div className="mb-8">
         <h2 className="text-2xl font-normal mb-6">Mode Access</h2>
         <div className="grid grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-8">
+          <Link href="/study_mode" className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-8 hover:border-blue-500/40 hover:from-blue-500/15 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
               <BookOpen className="w-6 h-6 text-blue-400" />
             </div>
@@ -179,9 +180,9 @@ export default function DashboardPage() {
               </div>
               <span className="text-white/60 text-xs">75%</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-8">
+          <Link href="/Game_mode" className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-8 hover:border-purple-500/40 hover:from-purple-500/15 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
               <Gamepad2 className="w-6 h-6 text-purple-400" />
             </div>
@@ -193,9 +194,9 @@ export default function DashboardPage() {
               </div>
               <span className="text-white/60 text-xs">50%</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-8">
+          <Link href="/study_session" className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-8 hover:border-pink-500/40 hover:from-pink-500/15 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center mb-4">
               <Music className="w-6 h-6 text-pink-400" />
             </div>
@@ -207,9 +208,9 @@ export default function DashboardPage() {
               </div>
               <span className="text-white/60 text-xs">80%</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-8">
+          <Link href="/General_mode" className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-8 hover:border-green-500/40 hover:from-green-500/15 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
               <MessageSquare className="w-6 h-6 text-green-400" />
             </div>
@@ -221,7 +222,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-white/60 text-xs">67%</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
