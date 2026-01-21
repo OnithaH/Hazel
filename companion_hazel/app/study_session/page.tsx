@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Clock,
   Target,
@@ -46,10 +47,10 @@ export default function StudySessionDetails() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <button className="flex items-center gap-2 text-white/60 hover:text-white mb-4 transition-colors">
+            <Link href="/study_mode" className="flex items-center gap-2 text-white/60 hover:text-white mb-4 transition-colors">
               <ArrowLeft className="w-4 h-4" />
               Back
-            </button>
+            </Link>
             <h1 className="text-3xl font-normal mb-2">Study Session Details</h1>
             <p className="text-white/60">Today, 2:34 PM - 4:34 PM</p>
           </div>
