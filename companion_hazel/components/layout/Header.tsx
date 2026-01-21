@@ -1,6 +1,7 @@
 import React from 'react';
-import { BookOpen, Gamepad2, Music, MessageSquare } from 'lucide-react';
+import { BookOpen, Gamepad2, Music, MessageSquare, Settings } from 'lucide-react';
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function Header() {
   return (
@@ -8,35 +9,39 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo Section */}
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold">H</span>
             </div>
-            <span className="text-lg font-semibold">HAZEL</span>
-          </div>
+            <span className="text-lg font-semibold text-white">HAZEL</span>
+          </Link>
 
           {/* Navigation Links */}
           <div className="flex items-center gap-1">
-            <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <BookOpen className="w-4 h-4" />
               <span className="text-sm">Dashboard</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            </Link>
+            <Link href="/study_mode" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <BookOpen className="w-4 h-4" />
               <span className="text-sm">Study</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            </Link>
+            <Link href="/Game_mode" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <Gamepad2 className="w-4 h-4" />
               <span className="text-sm">Gaming</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            </Link>
+            <Link href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <Music className="w-4 h-4" />
               <span className="text-sm">Music</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            </Link>
+            <Link href="/General_mode" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <MessageSquare className="w-4 h-4" />
               <span className="text-sm">General</span>
-            </a>
+            </Link>
+            <Link href="/setting" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+              <Settings className="w-4 h-4" />
+              <span className="text-sm">Settings</span>
+            </Link>
           </div>
 
           {/* User Profile */}
