@@ -10,10 +10,11 @@ export default function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold">H</span>
-            </div>
-            <span className="text-lg font-semibold text-white">HAZEL</span>
+            <img
+              src="/images/logo%20(1).png"
+              alt="Hazel logo"
+              className="h-10 sm:h-12 w-auto"
+            />
           </Link>
 
           {/* Navigation Links */}
@@ -53,7 +54,7 @@ export default function Header() {
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="px-4 py-2 rounded-full bg-[#6c47ff] text-white text-sm hover:bg-[#5b3bdb] transition cursor-pointer">
+                <button className="px-4 py-2 rounded-full bg-[#00f2c6] text-black text-sm hover:bg-[#00d9ad] transition cursor-pointer">
                   Sign Up
                 </button>
               </SignUpButton>
