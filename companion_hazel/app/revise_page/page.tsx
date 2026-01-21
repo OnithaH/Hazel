@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -59,10 +60,10 @@ export default function ReviseQAPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <button className="flex items-center gap-2 text-white/60 hover:text-white mb-6 transition-colors">
+          <Link href="/study_mode" className="flex items-center gap-2 text-white/60 hover:text-white mb-6 transition-colors">
             <ArrowLeft className="w-5 h-5" />
             Back
-          </button>
+          </Link>
           
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center">

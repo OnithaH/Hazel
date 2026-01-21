@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 export default function StudyModePage() {
   const [selectedAroma, setSelectedAroma] = useState('Peppermint');
@@ -132,17 +133,17 @@ export default function StudyModePage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-3 gap-4">
-          <button className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
+          <Link href="/schedule_session" className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
             <Calendar className="w-6 h-6 text-blue-400 mb-3" />
             <h3 className="text-base mb-1">Schedule Session</h3>
             <p className="text-white/60 text-sm">Plan your study time</p>
-          </button>
+          </Link>
 
-          <button className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
+          <Link href="/revise_page" className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
             <BookOpen className="w-6 h-6 text-purple-400 mb-3" />
             <h3 className="text-base mb-1">Revise Q&A</h3>
             <p className="text-white/60 text-sm">Upload & practice</p>
-          </button>
+          </Link>
 
           <button className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
             <Camera className="w-6 h-6 text-pink-400 mb-3" />
@@ -171,9 +172,9 @@ export default function StudyModePage() {
                   </div>
                   <p className="text-white/60 text-sm">{item.distractions}</p>
                 </div>
-                <button className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
+                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
                   View Details
-                </button>
+                </Link>
               </div>
             ))}
           </div>

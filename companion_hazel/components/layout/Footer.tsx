@@ -9,10 +9,11 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
-              </div>
-              <span className="text-xl font-semibold">Hazel</span>
+              <img
+                src="/images/logo%20(1).png"
+                alt="Hazel logo"
+                className="h-8 sm:h-10 w-auto"
+              />
             </div>
             <p className="text-white/60 text-sm">Your intelligent companion robot for study, gaming, and everyday life.</p>
             <div className="flex items-center gap-2 text-sm text-white/60">
