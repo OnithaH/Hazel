@@ -179,24 +179,7 @@ export default function MusicModePage() {
           height: 100%;
           border-radius: 100px;
           transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-        .card-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card-lift:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
-
-        .shimmer-bar {
-          background: linear-gradient(90deg, #F6339A 0%, #AD46FF 35%, #2B7FFF 65%, #F6339A 100%);
-          background-size: 200% auto;
-          animation: shimmer 2.5s linear infinite;
         }
-
-        .progress-track { cursor: pointer; position: relative; }
-        .progress-thumb {
-          width: 14px; height: 14px; border-radius: 50%; background: white;
-          position: absolute; top: 50%; transform: translate(-50%, -50%);
-          opacity: 0; transition: opacity 0.2s ease;
-          box-shadow: 0 0 10px rgba(246,51,154,0.9); pointer-events: none;
-        }
-        .progress-track:hover .progress-thumb { opacity: 1; }
       `}</style>
 
       <div style={{ padding: "52px 40px 72px" }}>
@@ -220,7 +203,7 @@ export default function MusicModePage() {
           <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Album area */}
-            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "360px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "340px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
               <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(70px)" }} />
               <div style={{ position: "absolute", bottom: "32px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "2.5px", height: "64px", paddingInline: "28px" }}>
                 {(mounted ? bars : Array(40).fill(8)).map((h, i) => (
@@ -228,33 +211,6 @@ export default function MusicModePage() {
                 ))}
               </div>
               <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "7px" }} />
-        {/* ── Player Row — both columns same height ── */}
-        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
-
-          {/* ── Player Card ── */}
-          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
-
-            {/* Album — flex-grow so it fills leftover height */}
-            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "460px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
-              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(70px)" }} />
-
-              {/* Visualizer bars */}
-              <div style={{ position: "absolute", bottom: "32px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "2.5px", height: "64px", paddingInline: "28px" }}>
-                {(mounted ? bars : Array(40).fill(8)).map((h, i) => (
-                  <div key={i} style={{
-                    flex: 1, maxHeight: "64px",
-                    height: `${isPlaying ? h : 7}px`,
-                    background: `rgba(255,255,255,${isPlaying ? 0.28 : 0.11})`,
-                    borderRadius: "3px 3px 0 0",
-                    transition: `height ${0.13 + (i % 6) * 0.022}s ease`,
-                  }} />
-                ))}
-              </div>
-
-              {/* Chromatic bar */}
-              <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "7px" }} />
-
-              {/* Center content */}
               <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", paddingBottom: "48px" }}>
                 <div className={isPlaying ? "music-icon active" : "music-icon"}>
                   <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
@@ -293,7 +249,6 @@ export default function MusicModePage() {
             </div>
 
             {/* Controls */}
-            {/* Playback controls */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}>
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -325,7 +280,6 @@ export default function MusicModePage() {
           </div>
 
           {/* ── Right column ── */}
-          {/* ── Right column — stretch to match player height ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Gesture Controls */}
@@ -398,26 +352,6 @@ export default function MusicModePage() {
                 </div>
                 <div style={{ height: "7px", borderRadius: "100px", background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
                   <div style={{ width: "100%", height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, #F6339A, #FB64B6)", boxShadow: "0 0 10px rgba(246,51,154,0.5)" }} />
-            {/* Aroma Match — flex-grow to fill remaining height */}
-            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <rect x="1.5" y="1.5" width="15" height="15" rx="2.5" stroke="#FB64B6" strokeWidth="1.5"/>
-                  <path d="M15 1.5L18 0M13 3.5L15 1.5M1.5 15L0 16.5" stroke="#FB64B6" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <span style={{ fontSize: "15px", color: "#fff" }}>Aroma Match</span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "16px" }}>
-                <span style={{ color: "rgba(255,255,255,0.5)" }}>Current scent: </span>
-                <span style={{ color: "#fff", fontWeight: 500 }}>Citrus</span>
-              </div>
-              <div style={{ background: "rgba(255,255,255,0.05)", border: "0.8px solid rgba(255,255,255,0.09)", borderRadius: "12px", padding: "16px" }}>
-                <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: "0 0 12px" }}>Matches Pop genre</p>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ flex: 1, height: "7px", borderRadius: "100px", background: "rgba(255,255,255,0.1)" }}>
-                    <div style={{ width: "100%", height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, #F6339A, #FB64B6)", boxShadow: "0 0 10px rgba(246,51,154,0.5)" }} />
-                  </div>
-                  <span style={{ fontSize: "13px", color: "#FB64B6", flexShrink: 0, fontWeight: 500 }}>Active</span>
                 </div>
               </div>
 
@@ -450,14 +384,6 @@ export default function MusicModePage() {
             {genres.map((g, i) => (
               <button key={g.name} onClick={() => setActiveGenre(i)} className="genre-btn"
                 style={{ background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)", border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)", borderRadius: "18px", padding: "22px 18px", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", color: "#fff", boxShadow: activeGenre === i ? "0 10px 30px rgba(0,0,0,0.35)" : "none" }}>
-                style={{
-                  background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)",
-                  border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)",
-                  borderRadius: "18px", padding: "22px 18px",
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: "14px",
-                  color: "#fff",
-                  boxShadow: activeGenre === i ? "0 10px 30px rgba(0,0,0,0.35)" : "none",
-                }}>
                 <div style={{ width: "100%", height: "80px", borderRadius: "13px", background: g.gradient, boxShadow: activeGenre === i ? "0 6px 20px rgba(0,0,0,0.45)" : "none", transition: "box-shadow 0.25s ease" }} />
                 <span style={{ fontSize: "15px", fontWeight: activeGenre === i ? 500 : 400 }}>{g.name}</span>
                 <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{g.scent}</span>
