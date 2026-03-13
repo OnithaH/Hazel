@@ -5,7 +5,6 @@ import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationsSettings from '@/components/settings/NotificationsSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import AudioSettings from '@/components/settings/AudioSettings';
-import FocusTrackingSettings from '@/components/settings/FocusTrackingSettings';
 import AromaPillarsSettings from '@/components/settings/AromaPillarsSettings';
 import PrivacySecuritySettings from '@/components/settings/PrivacySecuritySettings';
 import AboutSection from '@/components/settings/AboutSection';
@@ -51,7 +50,6 @@ export default function SettingsPage() {
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                    <FocusTrackingSettings />
                     <AromaPillarsSettings />
                     <PrivacySecuritySettings />
                     <AboutSection />
