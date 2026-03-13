@@ -11,10 +11,10 @@ export default function StudyModePage() {
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
 
   const historyData = [
-    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
-    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
-    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
-    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
+    { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
+    { date: 'Yesterday', time: '3h 12m', focus: '92%', distractions: '2 distractions' },
+    { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
+    { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
   ];
 
   return (
@@ -26,7 +26,7 @@ export default function StudyModePage() {
             <h1 className="text-4xl font-normal">Study Mode</h1>
             <p className="text-white/60">Enhanced focus and learning environment</p>
           </div>
-          
+
           <div className="flex items-center gap-3 px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-full">
             <div className="w-2 h-2 bg-blue-500 rounded-full opacity-85"></div>
             <span>Study Mode Active</span>
@@ -39,7 +39,7 @@ export default function StudyModePage() {
           <div className="col-span-2 bg-linear-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-3xl p-8 space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl">Focus Tracking</h2>
-              <button 
+              <button
                 onClick={() => setIsTracking(!isTracking)}
                 className="px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-2xl flex items-center gap-2 text-blue-400 hover:bg-blue-500/30 transition-all"
               >
@@ -68,7 +68,7 @@ export default function StudyModePage() {
           </div>
 
           {/* Right Sidebar Cards */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Aroma Pillars */}
             <div className="bg-linear-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
@@ -81,11 +81,10 @@ export default function StudyModePage() {
                   <button
                     key={aroma}
                     onClick={() => setSelectedAroma(aroma)}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${
-                      selectedAroma === aroma
+                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
                         ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
                         : 'bg-white/5 border border-white/10 text-white/60'
-                    }`}
+                      }`}
                   >
                     {aroma}
                   </button>
@@ -125,29 +124,26 @@ export default function StudyModePage() {
             <h3 className="text-base mb-1">Revise Q&A</h3>
             <p className="text-white/60 text-sm">Upload & practice</p>
           </Link>
-          
         </div>
 
-        <div className="bg-[#1C212B] rounded-2xl p-6 space-y-6">
-          <h2 className="text-2xl font-normal text-white">Study History</h2>
-          
+        {/* Study History */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Study History</h2>
+
           <div className="space-y-3">
             {historyData.map((item, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center bg-[#252B36] rounded-xl p-4 hover:bg-[#2A313C] transition-all"
+                className="flex justify-between items-center bg-[#1C1E26] rounded-xl p-4 transition-all"
               >
                 <div className="flex items-center gap-16">
                   <div>
-                    <p className="text-white font-normal">{item.date}</p>
-                    <p className="text-white/60 text-sm mt-1">{item.time}</p>
+                    <p className="text-[14px]">{item.date}</p>
+                    <p className="text-white/40 text-[12px]">{item.time}</p>
                   </div>
-                  <p className="text-white/60 text-sm">{item.distractions}</p>
+                  <p className="text-white/60 text-[13px]">{item.distractions}</p>
                 </div>
-                <Link
-                  href="/study_session"
-                  className="px-5 py-2.5 bg-[#313843] border border-white/5 rounded-lg text-sm text-white hover:bg-[#3A4350] transition-all"
-                >
+                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
                   View Details
                 </Link>
               </div>
