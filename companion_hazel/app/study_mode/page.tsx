@@ -55,14 +55,10 @@ export default function StudyModePage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Focus Time</p>
                 <p className="text-2xl">2h 34m</p>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
-                <p className="text-white/60 text-sm">Focus Score</p>
-                <p className="text-2xl">87%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
@@ -73,21 +69,6 @@ export default function StudyModePage() {
 
           {/* Right Sidebar Cards */}
           <div className="space-y-4">
-            {/* Focus Shield */}
-            <div className="bg-linear-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6 space-y-3">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-purple-400" />
-                <h3 className="text-base">Focus Shield</h3>
-              </div>
-              <p className="text-white/60 text-sm">Audio monitoring active</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="w-4/5 h-full bg-purple-500 opacity-85"></div>
-                </div>
-                <span className="text-purple-400 text-sm">Active</span>
-              </div>
-            </div>
-
             {/* Aroma Pillars */}
             <div className="bg-linear-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
@@ -132,7 +113,7 @@ export default function StudyModePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <Link href="/schedule_session" className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
             <Calendar className="w-6 h-6 text-blue-400 mb-3" />
             <h3 className="text-base mb-1">Schedule Session</h3>
@@ -144,12 +125,6 @@ export default function StudyModePage() {
             <h3 className="text-base mb-1">Revise Q&A</h3>
             <p className="text-white/60 text-sm">Upload & practice</p>
           </Link>
-
-          <button className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
-            <Camera className="w-6 h-6 text-pink-400 mb-3" />
-            <h3 className="text-base mb-1">OCR Scanner</h3>
-            <p className="text-white/60 text-sm">Scan textbooks</p>
-          </button>
         </div>
 
         {/* Study History */}
