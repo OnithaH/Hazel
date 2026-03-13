@@ -31,7 +31,7 @@ export default function Header() {
               <Gamepad2 className="w-4 h-4" />
               <span className="text-sm">Gaming</span>
             </Link>
-            <Link href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            <Link href="/Music_mode" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <Music className="w-4 h-4" />
               <span className="text-sm">Music</span>
             </Link>
@@ -46,7 +46,7 @@ export default function Header() {
           </div>
 
           {/* User Profile */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3" suppressHydrationWarning>
             <SignedOut>
               <SignInButton mode="modal">
                 <button className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm hover:bg-white/20 transition cursor-pointer">
