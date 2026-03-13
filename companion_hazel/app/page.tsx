@@ -1,326 +1,251 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Clock, 
-  TrendingUp, 
-  Target, 
-  Flame, 
-  Brain, 
   Trophy, 
-  Droplet, 
-  BookOpen, 
-  Gamepad2, 
-  Music, 
-  MessageSquare, 
-  Calendar 
+  Activity, 
+  Clock, 
+  Heart, 
+  Twitter, 
+  Github, 
+  Linkedin, 
+  Mail 
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const [timer, setTimer] = useState(9255); // Starting around 2:34:15
+
+  useEffect(() => {
+    const interval = setInterval(() => setTimer(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const activities = [
+    { label: 'Study', percent: 65, colorClass: 'bg-blue-500', width: '65%' },
+    { label: 'Gaming', percent: 15, colorClass: 'bg-purple-500', width: '30%' },
+    { label: 'Music', percent: 12, colorClass: 'bg-pink-500', width: '25%' },
+    { label: 'General', percent: 8, colorClass: 'bg-green-500', width: '15%' },
+  ];
+
+  const weeklyData = [
+    { day: 'Mon', segments: [{color: 'bg-blue-500', w: 40}, {color: 'bg-purple-500', w: 10}, {color: 'bg-pink-500', w: 15}, {color: 'bg-green-500', w: 15}], total: '4h' },
+    { day: 'Tue', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 20}], total: '3h' },
+    { day: 'Wed', segments: [{color: 'bg-blue-500', w: 47}, {color: 'bg-purple-500', w: 12}, {color: 'bg-pink-500', w: 18}, {color: 'bg-green-500', w: 8}], total: '3h' },
+    { day: 'Thu', segments: [{color: 'bg-blue-500', w: 55}, {color: 'bg-purple-500', w: 8}, {color: 'bg-pink-500', w: 25}, {color: 'bg-green-500', w: 15}], total: '4h' },
+    { day: 'Fri', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 18}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '4h' },
+    { day: 'Sat', segments: [{color: 'bg-blue-500', w: 35}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 12}], total: '3h' },
+    { day: 'Sun', segments: [{color: 'bg-blue-500', w: 48}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '5h' },
+  ];
+
   return (
-    <main className="max-w-7xl mx-auto px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-normal mb-2">Welcome Back, User</h1>
-        <p className="text-white/60">Here&apos;s what&apos;s happening with Hazel today</p>
-      </div>
+    <div className="min-h-screen bg-[#07080A] text-white font-sans selection:bg-blue-500/30">
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-2">
-            <Clock className="w-5 h-5 text-blue-400" />
-            <span className="text-blue-400 text-sm">Today</span>
-          </div>
-          <div className="text-3xl font-normal mb-1">4h 23m</div>
-          <div className="text-white/60 text-sm">Focus Time</div>
+      <main className="max-w-[1240px] mx-auto mt-10 px-8">
+        {/* Header */}
+        <div className="mb-8 pl-1">
+          <h1 className="text-3xl font-medium mb-3">Welcome Back, User</h1>
+          <p className="text-white/40 text-sm">Here's what's happening with Hazel today</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-2">
-            <TrendingUp className="w-5 h-5 text-purple-400" />
-            <span className="text-purple-400 text-sm">+12%</span>
-          </div>
-          <div className="text-3xl font-normal mb-1">89%</div>
-          <div className="text-white/60 text-sm">Focus Score</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-pink-500/20 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-2">
-            <Target className="w-5 h-5 text-pink-400" />
-            <span className="text-pink-400 text-sm">3/5</span>
-          </div>
-          <div className="text-3xl font-normal mb-1">3</div>
-          <div className="text-white/60 text-sm">Goals Completed</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/20 rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-2">
-            <Flame className="w-5 h-5 text-green-400" />
-            <span className="text-green-400 text-sm">Active</span>
-          </div>
-          <div className="text-3xl font-normal mb-1">12</div>
-          <div className="text-white/60 text-sm">Day Streak</div>
-        </div>
-      </div>
-
-      {/* Focus Session & Side Cards */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="col-span-2 bg-white/5 border border-white/10 rounded-3xl p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-normal">Today&apos;s Focus Session</h2>
-            <span className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-sm">In Progress</span>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8 mb-6">
-            <div className="text-center">
-              <div className="text-6xl font-normal mb-2">2:34:15</div>
-              <div className="text-white/60">Time Elapsed</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Left Column (Wider) */}
+          <div className="lg:col-span-2 bg-[#12141C] border border-white/5 rounded-2xl p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-lg font-medium">Today's Session Breakdown</h2>
+              <span className="px-4 py-1.5 bg-[#1e293b]/50 text-blue-400 text-xs font-medium rounded-full">In Progress</span>
             </div>
-            <div className="mt-8 h-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-b-2xl"></div>
+            
+            <div className="flex-1 flex flex-col justify-center items-center py-16 relative bg-[#1A1D27] rounded-xl mb-10 overflow-hidden">
+              <div className="text-6xl font-light tracking-wider mb-2">{formatTime(timer)}</div>
+              <div className="text-white/40 text-xs">Time Elapsed</div>
+              <div className="absolute w-full bottom-0 left-0 h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-medium text-white/80 mb-5">Today's Activity Breakdown</h3>
+              <div className="space-y-4">
+                {activities.map((act) => (
+                  <div className="flex items-center gap-4 text-sm" key={act.label}>
+                    <div className="flex-1 h-7 bg-[#1A1D27] rounded-md overflow-hidden">
+                      <div className={`h-full ${act.colorClass} opacity-90`} style={{ width: act.width }}></div>
+                    </div>
+                    <div className="w-24 text-white/40 text-[11px] leading-tight flex flex-col justify-center">
+                      <span>{act.label} {act.percent}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h3 className="text-lg font-normal mb-4">Today&apos;s Activity Breakdown</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/5 rounded-lg h-8 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400" style={{width: '65%'}}></div>
+          {/* Right Column */}
+          <div className="flex flex-col gap-6">
+            {/* Weekly Goal */}
+            <div className="bg-[#12141D] border border-orange-500/10 rounded-2xl p-6 relative overflow-hidden flex-[1] flex flex-col min-h-[160px]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10"></div>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="text-orange-400" size={16} />
+                  <span className="text-xs font-medium text-white/80">Weekly Goal</span>
                 </div>
-                <span className="text-white/60 text-sm w-20">Study 65%</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/5 rounded-lg h-8 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400" style={{width: '15%'}}></div>
+                <div className="text-[28px] font-medium mb-1">24/30</div>
+                <div className="text-xs text-white/40 mb-5">Hours completed</div>
+                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden mt-6">
+                  <div className="h-full bg-orange-500 w-[80%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
                 </div>
-                <span className="text-white/60 text-sm w-20">Gaming 15%</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/5 rounded-lg h-8 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-pink-500 to-pink-400" style={{width: '12%'}}></div>
+            </div>
+
+            {/* Environment */}
+            <div className="bg-[#12141D] border border-cyan-500/10 rounded-2xl p-6 relative overflow-hidden flex-[1.2]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10"></div>
+              <div className="relative h-full flex flex-col">
+                <div className="flex items-center gap-2 mb-5">
+                  <Activity className="text-cyan-400" size={16} />
+                  <span className="text-xs font-medium text-white/80">Environment</span>
                 </div>
-                <span className="text-white/60 text-sm w-20">Music 12%</span>
+                <div className="space-y-2 mt-auto">
+                  <div className="flex justify-between items-center text-xs bg-[#1A1D27] px-4 py-2.5 rounded flex-1">
+                    <span className="text-white/40">Lighting</span>
+                    <span className="text-cyan-400 font-medium tracking-wide">Optimal</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs bg-[#1A1D27] px-4 py-2.5 rounded flex-1">
+                    <span className="text-white/40">Aroma</span>
+                    <span className="text-cyan-400 font-medium tracking-wide">Peppermint</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs bg-[#1A1D27] px-4 py-2.5 rounded flex-1">
+                    <span className="text-white/40">Audio</span>
+                    <span className="text-cyan-400 font-medium tracking-wide">Shield On</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/5 rounded-lg h-8 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-green-500 to-green-400" style={{width: '8%'}}></div>
+            </div>
+
+            {/* Focus Time */}
+            <div className="bg-[#12141D] border border-blue-500/10 rounded-2xl p-6 relative overflow-hidden flex-[0.8] flex flex-col justify-between min-h-[140px]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10"></div>
+              <div className="relative flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-blue-400" size={16} />
                 </div>
-                <span className="text-white/60 text-sm w-20">General 8%</span>
+                <span className="text-xs text-blue-400 font-medium">Today</span>
+              </div>
+              <div className="relative mt-auto">
+                <div className="text-[28px] font-medium mb-1">4h 23m</div>
+                <div className="text-xs text-white/40">Focus Time</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Brain className="w-6 h-6 text-purple-400" />
-              <h3 className="font-normal">Brain Activity</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-white/60 text-sm">Focus Level</span>
-                <span className="text-purple-400 text-sm">High</span>
-              </div>
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 opacity-50" style={{width: '80%'}}></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-6 h-6 text-yellow-400" />
-              <h3 className="font-normal">Weekly Goal</h3>
-            </div>
-            <div className="space-y-1 mb-3">
-              <div className="text-3xl font-normal">24/30</div>
-              <div className="text-white/60 text-sm">Hours completed</div>
-            </div>
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-yellow-500 to-orange-500" style={{width: '80%'}}></div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Droplet className="w-6 h-6 text-cyan-400" />
-              <h3 className="font-normal">Environment</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center bg-white/5 rounded-lg px-2 py-2">
-                <span className="text-white/60 text-xs">Lighting</span>
-                <span className="text-cyan-400 text-xs">Optimal</span>
-              </div>
-              <div className="flex justify-between items-center bg-white/5 rounded-lg px-2 py-2">
-                <span className="text-white/60 text-xs">Aroma</span>
-                <span className="text-cyan-400 text-xs">Peppermint</span>
-              </div>
-              <div className="flex justify-between items-center bg-white/5 rounded-lg px-2 py-2">
-                <span className="text-white/60 text-xs">Audio</span>
-                <span className="text-cyan-400 text-xs">Shield On</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mode Access */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-normal mb-6">Mode Access</h2>
-        <div className="grid grid-cols-4 gap-6">
-          <Link href="/study_mode" className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-8 hover:border-blue-500/40 hover:from-blue-500/15 transition-all duration-200 cursor-pointer">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
-              <BookOpen className="w-6 h-6 text-blue-400" />
-            </div>
-            <h3 className="text-xl font-normal mb-2">Study Mode</h3>
-            <p className="text-white/60 text-sm mb-4">Focus tracking & learning</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500" style={{width: '75%'}}></div>
-              </div>
-              <span className="text-white/60 text-xs">75%</span>
-            </div>
-          </Link>
-
-          <Link href="/Game_mode" className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-8 hover:border-purple-500/40 hover:from-purple-500/15 transition-all duration-200 cursor-pointer">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
-              <Gamepad2 className="w-6 h-6 text-purple-400" />
-            </div>
-            <h3 className="text-xl font-normal mb-2">Gaming Mode</h3>
-            <p className="text-white/60 text-sm mb-4">Mind-refreshing games</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500" style={{width: '50%'}}></div>
-              </div>
-              <span className="text-white/60 text-xs">50%</span>
-            </div>
-          </Link>
-
-          <Link href="/study_session" className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-8 hover:border-pink-500/40 hover:from-pink-500/15 transition-all duration-200 cursor-pointer">
-            <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center mb-4">
-              <Music className="w-6 h-6 text-pink-400" />
-            </div>
-            <h3 className="text-xl font-normal mb-2">Music Mode</h3>
-            <p className="text-white/60 text-sm mb-4">Gesture-controlled music</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-pink-500" style={{width: '80%'}}></div>
-              </div>
-              <span className="text-white/60 text-xs">80%</span>
-            </div>
-          </Link>
-
-          <Link href="/General_mode" className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-8 hover:border-green-500/40 hover:from-green-500/15 transition-all duration-200 cursor-pointer">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
-              <MessageSquare className="w-6 h-6 text-green-400" />
-            </div>
-            <h3 className="text-xl font-normal mb-2">General Mode</h3>
-            <p className="text-white/60 text-sm mb-4">Chat & reminders</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500" style={{width: '67%'}}></div>
-              </div>
-              <span className="text-white/60 text-xs">67%</span>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* Recent Sessions & Upcoming Schedule */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-normal mb-4">Recent Sessions</h3>
+        {/* Weekly Overview */}
+        <div className="bg-[#12141C] border border-white/5 rounded-2xl p-8 mb-16">
+          <h2 className="text-base font-medium mb-8">Weekly Overview</h2>
           <div className="space-y-4">
-            {[
-              { mode: 'Study Mode', time: '10:00 AM', duration: '2h 15m', score: '92%', color: 'blue' },
-              { mode: 'Music Mode', time: '2:30 PM', duration: '45m', score: '88%', color: 'pink' },
-              { mode: 'Gaming Mode', time: '4:15 PM', duration: '20m', score: '95%', color: 'purple' },
-              { mode: 'Study Mode', time: '6:00 PM', duration: '1h 30m', score: '87%', color: 'blue' }
-            ].map((session, i) => (
-              <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl p-4">
-                <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full bg-${session.color}-500`}></div>
-                  <div>
-                    <div className="font-normal">{session.mode}</div>
-                    <div className="text-white/60 text-xs">{session.time}</div>
-                  </div>
+            {weeklyData.map((data) => (
+              <div key={data.day} className="flex items-center gap-6 text-xs">
+                <div className="w-8 text-white/40 font-medium">{data.day}</div>
+                <div className="flex-1 h-8 bg-[#1A1D27] rounded-md overflow-hidden flex">
+                  {data.segments.map((seg, idx) => (
+                    <div key={idx} className={`h-full ${seg.color} opacity-90`} style={{ width: `${seg.w}%` }}></div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="font-normal">{session.duration}</div>
-                    <div className="text-white/60 text-xs">Score: {session.score}</div>
-                  </div>
-                  <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition">
-                    View Details
-                  </button>
-                </div>
+                <div className="w-8 text-right text-white/40 font-medium">{data.total}</div>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-normal">Upcoming Schedule</h3>
-            <Calendar className="w-5 h-5 text-white/60" />
-          </div>
-          <div className="space-y-4">
-            {[
-              { title: 'Math Study Session', time: 'Today, 3:00 PM', tag: 'Study', tagColor: 'blue' },
-              { title: 'Music Practice', time: 'Today, 5:00 PM', tag: 'Music', tagColor: 'pink' },
-              { title: 'Revision Q&A', time: 'Tomorrow, 10:00 AM', tag: 'Study', tagColor: 'blue' },
-              { title: 'Project Submission', time: 'Dec 25, 11:59 PM', tag: 'Reminder', tagColor: 'orange' }
-            ].map((item, i) => (
-              <div key={i} className="bg-white/5 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-normal">{item.title}</div>
-                  <span className={`px-3 py-1 bg-${item.tagColor}-500/20 text-${item.tagColor}-400 rounded-full text-xs`}>
-                    {item.tag}
-                  </span>
-                </div>
-                <div className="text-white/60 text-xs">{item.time}</div>
-              </div>
-            ))}
+          
+          <div className="flex items-center justify-center gap-8 mt-10">
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+               <span className="text-xs text-white/40">Study</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+               <span className="text-xs text-white/40">Gaming</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-pink-500"></div>
+               <span className="text-xs text-white/40">Music</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+               <span className="text-xs text-white/40">General</span>
+             </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Weekly Overview */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-        <h2 className="text-2xl font-normal mb-6">Weekly Overview</h2>
-        <div className="space-y-4 mb-6">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-            <div key={day} className="flex items-center gap-4">
-              <span className="text-white/60 text-sm w-12">{day}</span>
-              <div className="flex-1 bg-white/5 rounded-lg h-12 overflow-hidden flex">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-400" style={{width: '35%'}}></div>
-                <div className="bg-gradient-to-r from-purple-500 to-purple-400" style={{width: '10%'}}></div>
-                <div className="bg-gradient-to-r from-pink-500 to-pink-400" style={{width: '15%'}}></div>
-                <div className="bg-gradient-to-r from-green-500 to-green-400" style={{width: '8%'}}></div>
+      {/* Footer */}
+      <footer className="border-t border-white/5 bg-[#0A0C10] pt-16 pb-8 mt-auto">
+        <div className="max-w-[1240px] mx-auto px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1">
+              <div className="flex items-center gap-3 mb-6">
+                 <div className="w-8 h-8 rounded-full bg-[#A855F7] flex items-center justify-center text-white text-sm font-bold">H</div>
+                 <span className="text-white font-semibold tracking-widest text-sm">Hazel</span>
               </div>
-              <span className="text-white/60 text-sm w-8 text-right">{['4h', '3h', '3h', '4h', '4h', '3h', '5h'][i]}</span>
+              <p className="text-white/40 text-[11px] leading-relaxed pr-4 mb-4">
+                Your intelligent companion robot for study, gaming, music, and everyday life.
+              </p>
+              <p className="text-white/40 text-[11px] flex items-center gap-1.5">
+                Made with <Heart size={10} className="text-red-500" fill="currentColor"/> by the Hazel Team
+              </p>
             </div>
-          ))}
+            
+            <div className="pl-4">
+               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Product</h4>
+               <ul className="space-y-4 text-white/40 text-[11px]">
+                 <li><Link href="#" className="hover:text-white transition-colors">Features</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Modes</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Pricing</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Documentation</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">API</Link></li>
+               </ul>
+            </div>
+            
+            <div className="pl-4">
+               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Company</h4>
+               <ul className="space-y-4 text-white/40 text-[11px]">
+                 <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Press Kit</Link></li>
+               </ul>
+            </div>
+            
+            <div className="pl-4">
+               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Support</h4>
+               <ul className="space-y-4 text-white/40 text-[11px]">
+                 <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Community</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                 <li><Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+               </ul>
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-center text-[10px] text-white/20 pt-8 border-t border-white/5 gap-4">
+            <div>© 2025 Hazel. All rights reserved.</div>
+            <div className="flex gap-6">
+               <Twitter size={14} className="hover:text-white transition-colors cursor-pointer" /> 
+               <Github size={14} className="hover:text-white transition-colors cursor-pointer" /> 
+               <Linkedin size={14} className="hover:text-white transition-colors cursor-pointer" /> 
+               <Mail size={14} className="hover:text-white transition-colors cursor-pointer" />
+            </div>
+          </div>
         </div>
-        <div className="flex justify-center items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-white/60 text-sm">Study</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-white/60 text-sm">Gaming</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-            <span className="text-white/60 text-sm">Music</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-white/60 text-sm">General</span>
-          </div>
-        </div>
-      </div>
-    </main>
+      </footer>
+    </div>
   );
 }
