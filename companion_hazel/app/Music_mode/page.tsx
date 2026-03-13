@@ -10,6 +10,13 @@ const genres = [
   { name: "Classical", scent: "Chamomile", gradient: "linear-gradient(135deg, #A3B3FF 0%, #8EC5FF 50%, #53EAFD 100%)" },
 ];
 
+const scentPairs = [
+  { genre: "Pop", scent: "Citrus", dot: "#F6339A", intensity: 100 },
+  { genre: "Ballet", scent: "Lavender", dot: "#C27AFF", intensity: 62 },
+  { genre: "Rock", scent: "Peppermint", dot: "#FF6900", intensity: 48 },
+  { genre: "Jazz", scent: "Vanilla", dot: "#2B7FFF", intensity: 75 },
+];
+
 const upNextSongs = [
   { name: "Song Name 1", artist: "Artist 1", playlist: "Focus Beats", duration: "3:45" },
   { name: "Song Name 2", artist: "Artist 2", playlist: "Focus Beats", duration: "4:12" },
@@ -100,12 +107,30 @@ export default function MusicModePage() {
           0%, 100% { transform: translateY(0px); }
           50%       { transform: translateY(-5px); }
         }
+        @keyframes scent-drift {
+          0%   { transform: translateY(0px) scale(1);   opacity: 0.5; }
+          50%  { transform: translateY(-12px) scale(1.08); opacity: 0.8; }
+          100% { transform: translateY(0px) scale(1);   opacity: 0.5; }
+        }
+        @keyframes scent-drift2 {
+          0%   { transform: translateY(0px) scale(1);   opacity: 0.4; }
+          50%  { transform: translateY(-9px) scale(1.06); opacity: 0.7; }
+          100% { transform: translateY(0px) scale(1);   opacity: 0.4; }
+        }
+        @keyframes bar-fill {
+          from { width: 0%; }
+          to   { width: var(--target-width); }
+        }
 
         .page-enter { animation: fadeUp 0.55s ease both; }
         .pulse-dot  { animation: pulse-dot 2s ease-in-out infinite; }
         .glow-bg    { animation: glow-pulse 3s ease-in-out infinite; }
         .music-icon        { animation: float 3.2s ease-in-out infinite; }
         .music-icon.active { animation: float-fast 1.4s ease-in-out infinite; }
+
+        .scent-orb-1 { animation: scent-drift  4s ease-in-out infinite; }
+        .scent-orb-2 { animation: scent-drift2 5.5s ease-in-out infinite; }
+        .scent-orb-3 { animation: scent-drift  3.2s ease-in-out infinite 0.8s; }
 
         .genre-btn {
           transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
@@ -149,6 +174,29 @@ export default function MusicModePage() {
           box-shadow: 0 0 10px rgba(246,51,154,0.9); pointer-events: none;
         }
         .progress-track:hover .progress-thumb { opacity: 1; }
+
+        .intensity-bar {
+          height: 100%;
+          border-radius: 100px;
+          transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        .card-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-lift:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+
+        .shimmer-bar {
+          background: linear-gradient(90deg, #F6339A 0%, #AD46FF 35%, #2B7FFF 65%, #F6339A 100%);
+          background-size: 200% auto;
+          animation: shimmer 2.5s linear infinite;
+        }
+
+        .progress-track { cursor: pointer; position: relative; }
+        .progress-thumb {
+          width: 14px; height: 14px; border-radius: 50%; background: white;
+          position: absolute; top: 50%; transform: translate(-50%, -50%);
+          opacity: 0; transition: opacity 0.2s ease;
+          box-shadow: 0 0 10px rgba(246,51,154,0.9); pointer-events: none;
+        }
+        .progress-track:hover .progress-thumb { opacity: 1; }
       `}</style>
 
       <div style={{ padding: "52px 40px 72px" }}>
@@ -165,6 +213,21 @@ export default function MusicModePage() {
           </div>
         </div>
 
+        {/* ── Player Row ── */}
+        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
+
+          {/* Player Card */}
+          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
+
+            {/* Album area */}
+            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "360px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
+              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(70px)" }} />
+              <div style={{ position: "absolute", bottom: "32px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "2.5px", height: "64px", paddingInline: "28px" }}>
+                {(mounted ? bars : Array(40).fill(8)).map((h, i) => (
+                  <div key={i} style={{ flex: 1, maxHeight: "64px", height: `${isPlaying ? h : 7}px`, background: `rgba(255,255,255,${isPlaying ? 0.28 : 0.11})`, borderRadius: "3px 3px 0 0", transition: `height ${0.13 + (i % 6) * 0.022}s ease` }} />
+                ))}
+              </div>
+              <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "7px" }} />
         {/* ── Player Row — both columns same height ── */}
         <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
 
@@ -229,6 +292,7 @@ export default function MusicModePage() {
               </div>
             </div>
 
+            {/* Controls */}
             {/* Playback controls */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}>
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
@@ -260,6 +324,7 @@ export default function MusicModePage() {
             </div>
           </div>
 
+          {/* ── Right column ── */}
           {/* ── Right column — stretch to match player height ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
@@ -281,6 +346,58 @@ export default function MusicModePage() {
               </div>
             </div>
 
+            {/* ── Aroma Match — rich, fills remaining height ── */}
+            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column", gap: "18px", overflow: "hidden", position: "relative" }}>
+
+              {/* Floating scent orbs */}
+              <div style={{ position: "absolute", top: "16px", right: "16px", pointerEvents: "none" }}>
+                <div className="scent-orb-1" style={{ width: "56px", height: "56px", borderRadius: "50%", background: "radial-gradient(circle, rgba(246,51,154,0.35) 0%, rgba(246,51,154,0) 70%)", filter: "blur(8px)" }} />
+              </div>
+              <div style={{ position: "absolute", top: "40px", right: "44px", pointerEvents: "none" }}>
+                <div className="scent-orb-2" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "radial-gradient(circle, rgba(173,70,255,0.3) 0%, rgba(173,70,255,0) 70%)", filter: "blur(6px)" }} />
+              </div>
+              <div style={{ position: "absolute", top: "28px", right: "68px", pointerEvents: "none" }}>
+                <div className="scent-orb-3" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "radial-gradient(circle, rgba(251,100,182,0.25) 0%, rgba(251,100,182,0) 70%)", filter: "blur(4px)" }} />
+              </div>
+
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "10px", background: "rgba(246,51,154,0.2)", border: "0.8px solid rgba(246,51,154,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="#FB64B6" strokeWidth="1.3"/>
+                    <path d="M8 4v4l2.5 2.5" stroke="#FB64B6" strokeWidth="1.3" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: "15px", color: "#fff", fontWeight: 500 }}>Aroma Match</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: "1px" }}>Synced with current genre</div>
+                </div>
+              </div>
+
+              {/* Active scent hero */}
+              <div style={{ background: "rgba(246,51,154,0.1)", border: "0.8px solid rgba(246,51,154,0.25)", borderRadius: "14px", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
+                {/* Scent icon */}
+                <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, rgba(246,51,154,0.4) 0%, rgba(173,70,255,0.3) 100%)", border: "0.8px solid rgba(246,51,154,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 60%)" }} />
+                  <span style={{ fontSize: "22px" }}>🍊</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <span style={{ fontSize: "17px", color: "#fff", fontWeight: 500 }}>Citrus</span>
+                    <span style={{ fontSize: "10px", color: "#FB64B6", background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.3)", borderRadius: "100px", padding: "2px 8px", fontWeight: 500 }}>ACTIVE</span>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Matched to Pop genre</div>
+                </div>
+              </div>
+
+              {/* Intensity bar */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Diffusion Intensity</span>
+                  <span style={{ fontSize: "12px", color: "#FB64B6", fontWeight: 500 }}>100%</span>
+                </div>
+                <div style={{ height: "7px", borderRadius: "100px", background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+                  <div style={{ width: "100%", height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, #F6339A, #FB64B6)", boxShadow: "0 0 10px rgba(246,51,154,0.5)" }} />
             {/* Aroma Match — flex-grow to fill remaining height */}
             <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
@@ -303,6 +420,25 @@ export default function MusicModePage() {
                   <span style={{ fontSize: "13px", color: "#FB64B6", flexShrink: 0, fontWeight: 500 }}>Active</span>
                 </div>
               </div>
+
+              {/* Genre → Scent pairings */}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Scent Pairings</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {scentPairs.map((pair, i) => (
+                    <div key={pair.genre} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: pair.dot, flexShrink: 0, boxShadow: `0 0 5px ${pair.dot}` }} />
+                      <span style={{ fontSize: "12px", color: i === 0 ? "#fff" : "rgba(255,255,255,0.5)", width: "58px", flexShrink: 0 }}>{pair.genre}</span>
+                      <div style={{ flex: 1, height: "4px", borderRadius: "100px", background: "rgba(255,255,255,0.08)" }}>
+                        <div style={{ width: `${pair.intensity}%`, height: "100%", borderRadius: "100px", background: i === 0 ? `linear-gradient(90deg, ${pair.dot}, #FB64B6)` : pair.dot, opacity: i === 0 ? 1 : 0.5, transition: "width 0.8s ease" }} />
+                      </div>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", width: "28px", textAlign: "right", flexShrink: 0 }}>{pair.scent.slice(0, 3)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+
             </div>
           </div>
         </div>
@@ -313,6 +449,7 @@ export default function MusicModePage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "14px" }}>
             {genres.map((g, i) => (
               <button key={g.name} onClick={() => setActiveGenre(i)} className="genre-btn"
+                style={{ background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)", border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)", borderRadius: "18px", padding: "22px 18px", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", color: "#fff", boxShadow: activeGenre === i ? "0 10px 30px rgba(0,0,0,0.35)" : "none" }}>
                 style={{
                   background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)",
                   border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)",
