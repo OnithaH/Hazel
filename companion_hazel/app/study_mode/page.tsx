@@ -128,26 +128,23 @@ export default function StudyModePage() {
         </div>
 
         {/* Study History */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-          <h2 className="text-2xl">Study History</h2>
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Study History</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             {historyData.map((item, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 transition-all"
+                className="flex justify-between items-center bg-[#1C1E26] rounded-xl p-4 transition-all"
               >
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-16">
                   <div>
-                    <p className="text-base">{item.date}</p>
-                    <p className="text-white/60 text-sm">{item.time}</p>
+                    <p className="text-[14px]">Date</p>
+                    <p className="text-white/40 text-[12px]">1pm - 2pm</p>
                   </div>
-                  <div className="px-4 py-1.5 bg-blue-500/20 rounded-lg">
-                    <span className="text-blue-400 text-sm">Focus: {item.focus}</span>
-                  </div>
-                  <p className="text-white/60 text-sm">{item.distractions}</p>
+                  <p className="text-white/60 text-[13px]">{item.distractions}</p>
                 </div>
-                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
+                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
                   View Details
                 </Link>
               </div>
