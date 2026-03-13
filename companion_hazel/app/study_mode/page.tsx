@@ -26,7 +26,7 @@ export default function StudyModePage() {
             <h1 className="text-4xl font-normal">Study Mode</h1>
             <p className="text-white/60">Enhanced focus and learning environment</p>
           </div>
-          
+
           <div className="flex items-center gap-3 px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-full">
             <div className="w-2 h-2 bg-blue-500 rounded-full opacity-85"></div>
             <span>Study Mode Active</span>
@@ -39,7 +39,7 @@ export default function StudyModePage() {
           <div className="col-span-2 bg-linear-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-3xl p-8 space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl">Focus Tracking</h2>
-              <button 
+              <button
                 onClick={() => setIsTracking(!isTracking)}
                 className="px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-2xl flex items-center gap-2 text-blue-400 hover:bg-blue-500/30 transition-all"
               >
@@ -81,11 +81,10 @@ export default function StudyModePage() {
                   <button
                     key={aroma}
                     onClick={() => setSelectedAroma(aroma)}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${
-                      selectedAroma === aroma
+                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
                         ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
                         : 'bg-white/5 border border-white/10 text-white/60'
-                    }`}
+                      }`}
                   >
                     {aroma}
                   </button>
@@ -130,7 +129,7 @@ export default function StudyModePage() {
         {/* Study History */}
         <div className="space-y-4">
           <h2 className="text-lg font-medium">Study History</h2>
-          
+
           <div className="space-y-3">
             {historyData.map((item, index) => (
               <div
@@ -139,8 +138,8 @@ export default function StudyModePage() {
               >
                 <div className="flex items-center gap-16">
                   <div>
-                    <p className="text-[14px]">Date</p>
-                    <p className="text-white/40 text-[12px]">1pm - 2pm</p>
+                    <p className="text-[14px]">{item.date}</p>
+                    <p className="text-white/40 text-[12px]">{item.time}</p>
                   </div>
                   <p className="text-white/60 text-[13px]">{item.distractions}</p>
                 </div>
