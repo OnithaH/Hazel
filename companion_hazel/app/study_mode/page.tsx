@@ -11,10 +11,10 @@ export default function StudyModePage() {
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
 
   const historyData = [
-    { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
-    { date: 'Yesterday', time: '3h 12m', focus: '92%', distractions: '2 distractions' },
-    { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
-    { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
+    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
+    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
+    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
+    { date: 'Date', time: '1pm - 2pm', distractions: '3 distractions' },
   ];
 
   return (
@@ -55,14 +55,10 @@ export default function StudyModePage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Focus Time</p>
                 <p className="text-2xl">2h 34m</p>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
-                <p className="text-white/60 text-sm">Focus Score</p>
-                <p className="text-2xl">87%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
@@ -72,22 +68,7 @@ export default function StudyModePage() {
           </div>
 
           {/* Right Sidebar Cards */}
-          <div className="space-y-4">
-            {/* Focus Shield */}
-            <div className="bg-linear-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6 space-y-3">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-purple-400" />
-                <h3 className="text-base">Focus Shield</h3>
-              </div>
-              <p className="text-white/60 text-sm">Audio monitoring active</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="w-4/5 h-full bg-purple-500 opacity-85"></div>
-                </div>
-                <span className="text-purple-400 text-sm">Active</span>
-              </div>
-            </div>
-
+          <div className="space-y-6">
             {/* Aroma Pillars */}
             <div className="bg-linear-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
@@ -132,7 +113,7 @@ export default function StudyModePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <Link href="/schedule_session" className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
             <Calendar className="w-6 h-6 text-blue-400 mb-3" />
             <h3 className="text-base mb-1">Schedule Session</h3>
@@ -144,35 +125,29 @@ export default function StudyModePage() {
             <h3 className="text-base mb-1">Revise Q&A</h3>
             <p className="text-white/60 text-sm">Upload & practice</p>
           </Link>
-
-          <button className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/10 transition-all group">
-            <Camera className="w-6 h-6 text-pink-400 mb-3" />
-            <h3 className="text-base mb-1">OCR Scanner</h3>
-            <p className="text-white/60 text-sm">Scan textbooks</p>
-          </button>
+          
         </div>
 
-        {/* Study History */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-          <h2 className="text-2xl">Study History</h2>
+        <div className="bg-[#1C212B] rounded-2xl p-6 space-y-6">
+          <h2 className="text-2xl font-normal text-white">Study History</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             {historyData.map((item, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 transition-all"
+                className="flex justify-between items-center bg-[#252B36] rounded-xl p-4 hover:bg-[#2A313C] transition-all"
               >
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-16">
                   <div>
-                    <p className="text-base">{item.date}</p>
-                    <p className="text-white/60 text-sm">{item.time}</p>
-                  </div>
-                  <div className="px-4 py-1.5 bg-blue-500/20 rounded-lg">
-                    <span className="text-blue-400 text-sm">Focus: {item.focus}</span>
+                    <p className="text-white font-normal">{item.date}</p>
+                    <p className="text-white/60 text-sm mt-1">{item.time}</p>
                   </div>
                   <p className="text-white/60 text-sm">{item.distractions}</p>
                 </div>
-                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
+                <Link
+                  href="/study_session"
+                  className="px-5 py-2.5 bg-[#313843] border border-white/5 rounded-lg text-sm text-white hover:bg-[#3A4350] transition-all"
+                >
                   View Details
                 </Link>
               </div>
