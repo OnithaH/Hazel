@@ -35,7 +35,7 @@ const gestures = [
 export default function MusicModePage() {
   const [activeGenre, setActiveGenre] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(33);
+  const [progress, setProgress] = useState(29);
   const [mounted, setMounted] = useState(false);
   const [bars, setBars] = useState<number[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -43,13 +43,13 @@ export default function MusicModePage() {
 
   useEffect(() => {
     setMounted(true);
-    setBars(Array.from({ length: 32 }, () => Math.random() * 60 + 10));
+    setBars(Array.from({ length: 40 }, () => Math.random() * 56 + 8));
   }, []);
 
   useEffect(() => {
     if (isPlaying) {
       intervalRef.current = setInterval(() => {
-        setBars(Array.from({ length: 32 }, () => Math.random() * 60 + 10));
+        setBars(Array.from({ length: 40 }, () => Math.random() * 56 + 8));
       }, 160);
       progressRef.current = setInterval(() => {
         setProgress((p) => (p >= 100 ? 0 : p + 0.12));
@@ -71,19 +71,13 @@ export default function MusicModePage() {
   const timeStr = `${mins}:${secs.toString().padStart(2, "0")}`;
 
   return (
-    <div style={{
-      background: "linear-gradient(135deg, #000000 0%, #0d1b2a 50%, #000000 100%)",
-      minHeight: "100vh",
-      fontFamily: "'Arimo', sans-serif",
-      color: "#fff",
-      overflowX: "hidden",
-    }}>
+    <div style={{ background: "linear-gradient(135deg, #000000 0%, #0d1b2a 50%, #000000 100%)", minHeight: "100vh", fontFamily: "'Arimo', sans-serif", color: "#fff", overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
 
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
+          from { opacity: 0; transform: translateY(22px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulse-dot {
@@ -96,11 +90,11 @@ export default function MusicModePage() {
         }
         @keyframes glow-pulse {
           0%, 100% { opacity: 0.13; }
-          50%       { opacity: 0.24; }
+          50%       { opacity: 0.26; }
         }
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-7px); }
+          50%       { transform: translateY(-8px); }
         }
         @keyframes float-fast {
           0%, 100% { transform: translateY(0px); }
@@ -108,34 +102,28 @@ export default function MusicModePage() {
         }
 
         .page-enter { animation: fadeUp 0.55s ease both; }
-
-        .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-        .glow-bg   { animation: glow-pulse 3s ease-in-out infinite; }
-
-        .music-icon       { animation: float 3.2s ease-in-out infinite; }
+        .pulse-dot  { animation: pulse-dot 2s ease-in-out infinite; }
+        .glow-bg    { animation: glow-pulse 3s ease-in-out infinite; }
+        .music-icon        { animation: float 3.2s ease-in-out infinite; }
         .music-icon.active { animation: float-fast 1.4s ease-in-out infinite; }
 
         .genre-btn {
           transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-          cursor: pointer;
-          background: none;
+          cursor: pointer; background: none;
         }
         .genre-btn:hover  { transform: translateY(-5px) scale(1.02); }
         .genre-btn:active { transform: scale(0.97); }
 
         .ctrl-btn {
           transition: all 0.18s ease;
-          cursor: pointer;
-          background: none;
-          border: none;
-          padding: 0;
+          cursor: pointer; background: none; border: none; padding: 0;
           display: flex; align-items: center; justify-content: center;
         }
         .ctrl-btn:hover  { transform: scale(1.12); opacity: 0.9; }
         .ctrl-btn:active { transform: scale(0.92); }
 
         .play-btn { transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1); }
-        .play-btn:hover  { transform: scale(1.13); box-shadow: 0 0 32px rgba(246,51,154,0.6) !important; }
+        .play-btn:hover  { transform: scale(1.13); }
         .play-btn:active { transform: scale(0.94); }
 
         .row-item {
@@ -144,13 +132,8 @@ export default function MusicModePage() {
         }
         .row-item:hover { background: rgba(255,255,255,0.085) !important; transform: translateX(3px); }
 
-        .card-lift {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card-lift:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 48px rgba(0,0,0,0.45);
-        }
+        .card-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-lift:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
 
         .shimmer-bar {
           background: linear-gradient(90deg, #F6339A 0%, #AD46FF 35%, #2B7FFF 65%, #F6339A 100%);
@@ -160,24 +143,18 @@ export default function MusicModePage() {
 
         .progress-track { cursor: pointer; position: relative; }
         .progress-thumb {
-          width: 13px; height: 13px;
-          border-radius: 50%;
-          background: white;
-          position: absolute;
-          top: 50%; transform: translate(-50%, -50%);
-          opacity: 0;
-          transition: opacity 0.2s ease;
-          box-shadow: 0 0 10px rgba(246,51,154,0.9);
-          pointer-events: none;
+          width: 14px; height: 14px; border-radius: 50%; background: white;
+          position: absolute; top: 50%; transform: translate(-50%, -50%);
+          opacity: 0; transition: opacity 0.2s ease;
+          box-shadow: 0 0 10px rgba(246,51,154,0.9); pointer-events: none;
         }
         .progress-track:hover .progress-thumb { opacity: 1; }
       `}</style>
 
-      {/* Full-bleed wrapper — no horizontal padding, no max-width cap */}
-      <div style={{ padding: "56px 40px 72px" }}>
+      <div style={{ padding: "52px 40px 72px" }}>
 
         {/* ── Header ── */}
-        <div className="page-enter" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
+        <div className="page-enter" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
           <div>
             <h1 style={{ fontSize: "40px", fontWeight: 400, lineHeight: "48px", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Music Mode</h1>
             <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", margin: 0 }}>Gesture-controlled music with multi-sensory experience</p>
@@ -188,43 +165,43 @@ export default function MusicModePage() {
           </div>
         </div>
 
-        {/* ── Player Row ── */}
-        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
+        {/* ── Player Row — both columns same height ── */}
+        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
 
-          {/* Player Card */}
-          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "28px", padding: "32px", display: "flex", flexDirection: "column", gap: "22px" }}>
+          {/* ── Player Card ── */}
+          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
-            {/* Album area */}
-            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", height: "300px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
-              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(64px)" }} />
+            {/* Album — flex-grow so it fills leftover height */}
+            <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "460px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
+              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(70px)" }} />
 
-              {/* Visualizer */}
-              <div style={{ position: "absolute", bottom: "30px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "3px", height: "56px", paddingInline: "24px" }}>
-                {(mounted ? bars : Array(32).fill(10)).map((h, i) => (
+              {/* Visualizer bars */}
+              <div style={{ position: "absolute", bottom: "32px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "2.5px", height: "64px", paddingInline: "28px" }}>
+                {(mounted ? bars : Array(40).fill(8)).map((h, i) => (
                   <div key={i} style={{
-                    flex: 1, maxHeight: "56px",
-                    height: `${isPlaying ? h : 8}px`,
-                    background: `rgba(255,255,255,${isPlaying ? 0.28 : 0.12})`,
+                    flex: 1, maxHeight: "64px",
+                    height: `${isPlaying ? h : 7}px`,
+                    background: `rgba(255,255,255,${isPlaying ? 0.28 : 0.11})`,
                     borderRadius: "3px 3px 0 0",
-                    transition: `height ${0.14 + (i % 5) * 0.025}s ease`,
+                    transition: `height ${0.13 + (i % 6) * 0.022}s ease`,
                   }} />
                 ))}
               </div>
 
               {/* Chromatic bar */}
-              <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "6px" }} />
+              <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "7px" }} />
 
-              {/* Center */}
-              <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "14px", paddingBottom: "36px" }}>
+              {/* Center content */}
+              <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", paddingBottom: "48px" }}>
                 <div className={isPlaying ? "music-icon active" : "music-icon"}>
-                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
-                    <path d="M22 46V14l24-6v23" stroke="rgba(255,255,255,0.38)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="14" cy="46" r="8" stroke="rgba(255,255,255,0.38)" strokeWidth="4" fill="none"/>
-                    <circle cx="38" cy="31" r="8" stroke="rgba(255,255,255,0.38)" strokeWidth="4" fill="none"/>
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <path d="M24 50V15l26-6v24" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="15" cy="50" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
+                    <circle cx="41" cy="33" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
                   </svg>
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "24px", fontWeight: 400, marginBottom: "6px" }}>Currently Playing</div>
+                  <div style={{ fontSize: "26px", fontWeight: 400, marginBottom: "8px" }}>Currently Playing</div>
                   <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)" }}>Currently Playing Song · Artist Name</div>
                 </div>
               </div>
@@ -252,40 +229,38 @@ export default function MusicModePage() {
               </div>
             </div>
 
-            {/* Controls */}
+            {/* Playback controls */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}>
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
-                <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                  <path d="M14 3.5L7 9.5l7 6V3.5z" fill="white"/>
-                  <rect x="2.5" y="3.5" width="3" height="12" rx="1.2" fill="white"/>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M14.5 3.5L7.5 10l7 6.5V3.5z" fill="white"/>
+                  <rect x="2.5" y="3.5" width="3" height="13" rx="1.2" fill="white"/>
                 </svg>
               </button>
-
-              <button onClick={() => setIsPlaying(!isPlaying)} className="ctrl-btn play-btn" style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", paddingLeft: isPlaying ? 0 : "4px", boxShadow: isPlaying ? "0 0 28px rgba(246,51,154,0.5)" : "0 0 18px rgba(246,51,154,0.3)" }}>
+              <button onClick={() => setIsPlaying(!isPlaying)} className="ctrl-btn play-btn"
+                style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", paddingLeft: isPlaying ? 0 : "4px", boxShadow: isPlaying ? "0 0 30px rgba(246,51,154,0.55)" : "0 0 18px rgba(246,51,154,0.3)" }}>
                 {isPlaying
                   ? <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="4.5" height="16" rx="1.5" fill="white"/><rect x="13.5" y="3" width="4.5" height="16" rx="1.5" fill="white"/></svg>
                   : <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 3l14 8.5L5 20V3z" fill="white"/></svg>
                 }
               </button>
-
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
-                <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                  <path d="M5 3.5l7 6-7 6V3.5z" fill="white"/>
-                  <rect x="13.5" y="3.5" width="3" height="12" rx="1.2" fill="white"/>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M5.5 3.5l7 6.5-7 6.5V3.5z" fill="white"/>
+                  <rect x="14.5" y="3.5" width="3" height="13" rx="1.2" fill="white"/>
                 </svg>
               </button>
-
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
-                <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                  <path d="M2 6.5h4.5l4-4v14l-4-4H2V6.5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
-                  <path d="M14.5 5c1.4 1.3 2 3 2 4.5s-.6 3.2-2 4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M12.5 7.5c.7.7 1 1.7 1 2.5s-.3 1.8-1 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M2 7h5l4-4.5v15L7 13H2V7z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+                  <path d="M15 5.5c1.5 1.3 2.2 3 2.2 4.5s-.7 3.2-2.2 4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M13 8c.8.7 1.2 1.8 1.2 2.5S13.8 12.3 13 13" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Right column */}
+          {/* ── Right column — stretch to match player height ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Gesture Controls */}
@@ -298,7 +273,7 @@ export default function MusicModePage() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {gestures.map((g) => (
-                  <div key={g.gesture} className="row-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.05)", borderRadius: "10px", padding: "11px 14px" }}>
+                  <div key={g.gesture} className="row-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.05)", borderRadius: "10px", padding: "12px 14px" }}>
                     <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>{g.gesture}</span>
                     <span style={{ fontSize: "14px", color: "#fff" }}>{g.action}</span>
                   </div>
@@ -306,8 +281,8 @@ export default function MusicModePage() {
               </div>
             </div>
 
-            {/* Aroma Match */}
-            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flex: 1 }}>
+            {/* Aroma Match — flex-grow to fill remaining height */}
+            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <rect x="1.5" y="1.5" width="15" height="15" rx="2.5" stroke="#FB64B6" strokeWidth="1.5"/>
@@ -341,8 +316,7 @@ export default function MusicModePage() {
                 style={{
                   background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)",
                   border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)",
-                  borderRadius: "18px",
-                  padding: "22px 18px",
+                  borderRadius: "18px", padding: "22px 18px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: "14px",
                   color: "#fff",
                   boxShadow: activeGenre === i ? "0 10px 30px rgba(0,0,0,0.35)" : "none",
@@ -392,7 +366,7 @@ export default function MusicModePage() {
             </div>
           </div>
 
-          {/* Playlists */}
+          {/* Your Playlists */}
           <div className="card-lift" style={{ background: "rgba(255,255,255,0.04)", border: "0.8px solid rgba(255,255,255,0.09)", borderRadius: "20px", padding: "26px" }}>
             <h3 style={{ fontSize: "18px", fontWeight: 400, margin: "0 0 18px", letterSpacing: "-0.2px" }}>Your Playlists</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -413,7 +387,7 @@ export default function MusicModePage() {
                   </div>
                   <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(251,44,54,0.15)", border: "0.8px solid rgba(251,44,54,0.3)" }}>
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M1.5 2.5h9M4 2.5V2a.8.8 0 0 1 .8-.8h2.4a.8.8 0 0 1 .8.8v.5M4.5 5v4M7.5 5v4M2 2.5l.6 6.7A.8.8 0 0 0 3.4 10h5.2a.8.8 0 0 0 .8-.8L10 2.5" stroke="#FB2C36" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1.5 2.5h9M4 2.5V2a.8.8 0 0 1 .8-.8h2.4a.8.8 0 0 1 .8.8v.5M4.5 5v4M7.5 5v4M2 2.5l.6 6.7a.8.8 0 0 0 .8.8h5.2a.8.8 0 0 0 .8-.8L10 2.5" stroke="#FB2C36" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </button>
                 </div>
@@ -427,7 +401,6 @@ export default function MusicModePage() {
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
