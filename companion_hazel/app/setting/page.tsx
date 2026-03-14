@@ -5,7 +5,6 @@ import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationsSettings from '@/components/settings/NotificationsSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
 import AudioSettings from '@/components/settings/AudioSettings';
-import FocusTrackingSettings from '@/components/settings/FocusTrackingSettings';
 import AromaPillarsSettings from '@/components/settings/AromaPillarsSettings';
 import PrivacySecuritySettings from '@/components/settings/PrivacySecuritySettings';
 import AboutSection from '@/components/settings/AboutSection';
@@ -29,7 +28,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="min-h-screen pt-12 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
                 <div className="p-3 bg-purple-600/20 rounded-2xl border border-purple-500/30">
                     <Settings className="w-8 h-8 text-purple-400" />
@@ -40,7 +39,7 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-6">
                     <ProfileSettings />
@@ -51,15 +50,14 @@ export default function SettingsPage() {
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                    <FocusTrackingSettings />
                     <AromaPillarsSettings />
                     <PrivacySecuritySettings />
                     <AboutSection />
                 </div>
             </div>
 
-            {/* Save Button (Fixed or Sticky at bottom for easy access) */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-center z-50">
+            {/* Save Button */}
+            <div className="mt-8 pt-8 border-t border-white/10 flex justify-center">
                 <button
                     onClick={handleSave}
                     disabled={saveStatus === 'saving'}
