@@ -19,7 +19,7 @@ const PrivacyToggle = ({ label, checked, onChange }: { label: string, checked: b
 
 const PrivacySecuritySettings = () => {
     const [settings, setSettings] = React.useState({
-        studyHistory: true,
+        PrivacyTurn: true,
         cameraAccess: true,
         microphoneAccess: false,
     });
@@ -28,27 +28,13 @@ const PrivacySecuritySettings = () => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const [isClearing, setIsClearing] = React.useState(false);
-
-    const handleClearData = () => {
-        const confirmed = window.confirm("Are you sure you want to clear all data? This action cannot be undone.");
-        if (confirmed) {
-            setIsClearing(true);
-            // Simulate API call
-            setTimeout(() => {
-                setIsClearing(false);
-                alert("All data has been cleared successfully.");
-            }, 1000);
-        }
-    };
-
     return (
         <SectionWrapper title="Privacy & Security" icon={Shield}>
             <div className="space-y-3">
                 <PrivacyToggle
-                    label="Save Study History"
-                    checked={settings.studyHistory}
-                    onChange={() => toggleSetting('studyHistory')}
+                    label="Privacy Turn"
+                    checked={settings.PrivacyTurn}
+                    onChange={() => toggleSetting('PrivacyTurn')}
                 />
                 <PrivacyToggle
                     label="Allow Camera Access"
@@ -60,14 +46,6 @@ const PrivacySecuritySettings = () => {
                     checked={settings.microphoneAccess}
                     onChange={() => toggleSetting('microphoneAccess')}
                 />
-
-                <button
-                    onClick={handleClearData}
-                    disabled={isClearing}
-                    className="w-full mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl p-3 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isClearing ? "Clearing..." : "Clear All Data"}
-                </button>
             </div>
         </SectionWrapper>
     );
