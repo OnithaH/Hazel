@@ -4,16 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Clock,
-  Target,
   AlertTriangle,
-  TrendingUp,
-  Circle,
-  AlertCircle,
-  Coffee,
-  RotateCcw,
-  CheckCircle2,
   ArrowLeft,
-  ChevronLeft
+  Zap,
+  Eye,
+  Calendar,
+  BookOpen
 } from 'lucide-react';
 
 export default function StudySessionDetails() {
@@ -21,210 +17,214 @@ export default function StudySessionDetails() {
 
   type SessionEvent = {
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    color: 'blue' | 'green' | 'orange';
+    color: 'blue' | 'green' | 'orange' | 'slate';
     title: string;
     time: string;
   };
 
   const sessionEvents: SessionEvent[] = [
-    { icon: Circle, color: 'blue', title: 'Session started', time: '2:34 PM' },
-    { icon: CheckCircle2, color: 'green', title: 'High focus detected - Peppermint aroma activated', time: '2:45 PM' },
-    { icon: AlertCircle, color: 'orange', title: 'Distraction detected - Door slam covered with white noise', time: '3:12 PM' },
-    { icon: CheckCircle2, color: 'green', title: 'Focus restored automatically', time: '3:15 PM' },
-    { icon: Coffee, color: 'blue', title: 'Break suggestion accepted - Gaming mode for 15 mins', time: '3:45 PM' },
-    { icon: RotateCcw, color: 'green', title: 'Returned to study mode', time: '4:00 PM' },
-    { icon: Circle, color: 'blue', title: 'Session ended', time: '4:34 PM' },
+    { icon: Zap, color: 'blue', title: 'Session started', time: '2:34 PM' },
+    { icon: Eye, color: 'green', title: 'High focus detected - Peppermint aroma activated', time: '2:45 PM' },
+    { icon: AlertTriangle, color: 'orange', title: 'Distraction detected - Door slam covered with white noise', time: '3:12 PM' },
+    { icon: Eye, color: 'green', title: 'Focus restored automatically', time: '3:15 PM' },
+    { icon: Calendar, color: 'slate', title: 'Break suggestion accepted - Gaming mode for 15 mins', time: '3:45 PM' },
+    { icon: BookOpen, color: 'green', title: 'Returned to study mode', time: '4:00 PM' },
+    { icon: Clock, color: 'blue', title: 'Session ended', time: '4:34 PM' },
   ];
 
   const materials = [
-    { subject: 'Mathematics - Chapter 5', pages: 'Pages 45-67', time: '45 mins', icon: '📐' },
-    { subject: 'Physics - Thermodynamics', pages: 'Pages 120-145', time: '50 mins', icon: '⚡' },
-    { subject: 'Chemistry - Organic Compounds', pages: 'Pages 89-102', time: '39 mins', icon: '🧪' },
+    { subject: 'Mathematics - Chapter 5', pages: 'Pages\n45-67', time: '45 mins' },
+    { subject: 'Physics - Thermodynamics', pages: 'Pages\n120-145', time: '50 mins' },
+    { subject: 'Chemistry - Organic Compounds', pages: 'Pages\n80-102', time: '39 mins' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#101828] to-black text-white p-8 pt-28 font-arimo">
-      <div className="max-w-[1088px] mx-auto space-y-8 flex flex-col">
+    <div className="min-h-screen bg-[#0F1117] text-white p-8 pt-28 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center h-[72px]">
-          <div className="flex flex-col gap-2 w-[345px]">
-            <h1 className="text-[36px] leading-[40px] font-normal translate-y-[-3px]">Study Session Details</h1>
-            <p className="text-white/60 text-[16px] leading-[24px]">Today, 2:34 PM - 4:34 PM</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <Link href="/study_mode" className="flex items-center gap-2 text-white/50 hover:text-white mb-6 text-sm transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
+            <h1 className="text-3xl font-medium mb-1">Study Session Details</h1>
+            <p className="text-white/40 text-sm">Today, 2:34 PM - 4:34 PM</p>
           </div>
-          
-          <div className="flex flex-col items-start px-[24.8px] py-[13.6px] bg-[#2B7FFF]/20 border-[0.8px] border-[#2B7FFF]/40 rounded-full shrink-0">
-             <span className="text-[#51A2FF] text-[16px] leading-[24px]">Study Mode</span>
-          </div>
+          <button className="px-5 py-2 mt-8 bg-[#1B2A4E] text-[#60A5FA] hover:bg-[#233561] rounded-full text-sm font-medium transition-all">
+            Study Mode
+          </button>
         </div>
 
-        {/* Stats Grid - 2 Cards */}
-        <div className="flex gap-[24px] h-[142px]">
-          <div className="relative w-[232.75px] h-[141.6px] bg-gradient-to-br from-[#2b7fff]/20 to-[#2b7fff]/5 border-[0.8px] border-[#2b7fff]/20 rounded-[16px]">
-            <Clock className="absolute left-[24.8px] top-[24.8px] w-5 h-5 text-[#51A2FF]" />
-            <div className="absolute left-[24.8px] top-[52.8px] w-[204.4px] h-[36px]">
-               <p className="text-[30px] leading-[36px] translate-y-[-2.6px]">2h 34m</p>
-            </div>
-            <div className="absolute left-[24.8px] top-[92.8px] w-[204.4px] h-[24px]">
-               <p className="text-white/60 text-[16px] leading-[24px] translate-y-[-2.2px]">Total Duration</p>
-            </div>
+        {/* Stats Cards */}
+        <div className="flex gap-4">
+          <div className="bg-[#121E36] border border-[#1E3A5F] rounded-2xl p-5 w-56 flex flex-col justify-center">
+            <Clock className="w-5 h-5 text-[#3B82F6] mb-3" />
+            <p className="text-[28px] font-medium text-white leading-tight mb-1">2h 34m</p>
+            <p className="text-white/40 text-xs">Total Duration</p>
           </div>
 
-          <div className="relative w-[232.75px] h-[141.6px] bg-gradient-to-br from-[#ff6900]/20 to-[#ff6900]/5 border-[0.8px] border-[#ff6900]/20 rounded-[16px]">
-            <AlertTriangle className="absolute left-[24.8px] top-[24.8px] w-5 h-5 text-[#FF8904]" />
-            <div className="absolute left-[24.8px] top-[52.8px] w-[204.4px] h-[36px]">
-               <p className="text-[30px] leading-[36px] translate-y-[-2.6px]">3</p>
-            </div>
-            <div className="absolute left-[24.8px] top-[92.8px] w-[204.4px] h-[24px]">
-               <p className="text-white/60 text-[16px] leading-[24px] translate-y-[-2.2px]">Distractions</p>
-            </div>
+          <div className="bg-[#2D1A14] border border-[#442319] rounded-2xl p-5 w-56 flex flex-col justify-center">
+            <AlertTriangle className="w-5 h-5 text-[#F59E0B] mb-3" />
+            <p className="text-[28px] font-medium text-white leading-tight mb-1">3</p>
+            <p className="text-white/40 text-xs">Distractions</p>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="flex gap-[24px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left Column - Timeline & Events */}
-          <div className="relative w-[717.33px] bg-white/5 border-[0.8px] border-white/10 rounded-[24px] p-[24.8px] min-h-[1057px]">
-            
-            <h2 className="text-[24px] leading-[32px] mb-[164px]">Session Timeline</h2>
-            
-            {/* Timeline Segment */}
-            <div className="absolute left-[24.8px] top-[80.79px] w-[667.73px] flex flex-col gap-[8px]">
-                <div className="relative w-full h-[80px] bg-white/5 rounded-[14px] overflow-hidden flex">
-                    <div className="w-[40%] bg-gradient-to-r from-[#00C950] to-[#05DF72]"></div>
-                    <div className="w-[5%] bg-gradient-to-r from-[#FB2C36] to-[#FF6467]"></div>
-                    <div className="w-[30%] bg-gradient-to-r from-[#00C950] to-[#05DF72]"></div>
-                    <div className="w-[10%] bg-gradient-to-r from-[#F0B100] to-[#FDC700]"></div>
-                    <div className="w-[15%] bg-gradient-to-r from-[#00C950] to-[#05DF72]"></div>
+          <div className="md:col-span-2 space-y-6">
+            {/* Session Timeline */}
+            <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+              <h2 className="text-base font-medium mb-5">Session Timeline</h2>
+              
+              {/* Timeline Bar */}
+              <div className="mb-4">
+                <div className="flex h-10 rounded-xl overflow-hidden mb-3">
+                  <div className="bg-[#22C55E]" style={{ width: '45%' }}></div>
+                  <div className="bg-[#EF4444]" style={{ width: '5%' }}></div>
+                  <div className="bg-[#22C55E]" style={{ width: '35%' }}></div>
+                  <div className="bg-[#FBBF24]" style={{ width: '10%' }}></div>
+                  <div className="bg-[#22C55E]" style={{ width: '5%' }}></div>
                 </div>
-                {/* Timeline Labels */}
-                <div className="relative w-full h-[20px] text-[14px] leading-[20px] text-white/60">
-                    <span className="absolute left-0">2:34 PM</span>
-                    <span className="absolute left-[23%]">3:04 PM</span>
-                    <span className="absolute left-[46%]">3:34 PM</span>
-                    <span className="absolute left-[69%]">4:04 PM</span>
-                    <span className="absolute right-0">4:34 PM</span>
-                </div>
-            </div>
-
-            {/* Legend */}
-            <div className="absolute left-[24.8px] top-[220.79px] flex gap-[24px]">
-              <div className="flex items-center gap-[8px]">
-                <div className="w-3 h-3 bg-[#00C950] rounded-full shrink-0"></div>
-                <span className="text-white/60 text-[16px] leading-[24px]">Focused</span>
-              </div>
-              <div className="flex items-center gap-[8px]">
-                <div className="w-3 h-3 bg-[#FB2C36] rounded-full shrink-0"></div>
-                <span className="text-white/60 text-[16px] leading-[24px]">Distracted</span>
-              </div>
-              <div className="flex items-center gap-[8px]">
-                <div className="w-3 h-3 bg-[#F0B100] rounded-full shrink-0"></div>
-                <span className="text-white/60 text-[16px] leading-[24px]">Break</span>
-              </div>
-            </div>
-
-            <h2 className="absolute left-[24.8px] top-[276.79px] text-[20px] leading-[28px]">Session Events</h2>
-            
-            {/* Session Events List */}
-            <div className="absolute left-[24.8px] top-[320.79px] w-[667.73px] flex flex-col gap-[12px]">
-              {sessionEvents.map((event, index) => {
-                const Icon = event.icon;
-                const colorClasses = {
-                  blue: 'bg-[#2B7FFF]/20 text-[#51A2FF]',
-                  green: 'bg-[#00C950]/20 text-[#05DF72]',
-                  orange: 'bg-[#FF6900]/20 text-[#FF8904]',
-                };
                 
-                return (
-                  <div key={index} className="flex p-[16px] gap-[16px] bg-white/5 rounded-[14px]">
-                    <div className={`w-[40px] h-[40px] rounded-[10px] flex items-center justify-center shrink-0 ${colorClasses[event.color]}`}>
-                      <Icon className="w-5 h-5" />
+                {/* Time Labels */}
+                <div className="flex justify-between text-[11px] text-white/40 font-medium tracking-wide">
+                  <span>2:34 PM</span>
+                  <span>3:04 PM</span>
+                  <span>3:34 PM</span>
+                  <span>4:04 PM</span>
+                  <span>4:34 PM</span>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex gap-5 text-xs font-medium">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#22C55E] rounded-full"></div>
+                  <span className="text-white/50">Focused</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#EF4444] rounded-full"></div>
+                  <span className="text-white/50">Distracted</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#FBBF24] rounded-full"></div>
+                  <span className="text-white/50">Break</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Session Events */}
+            <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+              <h2 className="text-base font-medium mb-5">Session Events</h2>
+              
+              <div className="space-y-3">
+                {sessionEvents.map((event, index) => {
+                  const Icon = event.icon;
+                  const bgColors = {
+                    blue: 'bg-[#1D2B4D]',
+                    green: 'bg-[#143128]',
+                    orange: 'bg-[#332219]',
+                    slate: 'bg-[#2A2D3A]'
+                  };
+                  const iconColors = {
+                    blue: 'text-[#60A5FA]',
+                    green: 'text-[#34D399]',
+                    orange: 'text-[#F59E0B]',
+                    slate: 'text-[#94A3B8]'
+                  };
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-4 bg-[#262833] rounded-xl p-4">
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${bgColors[event.color]}`}>
+                        <Icon className={`w-4 h-4 ${iconColors[event.color]}`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[13px] font-medium text-white/90">{event.title}</p>
+                        <p className="text-[11px] text-white/40 mt-1">{event.time}</p>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-[4px] h-[48px] justify-center">
-                      <p className="text-[16px] leading-[24px]">{event.title}</p>
-                      <p className="text-[14px] leading-[20px] text-white/60">{event.time}</p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* Right Column - Focus Breakdown, Environment, Notes */}
-          <div className="w-[346.68px] flex flex-col gap-[24px]">
+          <div className="space-y-6">
             {/* Focus Breakdown */}
-            <div className="p-[24.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[16px] flex flex-col gap-[16px]">
-              <h3 className="text-[20px] leading-[28px]">Focus Breakdown</h3>
+            <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+              <h2 className="text-base font-medium mb-5">Focus Breakdown</h2>
               
-              <div className="flex flex-col gap-[8px]">
-                  {/* Deep Focus */}
-                  <div className="flex flex-col gap-[8px]">
-                      <div className="flex justify-between items-center text-[16px] leading-[24px]">
-                          <span className="text-white/60">Deep Focus</span>
-                          <span className="text-[#05DF72]">72%</span>
-                      </div>
-                      <div className="w-full h-[8px] bg-white/10 rounded-full">
-                          <div className="h-full w-[72%] bg-gradient-to-r from-[#00C950] to-[#05DF72] rounded-full"></div>
-                      </div>
+              <div className="space-y-5">
+                <div>
+                  <div className="flex justify-between text-xs font-medium mb-2">
+                    <span className="text-white/60">Deep Focus</span>
+                    <span className="text-[#22C55E]">72%</span>
                   </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#22C55E]" style={{ width: '72%' }}></div>
+                  </div>
+                </div>
 
-                  {/* Breaks */}
-                  <div className="flex flex-col gap-[8px] mt-[8px]">
-                      <div className="flex justify-between items-center text-[16px] leading-[24px]">
-                          <span className="text-white/60">Breaks</span>
-                          <span className="text-[#FDC700]">10%</span>
-                      </div>
-                      <div className="w-full h-[8px] bg-white/10 rounded-full">
-                          <div className="h-full w-[10%] bg-gradient-to-r from-[#F0B100] to-[#FDC700] rounded-full"></div>
-                      </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium mb-2">
+                    <span className="text-white/60">Breaks</span>
+                    <span className="text-[#FBBF24]">10%</span>
                   </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#FBBF24]" style={{ width: '10%' }}></div>
+                  </div>
+                </div>
 
-                  {/* Distracted */}
-                  <div className="flex flex-col gap-[8px] mt-[8px]">
-                      <div className="flex justify-between items-center text-[16px] leading-[24px]">
-                          <span className="text-white/60">Distracted</span>
-                          <span className="text-[#FF6467]">3%</span>
-                      </div>
-                      <div className="w-full h-[8px] bg-white/10 rounded-full">
-                          <div className="h-full w-[3%] bg-gradient-to-r from-[#FB2C36] to-[#FF6467] rounded-full"></div>
-                      </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium mb-2">
+                    <span className="text-white/60">Distracted</span>
+                    <span className="text-[#EF4444]">3%</span>
                   </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#EF4444]" style={{ width: '3%' }}></div>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Environment */}
-            <div className="p-[24.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[16px] flex flex-col gap-[16px]">
-              <h3 className="text-[20px] leading-[28px]">Environment</h3>
+            <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+              <h2 className="text-base font-medium mb-5">Environment</h2>
               
-              <div className="flex flex-col gap-[12px]">
-                <div className="bg-white/5 p-[12px] pb-[16px] rounded-[10px] flex flex-col gap-[4px] h-[76px] justify-center">
-                  <p className="text-[16px] leading-[24px] text-white/60">Aroma</p>
-                  <p className="text-[16px] leading-[24px]">Peppermint (Focus)</p>
+              <div className="space-y-3">
+                <div className="bg-[#262833] rounded-xl p-4">
+                  <p className="text-white/40 text-[11px] font-medium mb-1">Aroma</p>
+                  <p className="text-[13px] text-white/90 font-medium">Peppermint (Focus)</p>
                 </div>
                 
-                <div className="bg-white/5 p-[12px] pb-[16px] rounded-[10px] flex flex-col gap-[4px] h-[76px] justify-center">
-                  <p className="text-[16px] leading-[24px] text-white/60">RGB Theme</p>
-                  <p className="text-[16px] leading-[24px]">Cool Blue - High Focus</p>
+                <div className="bg-[#262833] rounded-xl p-4">
+                  <p className="text-white/40 text-[11px] font-medium mb-1">RGB Theme</p>
+                  <p className="text-[13px] text-white/90 font-medium">Cool Blue - High Focus</p>
                 </div>
                 
-                <div className="bg-white/5 p-[12px] pb-[16px] rounded-[10px] flex flex-col gap-[4px] h-[76px] justify-center">
-                  <p className="text-[16px] leading-[24px] text-white/60">Lighting</p>
-                  <p className="text-[16px] leading-[24px]">Daylight Mode</p>
+                <div className="bg-[#262833] rounded-xl p-4">
+                  <p className="text-white/40 text-[11px] font-medium mb-1">Lighting</p>
+                  <p className="text-[13px] text-white/90 font-medium">Daylight Mode</p>
                 </div>
               </div>
             </div>
 
             {/* Session Notes */}
-            <div className="p-[24.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[16px] flex flex-col gap-[16px]">
-              <h3 className="text-[20px] leading-[28px]">Session Notes</h3>
+            <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+              <h2 className="text-base font-medium mb-4">Session Notes</h2>
               
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add notes about this session..."
-                className="w-full h-[121.6px] bg-white/5 border-[0.8px] border-white/10 rounded-[14px] p-4 text-[16px] leading-[24px] text-white placeholder:text-white/50 focus:outline-none focus:border-[#2B7FFF]/40 resize-none"
+                className="w-full h-24 bg-[#14161C] border border-white/5 rounded-xl p-4 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#3B82F6]/40 resize-none mb-4"
               />
               
-              <button className="w-full h-[41.6px] bg-[#2B7FFF]/20 border-[0.8px] border-[#2B7FFF]/40 rounded-[10px] text-[#51A2FF] text-[16px] leading-[24px] hover:bg-[#2B7FFF]/30 transition-all font-arimo">
+              <button className="w-full py-2.5 bg-[#1B2A4E] text-[#60A5FA] hover:bg-[#233561] rounded-xl text-sm font-medium transition-all">
                 Save Notes
               </button>
             </div>
@@ -232,24 +232,24 @@ export default function StudySessionDetails() {
         </div>
 
         {/* Materials Studied */}
-        <div className="p-[24.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[16px] flex flex-col gap-[24px]">
-          <h2 className="text-[24px] leading-[32px]">Materials Studied</h2>
+        <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
+          <h2 className="text-base font-medium mb-5">Materials Studied</h2>
           
-          <div className="flex gap-[16px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {materials.map((material, index) => (
-              <div key={index} className="flex-1 bg-white/5 border-[0.8px] border-white/10 rounded-[14px] p-[16.8px] flex flex-col gap-[12px]">
-                <div className="flex items-center gap-[12px] h-[48px]">
-                  <div className="w-[40px] h-[40px] bg-[#2B7FFF]/20 rounded-[10px] flex items-center justify-center shrink-0">
-                      <span className="text-[20px]">{material.icon}</span>
+              <div key={index} className="bg-[#262833] rounded-xl p-5 flex flex-col justify-between h-auto">
+                <div className="flex items-start gap-3 mb-6">
+                  <div className="w-9 h-9 bg-[#1D2B4D] rounded-lg flex items-center justify-center shrink-0">
+                    <BookOpen className="w-4 h-4 text-[#60A5FA]" />
                   </div>
-                  <div className="flex flex-col h-[44px] justify-center">
-                    <p className="text-[16px] leading-[24px]">{material.subject}</p>
-                    <p className="text-[14px] leading-[20px] text-white/60">{material.pages}</p>
+                  <div className="pt-0.5">
+                    <p className="text-[13px] font-medium text-white/90 mb-2 leading-tight">{material.subject}</p>
+                    <p className="text-[11px] text-white/40 whitespace-pre-line leading-relaxed">{material.pages}</p>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-[14px] leading-[20px]">
-                  <span className="text-white/60">Study Time</span>
-                  <span className="text-[#51A2FF]">{material.time}</span>
+                <div className="flex items-center justify-between mt-auto border-none pt-0">
+                  <span className="text-white/40 text-[11px] font-medium">Study Time</span>
+                  <span className="text-[#60A5FA] text-[13px] font-medium">{material.time}</span>
                 </div>
               </div>
             ))}
