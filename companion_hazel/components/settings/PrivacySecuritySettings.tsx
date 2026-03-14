@@ -42,6 +42,7 @@ const PrivacySecuritySettings = () => {
             }, 1000);
         }
     };
+
     return (
         <SectionWrapper title="Privacy & Security" icon={Shield}>
             <div className="space-y-3">
@@ -65,14 +66,6 @@ const PrivacySecuritySettings = () => {
                     checked={settings.microphoneAccess}
                     onChange={() => toggleSetting('microphoneAccess')}
                 />
-
-                <button
-                    onClick={handleClearData}
-                    disabled={isClearing}
-                    className="w-full mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl p-3 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isClearing ? "Clearing..." : "Clear All Data"}
-                </button>
             </div>
         </SectionWrapper>
     );
