@@ -31,7 +31,7 @@ export default function Header() {
               <Gamepad2 className="w-4 h-4" />
               <span className="text-sm">Gaming</span>
             </Link>
-            <Link href="/Music_mode" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
+            <Link href="#" className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition">
               <Music className="w-4 h-4" />
               <span className="text-sm">Music</span>
             </Link>

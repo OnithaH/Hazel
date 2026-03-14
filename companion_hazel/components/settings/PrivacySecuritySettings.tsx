@@ -46,6 +46,10 @@ const PrivacySecuritySettings = () => {
                     checked={settings.microphoneAccess}
                     onChange={() => toggleSetting('microphoneAccess')}
                 />
+
+                <button className="w-full mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl p-3 text-sm font-medium transition-colors">
+                    Clear All Data
+                </button>
             </div>
         </SectionWrapper>
     );
