@@ -2,17 +2,31 @@
 
 import React from 'react';
 import SectionWrapper from './SectionWrapper';
-import { Wind } from 'lucide-react';
+import { Wind, Edit2 } from 'lucide-react';
 
-const AromaItem = ({ label, scent }: { label: string, scent: string }) => (
-    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
-        <span className="text-sm text-gray-400">{label}</span>
-        <span className="text-sm text-white font-medium">{scent}</span>
-    </div>
-);
+const AromaItem = ({ label, scent, onScentChange }: { label: string, scent: string, onScentChange: (newScent: string) => void }) => {
+    return (
+        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group">
+            <span className="text-sm text-gray-400">{label}</span>
+            <div className="flex items-center gap-2 w-1/2 justify-end">
+                <input
+                    type="text"
+                    value={scent}
+                    onChange={(e) => onScentChange(e.target.value)}
+                    placeholder="Enter fragrance"
+                    className="text-sm text-white font-medium bg-transparent border-none outline-none text-right w-full focus:ring-1 focus:ring-purple-500/50 rounded px-2"
+                />
+                <Edit2 className="w-3.5 h-3.5 text-gray-500" />
+            </div>
+        </div>
+    );
+};
 
 const AromaPillarsSettings = () => {
     const [aromaEnabled, setAromaEnabled] = React.useState(false);
+    const [freshScent, setFreshScent] = React.useState("Peppermint");
+    const [calmingScent, setCalmingScent] = React.useState("Lavender");
+    const [sharpScent, setSharpScent] = React.useState("Citrus");
 
     return (
         <SectionWrapper title="Aroma Pillars" icon={Wind}>
@@ -31,11 +45,11 @@ const AromaPillarsSettings = () => {
                 <div>
                     <label className="block text-xs text-gray-500 mb-2 ml-1 mt-4">Default Scents</label>
                     <div className="space-y-1 bg-black/20 border border-white/5 rounded-xl p-2">
-                        <AromaItem label="Study Mode" scent="Peppermint" />
+                        <AromaItem label="Fresh and energizing" scent={freshScent} onScentChange={setFreshScent} />
                         <div className="h-px bg-white/5 mx-2" />
-                        <AromaItem label="Music Mode" scent="Lavender" />
+                        <AromaItem label="Calming and relaxing" scent={calmingScent} onScentChange={setCalmingScent} />
                         <div className="h-px bg-white/5 mx-2" />
-                        <AromaItem label="General Mode" scent="Citrus" />
+                        <AromaItem label="Sharp and refreshing" scent={sharpScent} onScentChange={setSharpScent} />
                     </div>
                 </div>
             </div>
