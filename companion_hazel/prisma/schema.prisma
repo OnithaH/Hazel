@@ -18,14 +18,17 @@ model User {
   is_premium            Boolean  @default(false)
   privacy_mode_enabled  Boolean  @default(false)
   spotify_refresh_token String?
+  google_refresh_token  String?
   created_at            DateTime @default(now())
 
   studySessions         StudySession[]
   gameSessions          GameSession[]
+  modeUsageLogs         ModeUsageLog[]
   environmentLogs       EnvironmentLog[]
   aromaConfigurations   AromaConfiguration[]
   revisionMaterials     RevisionMaterial[]
   reminders             Reminder[]
+  musicGenreMappings    MusicGenreMapping[]
 }
 
 model StudySession {
@@ -39,7 +42,8 @@ model StudySession {
   focus_goal              String? // Tracks "What do you want to accomplish?"
   phone_detection_enabled Boolean  @default(false)
   focus_shield_enabled    Boolean  @default(false)
-  break_activity          String?  // 'GAME' or 'BREATHING'
+  break_activity          String? // 'GAME' or 'BREATHING'
+  break_used              Boolean  @default(false) // Tracks "Within half an hour, Hazel will suggest only one break"
   created_at              DateTime @default(now())
 
   distractions            DistractionLog[]
@@ -96,6 +100,8 @@ model RevisionMaterial {
   question_count  Int?     
   uploaded_at     DateTime @default(now())
   expires_at      DateTime
+
+  questions       RevisionQuestion[]
 }
 
 model Reminder {
@@ -107,4 +113,53 @@ model Reminder {
   time       String?  // E.g. "14:30"
   type       String   // 'Meeting', 'Task', 'Personal'
   created_at DateTime @default(now())
+}
+
+model MusicGenreMapping {
+  id              String   @id @default(uuid())
+  user_id         String
+  user            User     @relation(fields: [user_id], references: [id])
+  genre_name      String   // "Pop", "Rock", etc.
+  scent_name      String   // "Citrus", "Peppermint", etc.
+  intensity       Int      @default(100)
+  color_gradient  String?  // The CSS gradient to use in UI
+  updated_at      DateTime @updatedAt
+
+  @@unique([user_id, genre_name])
+}
+
+model RevisionQuestion {
+  id           String           @id @default(uuid())
+  material_id  String
+  material     RevisionMaterial @relation(fields: [material_id], references: [id], onDelete: Cascade)
+  question     String
+  answer       String
+  explanation  String?
+  created_at   DateTime         @default(now())
+}
+
+model BreathingExercise {
+  id            String   @id @default(uuid())
+  title         String   // "Deep Breathing", "Box Breathing"
+  video_url     String
+  duration_secs Int
+  thumbnail_url String?
+  created_at    DateTime @default(now())
+}
+
+model Game {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  thumbnail_url String?
+  created_at    DateTime @default(now())
+}
+
+model ModeUsageLog {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  mode       String   // 'GENERAL', 'STUDY', 'MUSIC', 'GAME'
+  start_time DateTime @default(now())
+  end_time   DateTime?
 }
