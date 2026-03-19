@@ -78,7 +78,7 @@ export default function StudySessionDetails() {
             {/* Session Timeline */}
             <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
               <h2 className="text-base font-medium mb-5">Session Timeline</h2>
-              
+
               {/* Timeline Bar */}
               <div className="mb-4">
                 <div className="flex h-10 rounded-xl overflow-hidden mb-3">
@@ -88,14 +88,14 @@ export default function StudySessionDetails() {
                   <div className="bg-[#FBBF24]" style={{ width: '10%' }}></div>
                   <div className="bg-[#22C55E]" style={{ width: '5%' }}></div>
                 </div>
-                
+
                 {/* Time Labels */}
                 <div className="flex justify-between text-[11px] text-white/40 font-medium tracking-wide">
-                  <span>2:34 PM</span>
-                  <span>3:04 PM</span>
-                  <span>3:34 PM</span>
-                  <span>4:04 PM</span>
-                  <span>4:34 PM</span>
+                  <span>2:35 PM</span>
+                  <span>3:05 PM</span>
+                  <span>3:35 PM</span>
+                  <span>4:05 PM</span>
+                  <span>4:35 PM</span>
                 </div>
               </div>
 
@@ -119,7 +119,7 @@ export default function StudySessionDetails() {
             {/* Session Events */}
             <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
               <h2 className="text-base font-medium mb-5">Session Events</h2>
-              
+
               <div className="space-y-3">
                 {sessionEvents.map((event, index) => {
                   const Icon = event.icon;
@@ -135,7 +135,7 @@ export default function StudySessionDetails() {
                     orange: 'text-[#F59E0B]',
                     slate: 'text-[#94A3B8]'
                   };
-                  
+
                   return (
                     <div key={index} className="flex items-center gap-4 bg-[#262833] rounded-xl p-4">
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${bgColors[event.color]}`}>
@@ -157,7 +157,7 @@ export default function StudySessionDetails() {
             {/* Focus Breakdown */}
             <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
               <h2 className="text-base font-medium mb-5">Focus Breakdown</h2>
-              
+
               <div className="space-y-5">
                 <div>
                   <div className="flex justify-between text-xs font-medium mb-2">
@@ -194,18 +194,18 @@ export default function StudySessionDetails() {
             {/* Environment */}
             <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
               <h2 className="text-base font-medium mb-5">Environment</h2>
-              
+
               <div className="space-y-3">
                 <div className="bg-[#262833] rounded-xl p-4">
                   <p className="text-white/40 text-[11px] font-medium mb-1">Aroma</p>
                   <p className="text-[13px] text-white/90 font-medium">Peppermint (Focus)</p>
                 </div>
-                
+
                 <div className="bg-[#262833] rounded-xl p-4">
                   <p className="text-white/40 text-[11px] font-medium mb-1">RGB Theme</p>
                   <p className="text-[13px] text-white/90 font-medium">Cool Blue - High Focus</p>
                 </div>
-                
+
                 <div className="bg-[#262833] rounded-xl p-4">
                   <p className="text-white/40 text-[11px] font-medium mb-1">Lighting</p>
                   <p className="text-[13px] text-white/90 font-medium">Daylight Mode</p>
@@ -216,14 +216,14 @@ export default function StudySessionDetails() {
             {/* Session Notes */}
             <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
               <h2 className="text-base font-medium mb-4">Session Notes</h2>
-              
+
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add notes about this session..."
                 className="w-full h-24 bg-[#14161C] border border-white/5 rounded-xl p-4 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#3B82F6]/40 resize-none mb-4"
               />
-              
+
               <button className="w-full py-2.5 bg-[#1B2A4E] text-[#60A5FA] hover:bg-[#233561] rounded-xl text-sm font-medium transition-all">
                 Save Notes
               </button>
@@ -234,7 +234,7 @@ export default function StudySessionDetails() {
         {/* Materials Studied */}
         <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
           <h2 className="text-base font-medium mb-5">Materials Studied</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {materials.map((material, index) => (
               <div key={index} className="bg-[#262833] rounded-xl p-5 flex flex-col justify-between h-auto">
