@@ -91,14 +91,15 @@ model AromaConfiguration {
 }
 
 model Reminder {
-  id         String   @id @default(uuid())
-  robot_id   String
-  robot      Robot    @relation(fields: [robot_id], references: [id])
-  title      String
-  date       DateTime @db.Date
-  time       String?
-  type       String
-  created_at DateTime @default(now())
+  id              String   @id @default(uuid())
+  robot_id        String
+  robot           Robot    @relation(fields: [robot_id], references: [id])
+  title           String
+  date            DateTime @db.Date
+  time            String?
+  type            String
+  google_event_id String?
+  created_at      DateTime @default(now())
 }
 
 model MusicGenreMapping {
