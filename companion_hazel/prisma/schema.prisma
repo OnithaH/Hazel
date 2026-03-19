@@ -133,6 +133,7 @@ model RevisionMaterial {
   user_id         String
   file_url        String
   file_name       String
+  content         String?
   uploaded_at     DateTime @default(now())
   expires_at      DateTime
   questions       RevisionQuestion[]
