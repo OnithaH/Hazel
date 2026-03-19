@@ -1,0 +1,110 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String   @id @default(uuid())
+  clerk_id              String   @unique
+  email                 String   @unique
+  name                  String?
+  weekly_study_goal     Int      @default(15)
+  is_premium            Boolean  @default(false)
+  privacy_mode_enabled  Boolean  @default(false)
+  spotify_refresh_token String?
+  created_at            DateTime @default(now())
+
+  studySessions         StudySession[]
+  gameSessions          GameSession[]
+  environmentLogs       EnvironmentLog[]
+  aromaConfigurations   AromaConfiguration[]
+  revisionMaterials     RevisionMaterial[]
+  reminders             Reminder[]
+}
+
+model StudySession {
+  id                      String   @id @default(uuid())
+  user_id                 String
+  user                    User     @relation(fields: [user_id], references: [id])
+  start_time              DateTime
+  end_time                DateTime?
+  scheduled_duration      Int // in minutes
+  actual_focus_time       Int? // in minutes
+  focus_goal              String? // Tracks "What do you want to accomplish?"
+  phone_detection_enabled Boolean  @default(false)
+  focus_shield_enabled    Boolean  @default(false)
+  break_activity          String?  // 'GAME' or 'BREATHING'
+  created_at              DateTime @default(now())
+
+  distractions            DistractionLog[]
+}
+
+model DistractionLog {
+  id          String   @id @default(uuid())
+  session_id  String
+  session     StudySession @relation(fields: [session_id], references: [id])
+  type        String   // 'PHONE', 'DROWSINESS', 'UNFOCUSED'
+  timestamp   DateTime @default(now())
+}
+
+model GameSession {
+  id            String   @id @default(uuid())
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id])
+  activity_type String   // 'GAME' or 'BREATHING'
+  game_name     String
+  duration      Int      // in seconds
+  score         Int?
+  result        String?  // 'WIN', 'LOSS', 'DRAW'
+  played_at     DateTime @default(now())
+}
+
+model EnvironmentLog {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  temperature Float
+  humidity    Float
+  recorded_at DateTime @default(now())
+}
+
+model AromaConfiguration {
+  id             String   @id @default(uuid())
+  user_id        String
+  user           User     @relation(fields: [user_id], references: [id])
+  chamber_number Int
+  scent_name     String
+  description    String?  // E.g., "Calming and relaxing"
+  intensity      Int      @default(75) 
+  color_hex      String?  
+  updated_at     DateTime @updatedAt
+}
+
+model RevisionMaterial {
+  id              String   @id @default(uuid())
+  user_id         String
+  user            User     @relation(fields: [user_id], references: [id])
+  file_url        String
+  file_name       String
+  file_size_bytes Int?     
+  question_count  Int?     
+  uploaded_at     DateTime @default(now())
+  expires_at      DateTime
+}
+
+model Reminder {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  title      String
+  date       DateTime @db.Date // Stores the Date context
+  time       String?  // E.g. "14:30"
+  type       String   // 'Meeting', 'Task', 'Personal'
+  created_at DateTime @default(now())
+}
