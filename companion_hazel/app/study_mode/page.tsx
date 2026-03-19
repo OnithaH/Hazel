@@ -82,8 +82,8 @@ export default function StudyModePage() {
                     key={aroma}
                     onClick={() => setSelectedAroma(aroma)}
                     className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
-                        ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
-                        : 'bg-white/5 border border-white/10 text-white/60'
+                      ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
+                      : 'bg-white/5 border border-white/10 text-white/60'
                       }`}
                   >
                     {aroma}
@@ -127,10 +127,10 @@ export default function StudyModePage() {
         </div>
 
         {/* Study History */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Study History</h2>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
+          <h2 className="text-2xl">Study History</h2>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {historyData.map((item, index) => (
               <div
                 key={index}
@@ -138,8 +138,8 @@ export default function StudyModePage() {
               >
                 <div className="flex items-center gap-16">
                   <div>
-                    <p className="text-[14px]">{item.date}</p>
-                    <p className="text-white/40 text-[12px]">{item.time}</p>
+                    <p className="text-base">{item.date}</p>
+                    <p className="text-white/60 text-sm">{item.time}</p>
                   </div>
                   <p className="text-white/60 text-[13px]">{item.distractions}</p>
                 </div>
