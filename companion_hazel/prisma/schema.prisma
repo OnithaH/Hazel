@@ -86,6 +86,7 @@ model AromaConfiguration {
   scent_name     String
   intensity      Int      @default(75)
   color_hex      String?
+  isActive       Boolean  @default(true)
   updated_at     DateTime @updatedAt
 }
 
