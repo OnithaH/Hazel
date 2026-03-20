@@ -3,6 +3,35 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { generateQuestions } from "@/lib/gemini";
 
+/**
+ * @swagger
+ * /api/revise/upload:
+ *   post:
+ *     summary: Upload material and generate questions
+ *     description: Uploads a file (PDF, DOCX, TXT, or Image), extracts text, and generates 10 revision questions using Gemini AI.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The study material file to upload.
+ *     responses:
+ *       200:
+ *         description: Material uploaded and questions generated successfully.
+ *       400:
+ *         description: No file uploaded.
+ *       401:
+ *         description: Unauthorized.
+ *       500:
+ *         description: Server error.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();

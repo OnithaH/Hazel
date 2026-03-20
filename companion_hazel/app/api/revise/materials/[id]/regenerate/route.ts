@@ -3,6 +3,31 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { generateQuestions } from "@/lib/gemini";
 
+/**
+ * @swagger
+ * /api/revise/materials/{id}/regenerate:
+ *   post:
+ *     summary: Re-generate questions for a material
+ *     description: Generates a new set of 10 questions using the stored source content for the given material ID.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the revision material.
+ *     responses:
+ *       200:
+ *         description: Questions re-generated successfully.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Material not found.
+ *       500:
+ *         description: Server error.
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
