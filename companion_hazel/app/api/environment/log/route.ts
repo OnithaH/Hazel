@@ -2,9 +2,38 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 /**
- * POST /api/environment/log
- * Description: Logs temperature and humidity from the Raspberry Pi / ESP32.
- * Headers: X-Robot-Secret (The unique secret for the robot)
+ * @swagger
+ * /api/environment/log:
+ *   post:
+ *     summary: Log sensor data
+ *     description: Logs temperature and humidity data sent from the robot hardware.
+ *     parameters:
+ *       - in: header
+ *         name: x-robot-secret
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique secret key for the robot.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               temperature:
+ *                 type: number
+ *               humidity:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Log created successfully
+ *       401:
+ *         description: Missing secret
+ *       403:
+ *         description: Invalid secret
+ *       500:
+ *         description: Server error
  */
 export async function POST(req: Request) {
   try {

@@ -2,9 +2,38 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 /**
- * PATCH /api/aroma/[id]
- * Description: Updates the configuration for a specific aroma chamber.
- * Body: { intensity, color_hex, scent_name, isActive }
+ * @swagger
+ * /api/aroma/{id}:
+ *   patch:
+ *     summary: Update aroma configuration
+ *     description: Updates the configuration for a specific aroma chamber.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the aroma configuration.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               intensity:
+ *                 type: integer
+ *               color_hex:
+ *                 type: string
+ *               scent_name:
+ *                 type: string
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Aroma configuration updated successfully
+ *       500:
+ *         description: Server error
  */
 export async function PATCH(
   req: Request,

@@ -2,9 +2,27 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 /**
- * GET /api/environment/current
- * Description: Fetches the latest temperature and humidity for the dashboard.
- * Query Params: robotId (The UUID of the robot)
+ * @swagger
+ * /api/environment/current:
+ *   get:
+ *     summary: Get latest environment data
+ *     description: Fetches the latest temperature and humidity readings for a specific robot.
+ *     parameters:
+ *       - in: query
+ *         name: robotId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the robot.
+ *     responses:
+ *       200:
+ *         description: Latest environment log
+ *       400:
+ *         description: Missing robotId
+ *       404:
+ *         description: No logs found
+ *       500:
+ *         description: Server error
  */
 export async function GET(req: Request) {
   try {
