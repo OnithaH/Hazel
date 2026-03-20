@@ -56,12 +56,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { 
-      duration, 
-      break_activity, 
-      phone_detection_enabled, 
+    const {
+      duration,
+      break_activity,
+      phone_detection_enabled,
       focus_shield_enabled,
-      focus_goal 
+      focus_goal
     } = body;
 
     if (!duration) {
