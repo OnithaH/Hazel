@@ -2,6 +2,32 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/user/profile:
+ *   get:
+ *     summary: Get user profile settings
+ *     description: Retrieves the current user's settings, including weekly study goal and privacy mode. Automatically creates the user record on first login.
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 weekly_study_goal:
+ *                   type: integer
+ *                 privacy_mode_enabled:
+ *                   type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found in Clerk
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -47,6 +73,49 @@ export async function GET() {
   }
 }
 
+/**
+ * @swagger
+ * /api/user/profile:
+ *   patch:
+ *     summary: Update user profile settings
+ *     description: Allows updating the user's weekly study goal or toggling privacy mode.
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               weekly_study_goal:
+ *                 type: integer
+ *               privacy_mode_enabled:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: User profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 clerk_id:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 weekly_study_goal:
+ *                   type: integer
+ *                 privacy_mode_enabled:
+ *                   type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function PATCH(req: Request) {
   try {
     const { userId } = await auth();

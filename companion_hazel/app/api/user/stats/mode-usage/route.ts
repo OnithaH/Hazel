@@ -2,6 +2,50 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/user/stats/mode-usage:
+ *   get:
+ *     summary: Get weekly mode usage statistics
+ *     description: Provides a detailed breakdown of time spent in each mode (Study, Game, Music, General) over the last 7 days.
+ *     tags: [Stats]
+ *     responses:
+ *       200:
+ *         description: Mode usage statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totals:
+ *                   type: object
+ *                   properties:
+ *                     study: { type: string }
+ *                     gaming: { type: string }
+ *                     music: { type: string }
+ *                     general: { type: string }
+ *                 weeklyAnalysis:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       day: { type: string }
+ *                       segments:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             label: { type: string }
+ *                             value: { type: integer }
+ *                             color: { type: string }
+ *                       total: { type: string }
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Robot or user not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET() {
   try {
     const { userId } = await auth();

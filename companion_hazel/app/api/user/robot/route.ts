@@ -2,6 +2,39 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/user/robot:
+ *   get:
+ *     summary: Get user's assigned robot
+ *     description: Retrieves details of the robot assigned to the currently authenticated user.
+ *     tags: [Robot]
+ *     responses:
+ *       200:
+ *         description: Robot details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 secret_key:
+ *                   type: string
+ *                 user_id:
+ *                   type: string
+ *                 created_at:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User or robot not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET() {
   try {
     const { userId } = await auth();
