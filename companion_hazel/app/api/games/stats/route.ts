@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-
+/**
+ * @swagger
+ * /api/games/stats:
+ *   get:
+ *     summary: Get today's game statistics
+ *     description: Aggregates daily playtime, total points, win streak, and games left.
+ *     tags:
+ *       - Games
+ *     responses:
+ *       200:
+ *         description: Daily game statistics
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Robot not found
+ *       500:
+ *         description: Server error
+ */
 export async function GET() {
   try {
     const { userId } = await auth();

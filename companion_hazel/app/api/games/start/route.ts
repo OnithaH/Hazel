@@ -1,7 +1,37 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-
+/**
+ * @swagger
+ * /api/games/start:
+ *   post:
+ *     summary: Start a game or breathing activity
+ *     description: Updates the active robot mode to signal the hardware to start the activity.
+ *     tags:
+ *       - Games
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               activity_type:
+ *                 type: string
+ *               game_name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Hardware state updated successfully
+ *       400:
+ *         description: Missing required fields
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Robot not found
+ *       500:
+ *         description: Server error
+ */
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();

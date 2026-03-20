@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-
+/**
+ * @swagger
+ * /api/study/trigger-break:
+ *   post:
+ *     summary: Trigger a study break
+ *     description: Pauses an active study session and signals the hardware to start Game Mode.
+ *     tags:
+ *       - Study
+ *     responses:
+ *       200:
+ *         description: Break triggered successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: No active study session found / Robot not found
+ *       500:
+ *         description: Server error
+ */
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
