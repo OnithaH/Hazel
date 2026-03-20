@@ -2,6 +2,37 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/study/session/{id}:
+ *   patch:
+ *     summary: Update an active study session
+ *     description: Updates the actual focus time or marks a study session as finished.
+ *     tags: [Study]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               actual_focus_time:
+ *                 type: integer
+ *               is_finished:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Session updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

@@ -2,9 +2,33 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 /**
- * POST /api/study/distraction
- * Description: Logs interference (phone or drowsiness) detected by the Raspberry Pi.
- * Body: { session_id, type }
+ * @swagger
+ * /api/study/distraction:
+ *   post:
+ *     summary: Log study distraction
+ *     description: Logs interference (phone or drowsiness) detected by the Raspberry Pi during a study session.
+ *     tags: [Study]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               session_id:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [PHONE, DROWSINESS]
+ *     responses:
+ *       200:
+ *         description: Distraction logged successfully
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
  */
 export async function POST(req: Request) {
   try {
