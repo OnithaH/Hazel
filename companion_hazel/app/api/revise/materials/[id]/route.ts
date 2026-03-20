@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/revise/materials/{id}:
+ *   delete:
+ *     summary: Delete a revision material
+ *     description: Permanently deletes a revision material and all its associated questions for the authenticated user.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the revision material to delete.
+ *     responses:
+ *       200:
+ *         description: Material deleted successfully.
+ *       401:
+ *         description: Unauthorized.
+ *       404:
+ *         description: Material not found.
+ *       500:
+ *         description: Server error.
+ */
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }

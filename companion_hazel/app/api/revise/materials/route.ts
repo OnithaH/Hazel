@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/revise/materials:
+ *   get:
+ *     summary: Fetch all revision materials for the user
+ *     description: Returns a list of all study materials uploaded by the authenticated user, including the question count.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of revision materials.
+ *       401:
+ *         description: Unauthorized.
+ *       500:
+ *         description: Server error.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
