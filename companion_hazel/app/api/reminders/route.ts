@@ -3,8 +3,25 @@ import prisma from '@/lib/prisma';
 import { getGoogleAuthClient, createGoogleCalendarEvent, updateGoogleCalendarEvent, deleteGoogleCalendarEvent } from '@/lib/googleCalendar';
 
 /**
- * GET /api/reminders?robotId=uuid
- * Description: Fetches all upcoming reminders for a specific robot.
+ * @swagger
+ * /api/reminders:
+ *   get:
+ *     summary: Get all reminders for a robot
+ *     description: Fetches all upcoming reminders for a specific robot.
+ *     parameters:
+ *       - in: query
+ *         name: robotId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the robot.
+ *     responses:
+ *       200:
+ *         description: List of reminders
+ *       400:
+ *         description: Missing robotId
+ *       500:
+ *         description: Server error
  */
 export async function GET(req: Request) {
   try {
@@ -28,9 +45,35 @@ export async function GET(req: Request) {
 }
 
 /**
- * POST /api/reminders
- * Description: Creates a new reminder and syncs with Google Calendar.
- * Body: { robotId, title, date, time, type }
+ * @swagger
+ * /api/reminders:
+ *   post:
+ *     summary: Create a new reminder
+ *     description: Creates a new reminder and syncs with Google Calendar if a token exists.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               robotId:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *               time:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Reminder created successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
  */
 export async function POST(req: Request) {
   try {
@@ -76,8 +119,39 @@ export async function POST(req: Request) {
 }
 
 /**
- * PATCH /api/reminders?id=uuid
- * Description: Updates a reminder and syncs with Google Calendar.
+ * @swagger
+ * /api/reminders:
+ *   patch:
+ *     summary: Update an existing reminder
+ *     description: Updates a reminder and syncs changes with Google Calendar.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the reminder to update.
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *               time:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reminder updated successfully
+ *       404:
+ *         description: Reminder not found
+ *       500:
+ *         description: Server error
  */
 export async function PATCH(req: Request) {
   try {
@@ -134,8 +208,25 @@ export async function PATCH(req: Request) {
 }
 
 /**
- * DELETE /api/reminders?id=uuid
- * Description: Deletes a reminder and removes from Google Calendar.
+ * @swagger
+ * /api/reminders:
+ *   delete:
+ *     summary: Delete a reminder
+ *     description: Deletes a reminder and removes it from Google Calendar.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The UUID of the reminder to delete.
+ *     responses:
+ *       200:
+ *         description: Reminder deleted successfully
+ *       404:
+ *         description: Reminder not found
+ *       500:
+ *         description: Server error
  */
 export async function DELETE(req: Request) {
   try {
