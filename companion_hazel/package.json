@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -29,6 +29,10 @@
     "swagger-ui-react": "^5.32.1",
     "tailwind-merge": "^3.4.0",
     "ytmusic-api": "^5.3.1"
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
