@@ -3,8 +3,16 @@
 import React, { useState } from 'react';
 import { Clock, Gamepad2, TrendingUp, Target, X } from 'lucide-react';
 
+interface Game {
+  emoji: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  difficultyColor: string;
+}
+
 export default function Page() {
-  const [selectedGame, setSelectedGame] = useState(null);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const stats = [
     {
       icon: <Clock className="w-5 h-5 text-blue-400" />,

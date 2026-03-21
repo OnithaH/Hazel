@@ -22,12 +22,13 @@ import prisma from "@/lib/prisma";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const questions = await prisma.revisionQuestion.findMany({
       where: {
-        material_id: params.id,
+        material_id: id,
       },
     });
 
