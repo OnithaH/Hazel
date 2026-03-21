@@ -19,10 +19,77 @@ global.musicState = global.musicState || {
   genre: null,
 };
 
+/**
+ * @swagger
+ * /api/music/state:
+ *   get:
+ *     summary: Get current music state
+ *     description: Returns the in-memory music state including what is currently playing, the queue, and any pending commands.
+ *     tags: [Music]
+ *     responses:
+ *       200:
+ *         description: Music state successfully retrieved.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nowPlaying:
+ *                   type: object
+ *                   nullable: true
+ *                 queue:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 command:
+ *                   type: string
+ *                   nullable: true
+ *                 aromaChamber:
+ *                   type: string
+ *                   nullable: true
+ *                 genre:
+ *                   type: string
+ *                   nullable: true
+ */
 export async function GET() {
   return NextResponse.json(global.musicState);
 }
 
+/**
+ * @swagger
+ * /api/music/state:
+ *   post:
+ *     summary: Update music state or send a command
+ *     description: Used by the Dashboard to send commands or enqueue songs, and by the Raspberry Pi to sync its playback status.
+ *     tags: [Music]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nowPlaying:
+ *                 type: object
+ *                 description: Set by the Raspberry Pi to indicate the currently playing song.
+ *               command:
+ *                 type: string
+ *                 description: Command for the Raspberry Pi (e.g., 'play', 'pause', 'next', 'enqueue_song').
+ *               song:
+ *                 type: object
+ *                 description: Song object to be enqueued.
+ *               queue:
+ *                 type: array
+ *                 description: Allows overwriting the current queue state.
+ *               clearCommand:
+ *                 type: boolean
+ *                 description: Set to true by the Raspberry Pi to acknowledge receipt of a command.
+ *     responses:
+ *       200:
+ *         description: State successfully updated.
+ *       400:
+ *         description: Invalid payload submitted.
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
