@@ -19,10 +19,42 @@ const PrivacyToggle = ({ label, checked, onChange }: { label: string, checked: b
 
 const PrivacySecuritySettings = () => {
     const [settings, setSettings] = React.useState({
-        PrivacyTurn: true,
+        PrivacyTurn: false,
         cameraAccess: true,
         microphoneAccess: false,
     });
+
+    React.useEffect(() => {
+        const fetchPrivacy = async () => {
+            try {
+                const res = await fetch('/api/user/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    setSettings(prev => ({ ...prev, PrivacyTurn: data.privacy_mode_enabled }));
+                }
+            } catch (error) {
+                console.error("Failed to fetch privacy settings", error);
+            }
+        };
+        fetchPrivacy();
+    }, []);
+
+    React.useEffect(() => {
+        const handleSaveEvent = async () => {
+            try {
+                await fetch('/api/user/profile', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ privacy_mode_enabled: settings.PrivacyTurn })
+                });
+            } catch (error) {
+                console.error("Failed to save privacy settings", error);
+            }
+        };
+
+        window.addEventListener('save-settings', handleSaveEvent);
+        return () => window.removeEventListener('save-settings', handleSaveEvent);
+    }, [settings.PrivacyTurn]);
 
     const toggleSetting = (key: keyof typeof settings) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));

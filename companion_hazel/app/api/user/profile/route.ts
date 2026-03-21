@@ -41,29 +41,44 @@ export async function GET() {
       where: { clerk_id: userId },
     });
 
-    // If user doesn't exist in Prisma, create them using Clerk data
-    if (!user) {
+    // Sync name from Clerk if it's missing or set to the placeholder "User"
+    if (!user || user.name === "User" || !user.name) {
       const clerkUser = await currentUser();
-      
-      if (!clerkUser) {
-        return new NextResponse("User not found in Clerk", { status: 404 });
+      if (clerkUser) {
+        const email = clerkUser.emailAddresses[0]?.emailAddress;
+        const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
+
+        if (!user) {
+          // Create if absolutely not found (backup)
+          user = await prisma.user.create({
+            data: {
+              clerk_id: userId,
+              email: email || "",
+              name: name || null,
+              weekly_study_goal: 15,
+              privacy_mode_enabled: false,
+            },
+          });
+        } else if ((name && user.name !== name) || (email && user.email !== email)) {
+          // Update if name or email exists in Clerk and is different from DB
+          user = await prisma.user.update({
+            where: { clerk_id: userId },
+            data: { 
+              name: name || user.name,
+              email: email || user.email
+            }
+          });
+        }
       }
+    }
 
-      const email = clerkUser.emailAddresses[0]?.emailAddress;
-      const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
-
-      user = await prisma.user.create({
-        data: {
-          clerk_id: userId,
-          email: email || "",
-          name: name || null,
-          weekly_study_goal: 15,
-          privacy_mode_enabled: false,
-        },
-      });
+    if (!user) {
+      return new NextResponse("User profile could not be initialized", { status: 500 });
     }
 
     return NextResponse.json({
+      name: user.name,
+      email: user.email?.endsWith('@clerk.user') ? null : user.email,
       weekly_study_goal: user.weekly_study_goal,
       privacy_mode_enabled: user.privacy_mode_enabled,
     });
@@ -125,13 +140,15 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { weekly_study_goal, privacy_mode_enabled } = body;
+    const { weekly_study_goal, privacy_mode_enabled, email, name } = body;
 
     const user = await prisma.user.update({
       where: { clerk_id: userId },
       data: {
         weekly_study_goal: typeof weekly_study_goal === 'number' ? weekly_study_goal : undefined,
         privacy_mode_enabled: typeof privacy_mode_enabled === 'boolean' ? privacy_mode_enabled : undefined,
+        email: typeof email === 'string' ? email : undefined,
+        name: typeof name === 'string' ? name : undefined,
       },
     });
 

@@ -27,6 +27,54 @@ const AromaPillarsSettings = () => {
     const [freshScent, setFreshScent] = React.useState("Peppermint");
     const [calmingScent, setCalmingScent] = React.useState("Lavender");
     const [sharpScent, setSharpScent] = React.useState("Citrus");
+    const [aromaConfigs, setAromaConfigs] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        const fetchAromas = async () => {
+            try {
+                const res = await fetch('/api/aroma');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAromaConfigs(data);
+                    const fresh = data.find((a: any) => a.chamber_id === 1) || data[0];
+                    const calming = data.find((a: any) => a.chamber_id === 2) || data[1];
+                    const sharp = data.find((a: any) => a.chamber_id === 3) || data[2];
+
+                    if (fresh) setFreshScent(fresh.scent_name);
+                    if (calming) setCalmingScent(calming.scent_name);
+                    if (sharp) setSharpScent(sharp.scent_name);
+                }
+            } catch (error) {
+                console.error("Failed to fetch aroma settings", error);
+            }
+        };
+        fetchAromas();
+    }, []);
+
+    React.useEffect(() => {
+        const handleSaveEvent = async () => {
+            try {
+                const updates = aromaConfigs.map(config => {
+                    let newScent = config.scent_name;
+                    if (config.chamber_id === 1) newScent = freshScent;
+                    if (config.chamber_id === 2) newScent = calmingScent;
+                    if (config.chamber_id === 3) newScent = sharpScent;
+
+                    return fetch(`/api/aroma/${config.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ scent_name: newScent })
+                    });
+                });
+                await Promise.all(updates);
+            } catch (error) {
+                console.error("Failed to save aroma settings", error);
+            }
+        };
+
+        window.addEventListener('save-settings', handleSaveEvent);
+        return () => window.removeEventListener('save-settings', handleSaveEvent);
+    }, [freshScent, calmingScent, sharpScent, aromaConfigs]);
 
     return (
         <SectionWrapper title="Aroma Pillars" icon={Wind}>

@@ -2,19 +2,48 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Trophy, 
-  Activity, 
-  Clock, 
-  Heart, 
-  Twitter, 
-  Github, 
-  Linkedin, 
-  Mail 
+import {
+  Trophy,
+  Activity,
+  Clock,
+  Heart,
+  Twitter,
+  Github,
+  Linkedin,
+  Mail
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
+  const [userProfile, setUserProfile] = useState<{ name: string | null; weekly_study_goal: number } | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [profileRes, statsRes] = await Promise.all([
+          fetch('/api/user/profile'),
+          fetch('/api/user/stats/mode-usage')
+        ]);
+
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          setUserProfile(profileData);
+        }
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setStats(statsData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => setTimer(t => t + 1), 1000);
@@ -28,22 +57,60 @@ export default function DashboardPage() {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const activities = [
-    { label: 'Study', percent: 65, colorClass: 'bg-blue-500', width: '65%' },
-    { label: 'Gaming', percent: 15, colorClass: 'bg-purple-500', width: '30%' },
-    { label: 'Music', percent: 12, colorClass: 'bg-pink-500', width: '25%' },
-    { label: 'General', percent: 8, colorClass: 'bg-green-500', width: '15%' },
-  ];
+  // Derive activities from stats
+  const activities = React.useMemo(() => {
+    if (!stats) return [
+      { label: 'Study', percent: 0, colorClass: 'bg-blue-500', width: '0%' },
+      { label: 'Gaming', percent: 0, colorClass: 'bg-purple-500', width: '0%' },
+      { label: 'Music', percent: 0, colorClass: 'bg-pink-500', width: '0%' },
+      { label: 'General', percent: 0, colorClass: 'bg-green-500', width: '0%' },
+    ];
 
-  const weeklyData = [
-    { day: 'Mon', segments: [{color: 'bg-blue-500', w: 40}, {color: 'bg-purple-500', w: 10}, {color: 'bg-pink-500', w: 15}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Tue', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 20}], total: '3h' },
-    { day: 'Wed', segments: [{color: 'bg-blue-500', w: 47}, {color: 'bg-purple-500', w: 12}, {color: 'bg-pink-500', w: 18}, {color: 'bg-green-500', w: 8}], total: '3h' },
-    { day: 'Thu', segments: [{color: 'bg-blue-500', w: 55}, {color: 'bg-purple-500', w: 8}, {color: 'bg-pink-500', w: 25}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Fri', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 18}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '4h' },
-    { day: 'Sat', segments: [{color: 'bg-blue-500', w: 35}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 12}], total: '3h' },
-    { day: 'Sun', segments: [{color: 'bg-blue-500', w: 48}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '5h' },
-  ];
+    const modeTotals: Record<string, number> = { Study: 0, Gaming: 0, Music: 0, General: 0 };
+    let grandTotal = 0;
+
+    stats.weeklyAnalysis.forEach((day: any) => {
+      day.segments.forEach((seg: any) => {
+        if (modeTotals[seg.label] !== undefined) {
+          modeTotals[seg.label] += seg.value;
+          grandTotal += seg.value;
+        }
+      });
+    });
+
+    return Object.entries(modeTotals).map(([label, value]) => {
+      const colors: Record<string, string> = {
+        Study: 'bg-blue-500',
+        Gaming: 'bg-purple-500',
+        Music: 'bg-pink-500',
+        General: 'bg-green-500'
+      };
+      const percent = grandTotal > 0 ? Math.round((value / grandTotal) * 100) : 0;
+      return {
+        label,
+        percent,
+        colorClass: colors[label],
+        width: `${percent}%`
+      };
+    });
+  }, [stats]);
+
+  // Derive weeklyData from stats
+  const weeklyData = React.useMemo(() => {
+    if (!stats) return [];
+
+    return stats.weeklyAnalysis.map((day: any) => {
+      const totalMins = day.segments.reduce((acc: number, s: any) => acc + s.value, 0);
+      return {
+        day: day.day,
+        total: day.total,
+        segments: day.segments.map((s: any) => ({
+          color: s.color,
+          w: totalMins > 0 ? (s.value / totalMins) * 100 : 0
+        }))
+      };
+    });
+  }, [stats]);
 
   return (
     <div className="min-h-screen bg-[#07080A] text-white font-sans selection:bg-blue-500/30">
@@ -51,7 +118,7 @@ export default function DashboardPage() {
       <main className="max-w-[1240px] mx-auto mt-10 px-8">
         {/* Header */}
         <div className="mb-8 pl-1">
-          <h1 className="text-3xl font-medium mb-3">Welcome Back, User</h1>
+          <h1 className="text-3xl font-medium mb-3">Welcome Back, {userProfile?.name || "User"}</h1>
           <p className="text-white/40 text-sm">Here's what's happening with Hazel today</p>
         </div>
 
@@ -62,7 +129,7 @@ export default function DashboardPage() {
               <h2 className="text-lg font-medium">Today's Session Breakdown</h2>
               <span className="px-4 py-1.5 bg-[#1e293b]/50 text-blue-400 text-xs font-medium rounded-full">In Progress</span>
             </div>
-            
+
             <div className="flex-1 flex flex-col justify-center items-center py-16 relative bg-[#1A1D27] rounded-xl mb-10 overflow-hidden">
               <div className="text-6xl font-light tracking-wider mb-2">{formatTime(timer)}</div>
               <div className="text-white/40 text-xs">Time Elapsed</div>
@@ -96,7 +163,9 @@ export default function DashboardPage() {
                   <Trophy className="text-orange-400" size={16} />
                   <span className="text-xs font-medium text-white/80">Weekly Goal</span>
                 </div>
-                <div className="text-[28px] font-medium mb-1">24/30</div>
+                <div className="text-[28px] font-medium mb-1">
+                  {stats?.totals?.study?.split('h')[0] || 0}/{userProfile?.weekly_study_goal || 30}
+                </div>
                 <div className="text-xs text-white/40 mb-5">Hours completed</div>
                 <div className="h-1.5 bg-white/5 rounded-full overflow-hidden mt-6">
                   <div className="h-full bg-orange-500 w-[80%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
@@ -139,7 +208,7 @@ export default function DashboardPage() {
                 <span className="text-xs text-blue-400 font-medium">Today</span>
               </div>
               <div className="relative mt-auto">
-                <div className="text-[28px] font-medium mb-1">4h 23m</div>
+                <div className="text-[28px] font-medium mb-1">{stats?.totals?.study || '0h 0m'}</div>
                 <div className="text-xs text-white/40">Focus Time</div>
               </div>
             </div>
@@ -150,11 +219,11 @@ export default function DashboardPage() {
         <div className="bg-[#12141C] border border-white/5 rounded-2xl p-8 mb-16">
           <h2 className="text-base font-medium mb-8">Weekly Overview</h2>
           <div className="space-y-4">
-            {weeklyData.map((data) => (
+            {weeklyData.map((data: any) => (
               <div key={data.day} className="flex items-center gap-6 text-xs">
                 <div className="w-8 text-white/40 font-medium">{data.day}</div>
                 <div className="flex-1 h-8 bg-[#1A1D27] rounded-md overflow-hidden flex">
-                  {data.segments.map((seg, idx) => (
+                  {data.segments.map((seg: any, idx: number) => (
                     <div key={idx} className={`h-full ${seg.color} opacity-90`} style={{ width: `${seg.w}%` }}></div>
                   ))}
                 </div>
@@ -162,24 +231,24 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          
+
           <div className="flex items-center justify-center gap-8 mt-10">
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-               <span className="text-xs text-white/40">Study</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
-               <span className="text-xs text-white/40">Gaming</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-pink-500"></div>
-               <span className="text-xs text-white/40">Music</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-               <span className="text-xs text-white/40">General</span>
-             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+              <span className="text-xs text-white/40">Study</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+              <span className="text-xs text-white/40">Gaming</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-pink-500"></div>
+              <span className="text-xs text-white/40">Music</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+              <span className="text-xs text-white/40">General</span>
+            </div>
           </div>
         </div>
       </main>
@@ -190,58 +259,58 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1">
               <div className="flex items-center gap-3 mb-6">
-                 <div className="w-8 h-8 rounded-full bg-[#A855F7] flex items-center justify-center text-white text-sm font-bold">H</div>
-                 <span className="text-white font-semibold tracking-widest text-sm">Hazel</span>
+                <div className="w-8 h-8 rounded-full bg-[#A855F7] flex items-center justify-center text-white text-sm font-bold">H</div>
+                <span className="text-white font-semibold tracking-widest text-sm">Hazel</span>
               </div>
               <p className="text-white/40 text-[11px] leading-relaxed pr-4 mb-4">
                 Your intelligent companion robot for study, gaming, music, and everyday life.
               </p>
               <p className="text-white/40 text-[11px] flex items-center gap-1.5">
-                Made with <Heart size={10} className="text-red-500" fill="currentColor"/> by the Hazel Team
+                Made with <Heart size={10} className="text-red-500" fill="currentColor" /> by the Hazel Team
               </p>
             </div>
-            
+
             <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Product</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">Features</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Modes</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Pricing</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Documentation</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">API</Link></li>
-               </ul>
+              <h4 className="text-white/80 font-medium mb-6 text-[13px]">Product</h4>
+              <ul className="space-y-4 text-white/40 text-[11px]">
+                <li><Link href="#" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Modes</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">API</Link></li>
+              </ul>
             </div>
-            
+
             <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Company</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Press Kit</Link></li>
-               </ul>
+              <h4 className="text-white/80 font-medium mb-6 text-[13px]">Company</h4>
+              <ul className="space-y-4 text-white/40 text-[11px]">
+                <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Press Kit</Link></li>
+              </ul>
             </div>
-            
+
             <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Support</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Community</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link></li>
-               </ul>
+              <h4 className="text-white/80 font-medium mb-6 text-[13px]">Support</h4>
+              <ul className="space-y-4 text-white/40 text-[11px]">
+                <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Community</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+              </ul>
             </div>
           </div>
-          
+
           <div className="flex flex-col md:flex-row justify-between items-center text-[10px] text-white/20 pt-8 border-t border-white/5 gap-4">
             <div>© 2025 Hazel. All rights reserved.</div>
             <div className="flex gap-6">
-               <Twitter size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Github size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Linkedin size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Mail size={14} className="hover:text-white transition-colors cursor-pointer" />
+              <Twitter size={14} className="hover:text-white transition-colors cursor-pointer" />
+              <Github size={14} className="hover:text-white transition-colors cursor-pointer" />
+              <Linkedin size={14} className="hover:text-white transition-colors cursor-pointer" />
+              <Mail size={14} className="hover:text-white transition-colors cursor-pointer" />
             </div>
           </div>
         </div>

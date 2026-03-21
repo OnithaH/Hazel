@@ -16,15 +16,17 @@ export default function SettingsPage() {
     const handleSave = () => {
         setSaveStatus('saving');
 
-        // Simulate API save delay
+        // Dispatch custom event to trigger saves in sub-components
+        const event = new CustomEvent('save-settings');
+        window.dispatchEvent(event);
+
+        // Reset status after a few seconds
         setTimeout(() => {
             setSaveStatus('saved');
-
-            // Reset status after a few seconds
             setTimeout(() => {
                 setSaveStatus('idle');
             }, 3000);
-        }, 1500);
+        }, 1000);
     };
 
     return (

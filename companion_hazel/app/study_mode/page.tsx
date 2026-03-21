@@ -5,10 +5,29 @@ import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye 
 import Link from 'next/link';
 
 export default function StudyModePage() {
-  const [selectedAroma, setSelectedAroma] = useState('Peppermint');
-  const [isTracking, setIsTracking] = useState(false);
+  const [aromaConfigs, setAromaConfigs] = React.useState<any[]>([]);
+  const [selectedAroma, setSelectedAroma] = React.useState('Peppermint');
+  const [isTracking, setIsTracking] = React.useState(false);
 
-  const aromas = ['Peppermint', 'Lemon', 'Lavender'];
+  React.useEffect(() => {
+    const fetchAromas = async () => {
+      try {
+        const res = await fetch('/api/aroma');
+        if (res.ok) {
+          const data = await res.json();
+          setAromaConfigs(data);
+          if (data.length > 0) setSelectedAroma(data[0].scent_name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch aromas", error);
+      }
+    };
+    fetchAromas();
+  }, []);
+
+  const aromas = aromaConfigs.length > 0
+    ? aromaConfigs.map(a => a.scent_name)
+    : ['Peppermint', 'Lemon', 'Lavender'];
 
   const historyData = [
     { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
