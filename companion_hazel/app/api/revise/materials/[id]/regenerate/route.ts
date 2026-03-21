@@ -30,15 +30,16 @@ import { generateQuestions } from "@/lib/gemini";
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const materialId = params.id;
+    const materialId = id;
 
     const material = await prisma.revisionMaterial.findUnique({
       where: { id: materialId },

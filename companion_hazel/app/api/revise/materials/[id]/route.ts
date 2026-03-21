@@ -29,9 +29,10 @@ import prisma from "@/lib/prisma";
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,7 +40,7 @@ export async function DELETE(
 
     const material = await prisma.revisionMaterial.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 
@@ -49,7 +50,7 @@ export async function DELETE(
 
     await prisma.revisionMaterial.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 
