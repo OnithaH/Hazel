@@ -2,6 +2,24 @@
 
 import { useState, useEffect, useRef } from "react";
 
+interface Song {
+  title?: string;
+  name?: string;
+  videoId: string;
+  artist?: string;
+  duration?: string;
+  thumbnail?: string;
+  currentTime?: number;
+  totalTime?: number;
+}
+
+interface MusicState {
+  nowPlaying: Song | null;
+  queue: Song[];
+  command: string | null;
+  aromaChamber: string | null;
+}
+
 const genres = [
   { name: "Pop", scent: "Citrus", gradient: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)" },
   { name: "Ballet", scent: "Lavender", gradient: "linear-gradient(135deg, #FDA5D5 0%, #DAB2FF 50%, #8EC5FF 100%)" },
@@ -42,16 +60,79 @@ const gestures = [
 export default function MusicModePage() {
   const [activeGenre, setActiveGenre] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(29);
+  const [nowPlaying, setNowPlaying] = useState<Song | null>(null);
+  const [queue, setQueue] = useState<Song[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const [progress, setProgress] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [bars, setBars] = useState<number[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
+  // Use ref to hold current totalTime so setInterval closures get fresh values
+  const totalTimeRef = useRef<number>(225);
+
+  useEffect(() => {
+    if (nowPlaying?.totalTime) {
+      totalTimeRef.current = nowPlaying.totalTime;
+    }
+  }, [nowPlaying?.totalTime]);
 
   useEffect(() => {
     setMounted(true);
     setBars(Array.from({ length: 40 }, () => Math.random() * 56 + 8));
+
+    // Poll the state API every 2 seconds
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/music/state");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.nowPlaying) {
+             setNowPlaying(data.nowPlaying);
+             if (data.nowPlaying.currentTime !== undefined && data.nowPlaying.totalTime) {
+                setProgress((data.nowPlaying.currentTime / data.nowPlaying.totalTime) * 100);
+             }
+          }
+          if (data.queue) setQueue(data.queue);
+          if (data.genre) {
+            const index = genres.findIndex(g => g.name === data.genre);
+            if (index !== -1) setActiveGenre(index);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch music state", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
+
+  const sendCommand = async (cmd: string) => {
+    if (cmd === "play_pause") setIsPlaying(!isPlaying);
+    try {
+      await fetch("/api/music/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: cmd }),
+      });
+    } catch (err) { }
+  };
+
+  const searchMusic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/music/search?q=${encodeURIComponent(searchQuery)}`);
+      const data = await res.json();
+      setSearchResults(data.results || []);
+    } catch (err) { }
+    setIsSearching(false);
+  };
 
   useEffect(() => {
     if (isPlaying) {
@@ -59,7 +140,10 @@ export default function MusicModePage() {
         setBars(Array.from({ length: 40 }, () => Math.random() * 56 + 8));
       }, 160);
       progressRef.current = setInterval(() => {
-        setProgress((p) => (p >= 100 ? 0 : p + 0.12));
+        setProgress((p) => {
+           let step = (100 / totalTimeRef.current) * 0.1; // Smooth interpolate based on 100ms
+           return p >= 100 ? 0 : p + step;
+        });
       }, 100);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -71,11 +155,14 @@ export default function MusicModePage() {
     };
   }, [isPlaying]);
 
-  const totalSecs = 3 * 60 + 45;
-  const elapsed = Math.floor((progress / 100) * totalSecs);
+  const totalSecs = totalTimeRef.current;
+  const elapsed = nowPlaying?.currentTime !== undefined ? nowPlaying.currentTime : Math.floor((progress / 100) * totalSecs);
   const mins = Math.floor(elapsed / 60);
-  const secs = elapsed % 60;
+  const secs = Math.floor(elapsed % 60);
   const timeStr = `${mins}:${secs.toString().padStart(2, "0")}`;
+  const totalMins = Math.floor(totalSecs / 60);
+  const totalSecsRem = Math.floor(totalSecs % 60);
+  const durationStr = `${totalMins}:${totalSecsRem.toString().padStart(2, "0")}`;
 
   return (
     <div style={{ background: "linear-gradient(135deg, #000000 0%, #0d1b2a 50%, #000000 100%)", minHeight: "100vh", fontFamily: "'Arimo', sans-serif", color: "#fff", overflowX: "hidden" }}>
@@ -212,16 +299,24 @@ export default function MusicModePage() {
               </div>
               <div className="shimmer-bar" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "7px" }} />
               <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", paddingBottom: "48px" }}>
-                <div className={isPlaying ? "music-icon active" : "music-icon"}>
-                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                    <path d="M24 50V15l26-6v24" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="15" cy="50" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
-                    <circle cx="41" cy="33" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
-                  </svg>
+                <div className={isPlaying ? "music-icon active" : "music-icon"} style={{ borderRadius: nowPlaying?.thumbnail ? '50%' : '0', overflow: 'hidden', width: nowPlaying?.thumbnail ? '140px' : 'auto', height: nowPlaying?.thumbnail ? '140px' : 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {nowPlaying?.thumbnail ? (
+                    <img src={nowPlaying.thumbnail} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", boxShadow: "0 0 30px rgba(0,0,0,0.4)" }} alt="Cover" />
+                  ) : (
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                      <path d="M24 50V15l26-6v24" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="15" cy="50" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
+                      <circle cx="41" cy="33" r="9" stroke="rgba(255,255,255,0.38)" strokeWidth="4.5" fill="none"/>
+                    </svg>
+                  )}
                 </div>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "26px", fontWeight: 400, marginBottom: "8px" }}>Currently Playing</div>
-                  <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)" }}>Currently Playing Song · Artist Name</div>
+                <div style={{ textAlign: "center", marginTop: "10px" }}>
+                  <div style={{ fontSize: "26px", fontWeight: 400, marginBottom: "8px" }}>
+                    {nowPlaying?.name || nowPlaying?.title || "No song playing"}
+                  </div>
+                  <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)" }}>
+                    {nowPlaying?.artist || "YouTube Music"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -236,7 +331,7 @@ export default function MusicModePage() {
                     <line x1="6" y1="2" x2="6" y2="10" stroke="#C27AFF" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </button>
-                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)" }}>3:45</span>
+                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)" }}>{durationStr}</span>
               </div>
               <div className="progress-track" style={{ height: "7px", borderRadius: "100px", background: "rgba(255,255,255,0.1)" }}
                 onClick={(e) => {
@@ -256,14 +351,20 @@ export default function MusicModePage() {
                   <rect x="2.5" y="3.5" width="3" height="13" rx="1.2" fill="white"/>
                 </svg>
               </button>
-              <button onClick={() => setIsPlaying(!isPlaying)} className="ctrl-btn play-btn"
+              <button onClick={() => sendCommand("previous")} className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M14.5 3.5L7.5 10l7 6.5V3.5z" fill="white"/>
+                  <rect x="2.5" y="3.5" width="3" height="13" rx="1.2" fill="white"/>
+                </svg>
+              </button>
+              <button onClick={() => sendCommand("play_pause")} className="ctrl-btn play-btn"
                 style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", paddingLeft: isPlaying ? 0 : "4px", boxShadow: isPlaying ? "0 0 30px rgba(246,51,154,0.55)" : "0 0 18px rgba(246,51,154,0.3)" }}>
                 {isPlaying
                   ? <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="4.5" height="16" rx="1.5" fill="white"/><rect x="13.5" y="3" width="4.5" height="16" rx="1.5" fill="white"/></svg>
                   : <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 3l14 8.5L5 20V3z" fill="white"/></svg>
                 }
               </button>
-              <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
+              <button onClick={() => sendCommand("next")} className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M5.5 3.5l7 6.5-7 6.5V3.5z" fill="white"/>
                   <rect x="14.5" y="3.5" width="3" height="13" rx="1.2" fill="white"/>
@@ -333,14 +434,14 @@ export default function MusicModePage() {
                 {/* Scent icon */}
                 <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, rgba(246,51,154,0.4) 0%, rgba(173,70,255,0.3) 100%)", border: "0.8px solid rgba(246,51,154,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 60%)" }} />
-                  <span style={{ fontSize: "22px" }}>🍊</span>
+                  <span style={{ fontSize: "22px" }}>{genres[activeGenre]?.scent === "Citrus" ? "🍊" : genres[activeGenre]?.scent === "Lavender" ? "🪴" : genres[activeGenre]?.scent === "Peppermint" ? "🌿" : "✨"}</span>
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "17px", color: "#fff", fontWeight: 500 }}>Citrus</span>
+                    <span style={{ fontSize: "17px", color: "#fff", fontWeight: 500 }}>{genres[activeGenre]?.scent || "Citrus"}</span>
                     <span style={{ fontSize: "10px", color: "#FB64B6", background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.3)", borderRadius: "100px", padding: "2px 8px", fontWeight: 500 }}>ACTIVE</span>
                   </div>
-                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Matched to Pop genre</div>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Matched to {genres[activeGenre]?.name || "Pop"} genre</div>
                 </div>
               </div>
 
@@ -399,8 +500,8 @@ export default function MusicModePage() {
           <div className="card-lift" style={{ background: "rgba(255,255,255,0.04)", border: "0.8px solid rgba(255,255,255,0.09)", borderRadius: "20px", padding: "26px" }}>
             <h3 style={{ fontSize: "18px", fontWeight: 400, margin: "0 0 18px", letterSpacing: "-0.2px" }}>Up Next</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {upNextSongs.map((song) => (
-                <div key={song.name} className="row-item" style={{ background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px", display: "flex", alignItems: "center", gap: "13px" }}>
+              {queue.length > 0 ? queue.slice(0, 4).map((song, idx) => (
+                <div key={idx} className="row-item" style={{ background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px", display: "flex", alignItems: "center", gap: "13px" }}>
                   <div style={{ width: "40px", height: "40px", borderRadius: "11px", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(246,51,154,0.32)" }}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M6 13.5V4l8-2v8.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -409,59 +510,67 @@ export default function MusicModePage() {
                     </svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "14px", color: "#fff", marginBottom: "5px" }}>{song.name}</div>
+                    <div style={{ fontSize: "14px", color: "#fff", marginBottom: "5px" }}>{song.title || song.name}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{song.artist}</span>
+                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{song.artist || "Unknown Artist"}</span>
                       <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>•</span>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(173,70,255,0.18)", border: "0.8px solid rgba(173,70,255,0.28)", borderRadius: "7px", padding: "2px 8px 2px 6px" }}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                          <line x1="1" y1="2.5" x2="9" y2="2.5" stroke="#C27AFF" strokeWidth="1.1" strokeLinecap="round"/>
-                          <line x1="1" y1="5" x2="9" y2="5" stroke="#C27AFF" strokeWidth="1.1" strokeLinecap="round"/>
-                          <line x1="1" y1="7.5" x2="5.5" y2="7.5" stroke="#C27AFF" strokeWidth="1.1" strokeLinecap="round"/>
-                        </svg>
-                        <span style={{ fontSize: "11px", color: "#C27AFF" }}>{song.playlist}</span>
+                        <span style={{ fontSize: "11px", color: "#C27AFF" }}>Hazel Queue</span>
                       </div>
                     </div>
                   </div>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.38)", flexShrink: 0 }}>{song.duration}</span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.38)", flexShrink: 0 }}>{song.duration || "--:--"}</span>
                 </div>
-              ))}
+              )) : (
+                <div style={{ padding: "20px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>No songs in queue</div>
+              )}
             </div>
           </div>
 
-          {/* Your Playlists */}
+          {/* Playlists & Search */}
           <div className="card-lift" style={{ background: "rgba(255,255,255,0.04)", border: "0.8px solid rgba(255,255,255,0.09)", borderRadius: "20px", padding: "26px" }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 400, margin: "0 0 18px", letterSpacing: "-0.2px" }}>Your Playlists</h3>
+            <h3 style={{ fontSize: "18px", fontWeight: 400, margin: "0 0 18px", letterSpacing: "-0.2px" }}>Search YouTube Music</h3>
+            
+            <form onSubmit={searchMusic} style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search songs..."
+                style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "0.8px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "10px 14px", color: "#fff", fontSize: "14px", outline: "none" }}
+              />
+              <button type="submit" className="ctrl-btn" style={{ background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.3)", borderRadius: "8px", padding: "0 16px", color: "#F6339A", fontSize: "14px" }}>
+                {isSearching ? "Searching..." : "Search"}
+              </button>
+            </form>
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {playlists.map((pl) => (
-                <div key={pl.name} className="row-item" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px" }}>
+              {searchResults.length > 0 ? searchResults.map((result: any, idx: number) => (
+                <div key={idx} className="row-item" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px", cursor: "pointer" }}
+                  onClick={async () => {
+                    // Send an enqueue_song command with the song payload
+                    const newSong = { title: result.name, videoId: result.videoId, artist: result.artist?.name, thumbnail: result.thumbnails?.[0]?.url };
+                    await fetch("/api/music/state", { method: "POST", headers: { "Content-Type": "application/json"}, body: JSON.stringify({ command: "enqueue_song", song: newSong }) });
+                  }}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: "13px" }}>
-                    <div style={{ width: "40px", height: "40px", borderRadius: "11px", background: pl.iconBg, border: `0.8px solid ${pl.iconBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <line x1="2" y1="4" x2="14" y2="4" stroke={pl.iconColor} strokeWidth="1.4" strokeLinecap="round"/>
-                        <line x1="2" y1="8" x2="14" y2="8" stroke={pl.iconColor} strokeWidth="1.4" strokeLinecap="round"/>
-                        <line x1="2" y1="12" x2="9" y2="12" stroke={pl.iconColor} strokeWidth="1.4" strokeLinecap="round"/>
-                      </svg>
-                    </div>
+                    {result.thumbnails?.[0]?.url ? (
+                      <img src={result.thumbnails[0].url} style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover" }} alt={result.name} />
+                    ) : (
+                      <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(43,127,255,0.2)", border: "0.8px solid rgba(43,127,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{color: "#51A2FF"}}>🎵</span></div>
+                    )}
                     <div>
-                      <div style={{ fontSize: "14px", color: "#fff", marginBottom: "3px" }}>{pl.name}</div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{pl.tracks} tracks</div>
+                      <div style={{ fontSize: "14px", color: "#fff", marginBottom: "3px" }}>{result.name}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{result.artist?.name || "Unknown"}</div>
                     </div>
                   </div>
-                  <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(251,44,54,0.15)", border: "0.8px solid rgba(251,44,54,0.3)" }}>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M1.5 2.5h9M4 2.5V2a.8.8 0 0 1 .8-.8h2.4a.8.8 0 0 1 .8.8v.5M4.5 5v4M7.5 5v4M2 2.5l.6 6.7a.8.8 0 0 0 .8.8h5.2a.8.8 0 0 0 .8-.8L10 2.5" stroke="#FB2C36" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                  <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(43,127,255,0.15)", border: "0.8px solid rgba(43,127,255,0.3)" }}>
+                     <span style={{ fontSize: "14px", color: "#51A2FF", lineHeight: 1 }}>+</span>
                   </button>
                 </div>
-              ))}
-              <button className="ctrl-btn" style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.03)", border: "0.8px solid rgba(255,255,255,0.07)", borderRadius: "12px", padding: "14px", width: "100%", cursor: "pointer", marginTop: "2px" }}>
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <line x1="2" y1="7.5" x2="13" y2="7.5" stroke="rgba(255,255,255,0.42)" strokeWidth="1.4" strokeLinecap="round"/>
-                  <line x1="7.5" y1="2" x2="7.5" y2="13" stroke="rgba(255,255,255,0.42)" strokeWidth="1.4" strokeLinecap="round"/>
-                </svg>
-                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.42)" }}>Create Playlist</span>
-              </button>
+              )) : (
+                <div style={{ padding: "10px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: "13px" }}>Search for a song to play or add to queue via Next.js api</div>
+              )}
             </div>
           </div>
         </div>
