@@ -3,8 +3,21 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 /**
- * GET /api/study/history
- * Description: Fetches the logged-in user's past focus sessions and distraction counts.
+ * @swagger
+ * /api/study/history:
+ *   get:
+ *     summary: Fetch study session history
+ *     description: Retrieves a list of all past focus sessions and distraction counts for the authenticated user.
+ *     tags: [Study]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved history
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Robot not found
+ *       500:
+ *         description: Internal server error
  */
 export async function GET() {
   try {

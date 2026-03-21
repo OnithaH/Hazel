@@ -2,6 +2,42 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
+/**
+ * @swagger
+ * /api/study/session:
+ *   post:
+ *     summary: Start a new study session
+ *     description: Creates a new study session record for the authenticated user and their linked robot.
+ *     tags: [Study]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               duration:
+ *                 type: integer
+ *               break_activity:
+ *                 type: string
+ *               phone_detection_enabled:
+ *                 type: boolean
+ *               focus_shield_enabled:
+ *                 type: boolean
+ *               focus_goal:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Session created successfully
+ *       400:
+ *         description: Duration is required
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Robot not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -20,12 +56,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { 
-      duration, 
-      break_activity, 
-      phone_detection_enabled, 
+    const {
+      duration,
+      break_activity,
+      phone_detection_enabled,
       focus_shield_enabled,
-      focus_goal 
+      focus_goal
     } = body;
 
     if (!duration) {
