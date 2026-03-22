@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { 
   Trophy, 
   Activity, 
-  Clock, 
-  Heart, 
-  Twitter, 
-  Github, 
-  Linkedin, 
-  Mail 
+  Clock 
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -183,69 +177,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 bg-[#0A0C10] pt-16 pb-8 mt-auto">
-        <div className="max-w-[1240px] mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1">
-              <div className="flex items-center gap-3 mb-6">
-                 <div className="w-8 h-8 rounded-full bg-[#A855F7] flex items-center justify-center text-white text-sm font-bold">H</div>
-                 <span className="text-white font-semibold tracking-widest text-sm">Hazel</span>
-              </div>
-              <p className="text-white/40 text-[11px] leading-relaxed pr-4 mb-4">
-                Your intelligent companion robot for study, gaming, music, and everyday life.
-              </p>
-              <p className="text-white/40 text-[11px] flex items-center gap-1.5">
-                Made with <Heart size={10} className="text-red-500" fill="currentColor"/> by the Hazel Team
-              </p>
-            </div>
-            
-            <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Product</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">Features</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Modes</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Pricing</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Documentation</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">API</Link></li>
-               </ul>
-            </div>
-            
-            <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Company</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Press Kit</Link></li>
-               </ul>
-            </div>
-            
-            <div className="pl-4">
-               <h4 className="text-white/80 font-medium mb-6 text-[13px]">Support</h4>
-               <ul className="space-y-4 text-white/40 text-[11px]">
-                 <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Community</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                 <li><Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link></li>
-               </ul>
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center text-[10px] text-white/20 pt-8 border-t border-white/5 gap-4">
-            <div>© 2025 Hazel. All rights reserved.</div>
-            <div className="flex gap-6">
-               <Twitter size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Github size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Linkedin size={14} className="hover:text-white transition-colors cursor-pointer" /> 
-               <Mail size={14} className="hover:text-white transition-colors cursor-pointer" />
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
