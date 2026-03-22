@@ -10,15 +10,7 @@ export const getApiDocs = async () => {
         version: '1.0.0',
         description: 'Interactive API documentation for the Hazel Companion project.',
       },
-      components: {
-        securitySchemes: {
-          BearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-        },
-      },
+      components: {},
       security: [],
     },
   });

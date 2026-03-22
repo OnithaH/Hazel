@@ -9,8 +9,6 @@ import { generateQuestions } from "@/lib/gemini";
  *   post:
  *     summary: Upload material and generate questions
  *     description: Uploads a file (PDF, DOCX, TXT, or Image), extracts text, and generates 10 revision questions using Gemini AI.
- *     security:
- *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
