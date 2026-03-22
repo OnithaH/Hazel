@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Trophy, 
-  Activity, 
-  Clock 
+import {
+  Trophy,
+  Activity,
+  Clock
 } from 'lucide-react';
+
 
 export default function DashboardPage() {
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
@@ -30,13 +31,13 @@ export default function DashboardPage() {
   ];
 
   const weeklyData = [
-    { day: 'Mon', segments: [{color: 'bg-blue-500', w: 40}, {color: 'bg-purple-500', w: 10}, {color: 'bg-pink-500', w: 15}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Tue', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 20}], total: '3h' },
-    { day: 'Wed', segments: [{color: 'bg-blue-500', w: 47}, {color: 'bg-purple-500', w: 12}, {color: 'bg-pink-500', w: 18}, {color: 'bg-green-500', w: 8}], total: '3h' },
-    { day: 'Thu', segments: [{color: 'bg-blue-500', w: 55}, {color: 'bg-purple-500', w: 8}, {color: 'bg-pink-500', w: 25}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Fri', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 18}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '4h' },
-    { day: 'Sat', segments: [{color: 'bg-blue-500', w: 35}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 12}], total: '3h' },
-    { day: 'Sun', segments: [{color: 'bg-blue-500', w: 48}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '5h' },
+    { day: 'Mon', segments: [{ color: 'bg-blue-500', w: 40 }, { color: 'bg-purple-500', w: 10 }, { color: 'bg-pink-500', w: 15 }, { color: 'bg-green-500', w: 15 }], total: '4h' },
+    { day: 'Tue', segments: [{ color: 'bg-blue-500', w: 45 }, { color: 'bg-purple-500', w: 15 }, { color: 'bg-pink-500', w: 10 }, { color: 'bg-green-500', w: 20 }], total: '3h' },
+    { day: 'Wed', segments: [{ color: 'bg-blue-500', w: 47 }, { color: 'bg-purple-500', w: 12 }, { color: 'bg-pink-500', w: 18 }, { color: 'bg-green-500', w: 8 }], total: '3h' },
+    { day: 'Thu', segments: [{ color: 'bg-blue-500', w: 55 }, { color: 'bg-purple-500', w: 8 }, { color: 'bg-pink-500', w: 25 }, { color: 'bg-green-500', w: 15 }], total: '4h' },
+    { day: 'Fri', segments: [{ color: 'bg-blue-500', w: 45 }, { color: 'bg-purple-500', w: 18 }, { color: 'bg-pink-500', w: 20 }, { color: 'bg-green-500', w: 10 }], total: '4h' },
+    { day: 'Sat', segments: [{ color: 'bg-blue-500', w: 35 }, { color: 'bg-purple-500', w: 15 }, { color: 'bg-pink-500', w: 10 }, { color: 'bg-green-500', w: 12 }], total: '3h' },
+    { day: 'Sun', segments: [{ color: 'bg-blue-500', w: 48 }, { color: 'bg-purple-500', w: 15 }, { color: 'bg-pink-500', w: 20 }, { color: 'bg-green-500', w: 10 }], total: '5h' },
   ];
 
   return (
@@ -56,7 +57,7 @@ export default function DashboardPage() {
               <h2 className="text-lg font-medium">Today's Session Breakdown</h2>
               <span className="px-4 py-1.5 bg-[#1e293b]/50 text-blue-400 text-xs font-medium rounded-full">In Progress</span>
             </div>
-            
+
             <div className="flex-1 flex flex-col justify-center items-center py-16 relative bg-[#1A1D27] rounded-xl mb-10 overflow-hidden">
               <div className="text-6xl font-light tracking-wider mb-2">{formatTime(timer)}</div>
               <div className="text-white/40 text-xs">Time Elapsed</div>
@@ -156,24 +157,24 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          
+
           <div className="flex items-center justify-center gap-8 mt-10">
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-               <span className="text-xs text-white/40">Study</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
-               <span className="text-xs text-white/40">Gaming</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-pink-500"></div>
-               <span className="text-xs text-white/40">Music</span>
-             </div>
-             <div className="flex items-center gap-2">
-               <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-               <span className="text-xs text-white/40">General</span>
-             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+              <span className="text-xs text-white/40">Study</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+              <span className="text-xs text-white/40">Gaming</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-pink-500"></div>
+              <span className="text-xs text-white/40">Music</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+              <span className="text-xs text-white/40">General</span>
+            </div>
           </div>
         </div>
       </main>
