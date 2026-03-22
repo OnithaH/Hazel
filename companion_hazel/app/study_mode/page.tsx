@@ -1,12 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+
+interface BreathingExercise {
+  id: string;
+  title: string;
+  duration: number;
+}
 
 export default function StudyModePage() {
   const [selectedAroma, setSelectedAroma] = useState('Peppermint');
   const [isTracking, setIsTracking] = useState(false);
+
+  // Real Data states
+  const [isTriggeringBreak, setIsTriggeringBreak] = useState(false);
+  const [breathingExercises, setBreathingExercises] = useState<BreathingExercise[]>([]);
 
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
 
@@ -16,6 +26,46 @@ export default function StudyModePage() {
     { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
     { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
   ];
+
+  useEffect(() => {
+    // Connect the breathing exercises API
+    const fetchBreathingExercises = async () => {
+      try {
+        const res = await fetch('/api/games/breathing-exercises');
+        if (res.ok) {
+          const data = await res.json();
+          setBreathingExercises(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch breathing exercises", error);
+      }
+    };
+    fetchBreathingExercises();
+  }, []);
+
+  const handleTriggerBreak = async (type: 'GAME' | 'BREATHE') => {
+    setIsTriggeringBreak(true);
+    try {
+      // Trigger the break on the server
+      const res = await fetch('/api/study/trigger-break', {
+        method: 'POST',
+      });
+      
+      if (!res.ok) {
+        // Show error but don't strictly crash, as local mockup DB might lack an active session
+        const errorText = await res.text();
+        console.warn("Trigger break response:", errorText);
+      }
+      
+      alert(`Break triggered! Starting ${type} mode on your robot.`);
+      
+    } catch (error) {
+      console.error(error);
+      alert("Failed to trigger break");
+    } finally {
+      setIsTriggeringBreak(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
@@ -100,13 +150,26 @@ export default function StudyModePage() {
               </div>
               <p className="text-white/60 text-sm">You have been focused for 2h</p>
               <div className="grid grid-cols-2 gap-2">
-                <button className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
-                  Game
+                <button 
+                  onClick={() => handleTriggerBreak('GAME')}
+                  disabled={isTriggeringBreak}
+                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
                 </button>
-                <button className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
-                  Breathe
+                <button 
+                  onClick={() => handleTriggerBreak('BREATHE')}
+                  disabled={isTriggeringBreak}
+                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
                 </button>
               </div>
+              {breathingExercises.length > 0 && (
+                <div className="text-xs text-white/40 mt-2 text-center">
+                  {breathingExercises.length} breathing exercises loaded
+                </div>
+              )}
             </div>
           </div>
         </div>
