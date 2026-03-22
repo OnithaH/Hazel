@@ -88,7 +88,7 @@ export default function StudySessionDetails() {
 
   const startTime = new Date(session.start_time);
   const endTime = session.end_time ? new Date(session.end_time) : null;
-  
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   };
@@ -119,9 +119,9 @@ export default function StudySessionDetails() {
     ...(endTime ? [{ icon: Clock, color: 'blue' as const, title: 'Session ended', time: formatTime(endTime) }] : [])
   ];
 
-  // Logic for the timeline bar (simplified visualization)
+  // Logic for the timeline bar
   const totalSessionTime = endTime ? (endTime.getTime() - startTime.getTime()) : Date.now() - startTime.getTime();
-  
+
   return (
     <div className="min-h-screen bg-[#0F1117] text-white p-8 pt-28 font-sans">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -175,9 +175,9 @@ export default function StudySessionDetails() {
                     {session.distractions.map((d, i) => {
                       const pos = ((new Date(d.timestamp).getTime() - startTime.getTime()) / totalSessionTime) * 100;
                       return (
-                        <div 
-                          key={i} 
-                          className="absolute top-0 bottom-0 w-1 bg-[#EF4444]" 
+                        <div
+                          key={i}
+                          className="absolute top-0 bottom-0 w-1 bg-[#EF4444]"
                           style={{ left: `${Math.min(99, Math.max(0, pos))}%` }}
                         ></div>
                       );
@@ -284,4 +284,4 @@ export default function StudySessionDetails() {
       </div>
     </div>
   );
-}
+}
