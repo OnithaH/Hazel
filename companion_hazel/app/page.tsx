@@ -14,9 +14,6 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
-<<<<<<< Updated upstream
-  const [timer, setTimer] = useState(9255); // Starting around 2:34:15
-=======
   const [timer, setTimer] = useState(0);
   const [userName, setUserName] = useState('User');
   const [isInProgress, setIsInProgress] = useState(false);
@@ -27,7 +24,6 @@ export default function DashboardPage() {
     { label: 'General', percent: 0, colorClass: 'bg-green-500', width: '0%' },
   ]);
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
->>>>>>> Stashed changes
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -44,31 +40,6 @@ export default function DashboardPage() {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-<<<<<<< Updated upstream
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
-  const activities = [
-    { label: 'Study', percent: 65, colorClass: 'bg-blue-500', width: '65%' },
-    { label: 'Gaming', percent: 15, colorClass: 'bg-purple-500', width: '30%' },
-    { label: 'Music', percent: 12, colorClass: 'bg-pink-500', width: '25%' },
-    { label: 'General', percent: 8, colorClass: 'bg-green-500', width: '15%' },
-  ];
-
-  const weeklyData = [
-    { day: 'Mon', segments: [{color: 'bg-blue-500', w: 40}, {color: 'bg-purple-500', w: 10}, {color: 'bg-pink-500', w: 15}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Tue', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 20}], total: '3h' },
-    { day: 'Wed', segments: [{color: 'bg-blue-500', w: 47}, {color: 'bg-purple-500', w: 12}, {color: 'bg-pink-500', w: 18}, {color: 'bg-green-500', w: 8}], total: '3h' },
-    { day: 'Thu', segments: [{color: 'bg-blue-500', w: 55}, {color: 'bg-purple-500', w: 8}, {color: 'bg-pink-500', w: 25}, {color: 'bg-green-500', w: 15}], total: '4h' },
-    { day: 'Fri', segments: [{color: 'bg-blue-500', w: 45}, {color: 'bg-purple-500', w: 18}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '4h' },
-    { day: 'Sat', segments: [{color: 'bg-blue-500', w: 35}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 12}], total: '3h' },
-    { day: 'Sun', segments: [{color: 'bg-blue-500', w: 48}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '5h' },
-  ];
-=======
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -104,7 +75,6 @@ export default function DashboardPage() {
     const statsInterval = setInterval(fetchStats, 60000);
     return () => clearInterval(statsInterval);
   }, []);
->>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen bg-[#07080A] text-white font-sans selection:bg-blue-500/30">

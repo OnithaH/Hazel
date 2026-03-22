@@ -1,28 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StudyModePage() {
   const [selectedAroma, setSelectedAroma] = useState('Peppermint');
-<<<<<<< Updated upstream
-  const [isTracking, setIsTracking] = useState(false);
-
-  const aromas = ['Peppermint', 'Lemon', 'Lavender'];
-
-  const historyData = [
-    { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
-    { date: 'Yesterday', time: '3h 12m', focus: '92%', distractions: '2 distractions' },
-    { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
-    { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
-  ];
-=======
   const [activeSession, setActiveSession] = useState<any>(null);
   const [sessionElapsed, setSessionElapsed] = useState(0);
   const [focusElapsed, setFocusElapsed] = useState(0);
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [aromaConfigs, setAromaConfigs] = useState<any[]>([]);
+  const [isTracking, setIsTracking] = useState(false);
+
+  const aromas = ['Peppermint', 'Lemon', 'Lavender'];
 
   // Helper to format duration as HH:MM:SS
   const formatDuration = (totalSeconds: number) => {
@@ -202,7 +194,6 @@ export default function StudyModePage() {
     const m = mins % 60;
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
   };
->>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
@@ -236,11 +227,6 @@ export default function StudyModePage() {
             </div>
 
             {/* Video/Eye Tracking Area */}
-<<<<<<< Updated upstream
-            <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden">
-              <Eye className="w-16 h-16 text-blue-400/20" />
-              <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-=======
             <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group">
               {!activeSession && <Eye className="w-16 h-16 text-white/10 transition-all duration-700" />}
               {activeSession && (
@@ -276,16 +262,10 @@ export default function StudyModePage() {
                 </>
               )}
               <div className={`absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-500 ${activeSession ? 'translate-y-0' : 'translate-y-full'}`}></div>
->>>>>>> Stashed changes
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
-<<<<<<< Updated upstream
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
-                <p className="text-white/60 text-sm">Focus Time</p>
-                <p className="text-2xl">2h 34m</p>
-=======
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1 relative overflow-hidden">
                 <p className="text-white/60 text-sm">Actual Focus Time</p>
                 <p className={`text-3xl font-medium transition-colors ${activeSession?.is_distracted ? 'text-orange-400' : 'text-white'}`}>
@@ -294,7 +274,6 @@ export default function StudyModePage() {
                 <div className="absolute top-0 right-0 p-3 opacity-20">
                   <Zap className="w-8 h-8 text-blue-400" />
                 </div>
->>>>>>> Stashed changes
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
