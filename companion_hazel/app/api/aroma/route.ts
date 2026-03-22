@@ -56,13 +56,13 @@ export async function GET(req: Request) {
         where: { clerk_id: userId },
         include: { robots: true },
       });
-      if (user && user.robots.length > 0) {
+      if (user?.robots.length) {
         robotId = user.robots[0].id;
       }
     }
 
     if (!robotId) {
-      return new NextResponse("Unauthorized or Robot Not Found", { status: 401 });
+      return new NextResponse("Robot not found", { status: 404 });
     }
 
     const aromaConfigs = await prisma.aromaConfiguration.findMany({
