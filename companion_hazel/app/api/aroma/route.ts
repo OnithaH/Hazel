@@ -44,7 +44,8 @@ export async function GET(req: Request) {
     const { userId } = await auth();
     const secret = req.headers.get('x-robot-secret');
 
-    let robotId: string | null = null;
+    const { searchParams } = new URL(req.url);
+    let robotId = searchParams.get('robotId');
 
     if (secret) {
       const robot = await prisma.robot.findUnique({
@@ -52,13 +53,19 @@ export async function GET(req: Request) {
       });
       if (robot) robotId = robot.id;
     } else if (userId) {
-      const user = await prisma.user.findUnique({
-        where: { clerk_id: userId },
-        include: { robots: true },
-      });
-      if (user?.robots.length) {
-        robotId = user.robots[0].id;
+      // If robotId is not provided, try to find it via the current user
+      if (!robotId) {
+        const user = await prisma.user.findUnique({
+          where: { clerk_id: userId },
+          include: { robots: true },
+        });
+
+        if (user && user.robots.length > 0) {
+          robotId = user.robots[0].id;
+        }
       }
+    } else {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     if (!robotId) {
