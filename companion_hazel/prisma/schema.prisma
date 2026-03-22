@@ -45,8 +45,8 @@ model Robot {
 
 model StudySession {
   id                      String   @id @default(uuid())
-  robot_id                String
-  robot                   Robot    @relation(fields: [robot_id], references: [id])
+  robot_id                String?
+  robot                   Robot?   @relation(fields: [robot_id], references: [id])
   start_time              DateTime
   end_time                DateTime?
   scheduled_duration      Int
@@ -71,8 +71,8 @@ model DistractionLog {
 
 model EnvironmentLog {
   id          String   @id @default(uuid())
-  robot_id    String
-  robot       Robot    @relation(fields: [robot_id], references: [id])
+  robot_id    String?
+  robot       Robot?   @relation(fields: [robot_id], references: [id])
   temperature Float
   humidity    Float
   recorded_at DateTime @default(now())
@@ -80,8 +80,8 @@ model EnvironmentLog {
 
 model AromaConfiguration {
   id             String   @id @default(uuid())
-  robot_id       String
-  robot          Robot    @relation(fields: [robot_id], references: [id])
+  robot_id       String?
+  robot          Robot?    @relation(fields: [robot_id], references: [id])
   chamber_number Int
   scent_name     String
   intensity      Int      @default(75)
@@ -92,8 +92,8 @@ model AromaConfiguration {
 
 model Reminder {
   id              String   @id @default(uuid())
-  robot_id        String
-  robot           Robot    @relation(fields: [robot_id], references: [id])
+  robot_id        String?
+  robot           Robot?    @relation(fields: [robot_id], references: [id])
   title           String
   date            DateTime @db.Date
   time            String?
@@ -104,8 +104,8 @@ model Reminder {
 
 model MusicGenreMapping {
   id             String   @id @default(uuid())
-  robot_id       String
-  robot          Robot    @relation(fields: [robot_id], references: [id])
+  robot_id       String?
+  robot          Robot?    @relation(fields: [robot_id], references: [id])
   genre_name     String
   scent_name     String
   intensity      Int      @default(100)
@@ -117,8 +117,8 @@ model MusicGenreMapping {
 
 model GameSession {
   id            String   @id @default(uuid())
-  robot_id      String
-  robot         Robot    @relation(fields: [robot_id], references: [id])
+  robot_id      String?
+  robot         Robot?   @relation(fields: [robot_id], references: [id])
   activity_type String
   game_name     String
   duration      Int
@@ -164,8 +164,8 @@ model Game {
 
 model ModeUsageLog {
   id         String   @id @default(uuid())
-  robot_id   String
-  robot      Robot    @relation(fields: [robot_id], references: [id])
+  robot_id   String?
+  robot      Robot?    @relation(fields: [robot_id], references: [id])
   mode       String
   start_time DateTime @default(now())
   end_time   DateTime?
