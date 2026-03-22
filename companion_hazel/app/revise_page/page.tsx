@@ -48,39 +48,13 @@ export default function ReviseQAPage() {
       setIsLoading(true);
       const response = await axios.get('/api/revise/materials');
       
-      // Combine API data with dummy data if needed, or just set API data
-      if (response.data && response.data.length > 0) {
+      if (response.data) {
         setMaterials(response.data);
-      } else {
-        // Fallback dummy data
-        setMaterials([
-          {
-            id: 'dummy-1',
-            file_name: 'Biology Chapter 5 - Cell Structure.pdf',
-            uploaded_at: new Date().toISOString(),
-            _count: { questions: 10 }
-          },
-          {
-            id: 'dummy-2',
-            file_name: 'Physics Notes - Thermodynamics.docx',
-            uploaded_at: new Date(Date.now() - 86400000).toISOString(),
-            _count: { questions: 10 }
-          }
-        ]);
       }
       setError(null);
     } catch (err: any) {
       console.error('Error fetching materials:', err);
-      // Even on error, show dummy data for preview
-      setMaterials([
-        {
-          id: 'dummy-1',
-          file_name: 'Biology Chapter 5 - Cell Structure.pdf',
-          uploaded_at: new Date().toISOString(),
-          _count: { questions: 10 }
-        }
-      ]);
-      setError('Failed to load materials from server, showing preview data.');
+      setError('Failed to load materials from server. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -152,20 +126,11 @@ export default function ReviseQAPage() {
       setQuestions([]); // Clear previous questions
       
       // Fetch questions from API
-      if (!material.id.startsWith('dummy')) {
-        const response = await axios.get(`/api/revise/materials/${material.id}/questions`);
-        setQuestions(response.data);
-      } else {
-        // Fallback dummy questions
-        setQuestions([
-          { id: 'q1', question: 'What is the main function of the cell membrane?', answer: 'It regulates what enters and exits the cell.', explanation: 'The semi-permeable nature allows selective transport.' },
-          { id: 'q2', question: 'Which organelle is known as the powerhouse of the cell?', answer: 'Mitochondria', explanation: 'Mitochondria produce ATP through cellular respiration.' },
-          { id: 'q3', question: 'What is the largest organ in the human body?', answer: 'The Skin', explanation: 'The skin covers the entire body and is an organ system.' }
-        ]);
-      }
+      const response = await axios.get(`/api/revise/materials/${material.id}/questions`);
+      setQuestions(response.data);
     } catch (err) {
       console.error('Error fetching questions:', err);
-      setError('Failed to fetch questions for this material');
+      setError('Failed to fetch questions for this material. Please try again.');
     } finally {
       setIsFetchingQuestions(false);
     }
@@ -177,16 +142,6 @@ export default function ReviseQAPage() {
     try {
       setIsFetchingQuestions(true);
       setError(null);
-      
-      if (selectedMaterial.id.startsWith('dummy')) {
-        // Just mock a delay for dummy data
-        await new Promise(r => setTimeout(r, 1500));
-        setQuestions([
-          { id: 'q4', question: 'Explain the role of Ribosomes in the cell.', answer: 'Protein synthesis.', explanation: 'Ribosomes translate mRNA into polypeptide chains.' },
-          { id: 'q5', question: 'What is Osmosis?', answer: 'The movement of water through a semi-permeable membrane.', explanation: 'Water moves from high to low water potential.' }
-        ]);
-        return;
-      }
 
       const response = await axios.post(`/api/revise/materials/${selectedMaterial.id}/regenerate`);
       setQuestions(response.data.material.questions);

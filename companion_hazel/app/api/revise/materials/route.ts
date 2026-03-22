@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
     const materials = await prisma.revisionMaterial.findMany({
       where: {
         user_id: userId,
+        expires_at: {
+          gt: new Date(),
+        },
       },
       orderBy: {
         uploaded_at: "desc",
