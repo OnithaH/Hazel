@@ -33,6 +33,65 @@ import prisma from "@/lib/prisma";
  *       500:
  *         description: Internal server error
  */
+/**
+ * @swagger
+ * /api/study/session/{id}:
+ *   get:
+ *     summary: Fetch a single study session
+ *     description: Retrieves session details and distraction logs for a specific session ID.
+ *     tags: [Study]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved session
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const session = await prisma.studySession.findUnique({
+      where: { id },
+      include: {
+        distractions: {
+          orderBy: { timestamp: 'asc' },
+        },
+        _count: {
+          select: { distractions: true },
+        },
+      },
+    });
+
+    if (!session) {
+      return new NextResponse("Session not found", { status: 404 });
+    }
+
+    return NextResponse.json(session);
+  } catch (error) {
+    console.error("[STUDY_SESSION_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

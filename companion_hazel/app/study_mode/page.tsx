@@ -39,6 +39,7 @@ export default function StudyModePage() {
 
   // Timer states
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [breakActivity, setBreakActivity] = useState<'GAME' | 'BREATHE'>('GAME');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
@@ -143,7 +144,7 @@ export default function StudyModePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           duration: 60, // default 60 mins
-          break_activity: activityType !== 'NONE' ? activityType : 'GAME',
+          break_activity: activityType !== 'NONE' ? activityType : breakActivity,
           phone_detection_enabled: true,
           focus_shield_enabled: true,
           focus_goal: "Standard Study Session"
@@ -205,9 +206,7 @@ export default function StudyModePage() {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    if (h > 0) return `${h}h ${m}m`;
-    if (m > 0) return `${m}m ${s}s`;
-    return `${s}s`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const distractionCount = currentSession?._count?.distractions || 0;
@@ -252,7 +251,7 @@ export default function StudyModePage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => startSession('NONE')}
+                  onClick={() => startSession()}
                   disabled={isStarting}
                   className="px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-2xl flex items-center gap-2 text-blue-400 hover:bg-blue-500/30 transition-all disabled:opacity-50"
                 >
@@ -262,17 +261,19 @@ export default function StudyModePage() {
               )}
             </div>
 
-            {/* Video/Eye Tracking Area */}
+            {/* Focus Tracking Area */}
             <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group">
-              <Eye className={`w-16 h-16 transition-all duration-1000 ${currentSession ? 'text-blue-400 opacity-100 scale-110' : 'text-blue-400/10 opacity-40'}`} />
+              <div className={`flex flex-col items-center justify-center transition-all duration-1000 ${currentSession ? 'opacity-100 scale-110' : 'opacity-40'}`}>
+                <p className={`text-6xl font-mono font-bold tracking-tighter tabular-nums ${currentSession ? 'text-blue-400' : 'text-blue-400/20'}`}>
+                  {formatDuration(elapsedSeconds)}
+                </p>
+                {currentSession && (
+                  <p className="text-xs font-mono text-blue-400/60 uppercase tracking-[0.2em] mt-2 animate-pulse">
+                    Focusing
+                  </p>
+                )}
+              </div>
               <div className={`absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-500 ${currentSession ? 'translate-y-0' : 'translate-y-full'}`}></div>
-              
-              {currentSession && (
-                <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs font-mono text-blue-400">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                  REC - {formatDuration(elapsedSeconds)}
-                </div>
-              )}
             </div>
 
             {/* Stats */}
@@ -311,10 +312,12 @@ export default function StudyModePage() {
                   <button
                     key={aroma}
                     onClick={() => setSelectedAroma(aroma)}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
-                      ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
-                      : 'bg-white/5 border border-white/10 text-white/60'
-                      }`}
+                    disabled={!!currentSession}
+                    className={`flex-1 py-2 rounded-lg text-xs transition-all border ${
+                      selectedAroma === aroma
+                        ? 'bg-pink-500/20 border-pink-500/40 text-pink-400'
+                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                    } disabled:opacity-30 disabled:cursor-not-allowed`}
                   >
                     {aroma}
                   </button>
@@ -322,31 +325,35 @@ export default function StudyModePage() {
               </div>
             </div>
 
-            {/* Take a Break */}
+            {/* Break Activity Selection */}
             <div className="bg-linear-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
-                <h3 className="text-base">Take a Break?</h3>
+                <h3 className="text-base">Break Activity</h3>
               </div>
-              <p className="text-white/60 text-sm">
-                {currentSession 
-                  ? `You have been focused for ${formatDuration(elapsedSeconds)}` 
-                  : 'Start a session to track focus'}
-              </p>
+              <p className="text-white/40 text-xs">Chosen activity will trigger on robot during distractions</p>
               <div className="grid grid-cols-2 gap-2">
                 <button 
-                  onClick={() => currentSession ? handleTriggerBreak('GAME') : startSession('GAME')}
-                  disabled={isTriggeringBreak || isStarting}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-30 flex justify-center items-center gap-2"
+                  onClick={() => setBreakActivity('GAME')}
+                  disabled={!!currentSession || isStarting}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${
+                    breakActivity === 'GAME' 
+                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' 
+                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                  } disabled:opacity-30 disabled:cursor-not-allowed`}
                 >
-                   {isTriggeringBreak || isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
+                   {isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
                 </button>
                 <button 
-                  onClick={() => currentSession ? handleTriggerBreak('BREATHE') : startSession('BREATHE')}
-                  disabled={isTriggeringBreak || isStarting}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-30 flex justify-center items-center gap-2"
+                  onClick={() => setBreakActivity('BREATHE')}
+                  disabled={!!currentSession || isStarting}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${
+                    breakActivity === 'BREATHE' 
+                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' 
+                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                  } disabled:opacity-30 disabled:cursor-not-allowed`}
                 >
-                  {isTriggeringBreak || isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
+                  {isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
                 </button>
               </div>
             </div>

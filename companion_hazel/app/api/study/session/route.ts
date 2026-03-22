@@ -209,10 +209,23 @@ export async function PATCH(req: Request) {
       return new NextResponse("Session ID is required", { status: 400 });
     }
 
+    const existingSession = await prisma.studySession.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!existingSession) {
+      return new NextResponse("Session not found", { status: 404 });
+    }
+
+    const endTime = new Date();
+    const startTime = new Date(existingSession.start_time);
+    const actualDurationMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / 60000);
+
     const session = await prisma.studySession.update({
       where: { id: sessionId },
       data: {
-        end_time: new Date(),
+        end_time: endTime,
+        actual_focus_time: actualDurationMinutes,
       },
     });
 

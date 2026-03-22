@@ -58,7 +58,7 @@ export async function GET() {
     const formattedSessions = sessions.map((session: any) => ({
       id: session.id,
       date: session.start_time,
-      duration: session.scheduled_duration,
+      duration: session.actual_focus_time ?? (session.end_time ? Math.floor((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / 60000) : session.scheduled_duration),
       actual_focus_time: session.actual_focus_time,
       distractions_count: session._count?.distractions || 0,
       break_used: session.break_used,
