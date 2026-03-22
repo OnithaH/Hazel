@@ -42,26 +42,27 @@ import prisma from "@/lib/prisma";
 export async function GET(req: Request) {
   try {
     const { userId } = await auth();
+    const secret = req.headers.get('x-robot-secret');
 
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    let robotId: string | null = null;
 
-    const { searchParams } = new URL(req.url);
-    let robotId = searchParams.get('robotId');
-
-    // If robotId is not provided, try to find it via the current user
-    if (!robotId) {
+    if (secret) {
+      const robot = await prisma.robot.findUnique({
+        where: { secret_key: secret },
+      });
+      if (robot) robotId = robot.id;
+    } else if (userId) {
       const user = await prisma.user.findUnique({
         where: { clerk_id: userId },
         include: { robots: true },
       });
-
-      if (!user || user.robots.length === 0) {
-        return new NextResponse("Robot not found", { status: 404 });
+      if (user && user.robots.length > 0) {
+        robotId = user.robots[0].id;
       }
+    }
 
-      robotId = user.robots[0].id;
+    if (!robotId) {
+      return new NextResponse("Unauthorized or Robot Not Found", { status: 401 });
     }
 
     const aromaConfigs = await prisma.aromaConfiguration.findMany({
