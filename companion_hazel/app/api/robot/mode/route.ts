@@ -51,7 +51,7 @@ export async function PATCH(req: Request) {
     });
 
     if (!user || user.robots.length === 0) {
-      return new NextResponse("Robot not found", { status: 404 });
+      return NextResponse.json({ message: "No robot linked for mode update" });
     }
 
     const robotId = user.robots[0].id;

@@ -35,7 +35,7 @@ export async function GET() {
     });
 
     if (!user || user.robots.length === 0) {
-      return new NextResponse("No robot found for this user", { status: 404 });
+      return NextResponse.json([]);
     }
 
     const robotId = user.robots[0].id;
