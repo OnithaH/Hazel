@@ -14,13 +14,37 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+<<<<<<< Updated upstream
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
+=======
+  const [timer, setTimer] = useState(0);
+  const [userName, setUserName] = useState('User');
+  const [isInProgress, setIsInProgress] = useState(false);
+  const [activities, setActivities] = useState([
+    { label: 'Study', percent: 0, colorClass: 'bg-blue-500', width: '0%' },
+    { label: 'Gaming', percent: 0, colorClass: 'bg-purple-500', width: '0%' },
+    { label: 'Music', percent: 0, colorClass: 'bg-pink-500', width: '0%' },
+    { label: 'General', percent: 0, colorClass: 'bg-green-500', width: '0%' },
+  ]);
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+>>>>>>> Stashed changes
 
   useEffect(() => {
-    const interval = setInterval(() => setTimer(t => t + 1), 1000);
+    let interval: NodeJS.Timeout;
+    if (isInProgress) {
+        interval = setInterval(() => setTimer(t => t + 1), 1000);
+    }
     return () => clearInterval(interval);
-  }, []);
+  }, [isInProgress]);
 
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+<<<<<<< Updated upstream
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -44,6 +68,43 @@ export default function DashboardPage() {
     { day: 'Sat', segments: [{color: 'bg-blue-500', w: 35}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 10}, {color: 'bg-green-500', w: 12}], total: '3h' },
     { day: 'Sun', segments: [{color: 'bg-blue-500', w: 48}, {color: 'bg-purple-500', w: 15}, {color: 'bg-pink-500', w: 20}, {color: 'bg-green-500', w: 10}], total: '5h' },
   ];
+=======
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.name) setUserName(data.name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile", error);
+      }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch('/api/user/stats/mode-usage');
+            if (res.ok) {
+                const data = await res.json();
+                setTimer(data.today.totalSeconds);
+                setActivities(data.today.segments);
+                setWeeklyData(data.weeklyAnalysis);
+                setIsInProgress(data.today.isInProgress);
+            }
+        } catch (error) {
+            console.error("Failed to fetch stats", error);
+        }
+    };
+
+    fetchProfile();
+    fetchStats();
+
+    // Refresh stats every minute to keep in sync
+    const statsInterval = setInterval(fetchStats, 60000);
+    return () => clearInterval(statsInterval);
+  }, []);
+>>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen bg-[#07080A] text-white font-sans selection:bg-blue-500/30">
@@ -154,7 +215,7 @@ export default function DashboardPage() {
               <div key={data.day} className="flex items-center gap-6 text-xs">
                 <div className="w-8 text-white/40 font-medium">{data.day}</div>
                 <div className="flex-1 h-8 bg-[#1A1D27] rounded-md overflow-hidden flex">
-                  {data.segments.map((seg, idx) => (
+                  {data.segments.map((seg: any, idx: number) => (
                     <div key={idx} className={`h-full ${seg.color} opacity-90`} style={{ width: `${seg.w}%` }}></div>
                   ))}
                 </div>

@@ -56,8 +56,9 @@ model StudySession {
   focus_shield_enabled    Boolean  @default(false)
   break_activity          String?
   break_used              Boolean  @default(false)
+  is_distracted           Boolean  @default(false)
   created_at              DateTime @default(now())
-
+  actual_focus_seconds    Int      @default(0)
   distractions            DistractionLog[]
 }
 

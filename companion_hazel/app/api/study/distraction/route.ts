@@ -55,6 +55,12 @@ export async function POST(req: Request) {
       },
     });
 
+    // Mark session as distracted
+    await prisma.studySession.update({
+      where: { id: session_id },
+      data: { is_distracted: true },
+    });
+
     return NextResponse.json({ message: 'Distraction logged', data: distraction });
   } catch (error) {
     console.error("[STUDY_DISTRACTION_POST]", error);

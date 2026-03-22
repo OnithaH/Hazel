@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export default function StudyModePage() {
   const [selectedAroma, setSelectedAroma] = useState('Peppermint');
+<<<<<<< Updated upstream
   const [isTracking, setIsTracking] = useState(false);
 
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
@@ -16,6 +17,192 @@ export default function StudyModePage() {
     { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
     { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
   ];
+=======
+  const [activeSession, setActiveSession] = useState<any>(null);
+  const [sessionElapsed, setSessionElapsed] = useState(0);
+  const [focusElapsed, setFocusElapsed] = useState(0);
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper to format duration as HH:MM:SS
+  const formatDuration = (totalSeconds: number) => {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Timer logic for active session
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (activeSession && !activeSession.end_time) {
+      const startTime = new Date(activeSession.start_time).getTime();
+      
+      // Initialize focus time if not already set or whenever session changes
+      if (focusElapsed === 0) {
+        setFocusElapsed(activeSession.actual_focus_seconds || 0);
+      }
+
+      const updateTimer = () => {
+        // Total elapsed session time
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setSessionElapsed(elapsed > 0 ? elapsed : 0);
+        
+        // Actual focus time (pauses if distracted)
+        if (!activeSession.is_distracted) {
+          setFocusElapsed(prev => prev + 1);
+        }
+      };
+      
+      updateTimer();
+      interval = setInterval(updateTimer, 1000);
+    } else {
+      setSessionElapsed(0);
+      setFocusElapsed(0);
+    }
+    return () => clearInterval(interval);
+  }, [activeSession]);
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [aromaRes, historyRes, sessionRes] = await Promise.all([
+          fetch('/api/aroma'),
+          fetch('/api/study/history'),
+          fetch('/api/study/session/current')
+        ]);
+
+        if (aromaRes.ok) {
+          const aromas = await aromaRes.json();
+          setAromaConfigs(aromas);
+          if (aromas.length > 0) setSelectedAroma(aromas[0].scent_name);
+        }
+
+        if (historyRes.ok) {
+          const history = await historyRes.json();
+          setHistoryData(history);
+        }
+
+        if (sessionRes.ok) {
+          const session = await sessionRes.json();
+          setActiveSession(session);
+        }
+      } catch (error) {
+        console.error("Failed to fetch study data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Poll for active session updates every 10 seconds
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/study/session/current');
+        if (res.ok) {
+          const session = await res.json();
+          setActiveSession(session);
+        } else if (res.status === 404) {
+          setActiveSession(null);
+        }
+      } catch (e) {
+        console.error("Polling error", e);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStartSession = async () => {
+    try {
+      const res = await fetch('/api/study/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          duration: 60, // Default 60 mins for quick start
+          break_activity: 'GAME',
+          phone_detection_enabled: true,
+          focus_shield_enabled: true,
+          focus_goal: 'General Study'
+        }),
+      });
+
+      if (res.ok) {
+        const session = await res.json();
+        setActiveSession(session);
+        // Change robot mode to STUDY
+        await fetch('/api/robot/mode', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'STUDY' })
+        });
+      }
+    } catch (error) {
+      console.error("Failed to start session", error);
+    }
+  };
+
+  const handleStopSession = async () => {
+    if (!activeSession) return;
+    try {
+      const res = await fetch(`/api/study/session/${activeSession.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          is_finished: true,
+          actual_focus_seconds: focusElapsed 
+        }),
+      });
+
+      if (res.ok) {
+        setActiveSession(null);
+        // Set robot mode back to GENERAL
+        await fetch('/api/robot/mode', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'GENERAL' })
+        });
+        // Refresh history
+        const histRes = await fetch('/api/study/history');
+        if (histRes.ok) setHistoryData(await histRes.json());
+      }
+    } catch (error) {
+      console.error("Failed to stop session", error);
+    }
+  };
+
+  const handleTriggerBreak = async (type: 'GAME' | 'BREATHE') => {
+    try {
+      await fetch('/api/study/trigger-break', { method: 'POST' });
+      // In a real app, we'd wait for robot to confirm mode change
+    } catch (error) {
+      console.error("Failed to trigger break", error);
+    }
+  };
+
+  const handleTriggerAroma = async (scent: string) => {
+    setSelectedAroma(scent);
+    try {
+      await fetch('/api/aroma/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scent_name: scent })
+      });
+    } catch (error) {
+      console.error("Failed to trigger aroma", error);
+    }
+  };
+
+  const formatTime = (mins: number) => {
+    if (!mins) return '0m';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+>>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
@@ -49,16 +236,65 @@ export default function StudyModePage() {
             </div>
 
             {/* Video/Eye Tracking Area */}
+<<<<<<< Updated upstream
             <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden">
               <Eye className="w-16 h-16 text-blue-400/20" />
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+=======
+            <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group">
+              {!activeSession && <Eye className="w-16 h-16 text-white/10 transition-all duration-700" />}
+              {activeSession && (
+                <>
+                  {activeSession.is_distracted && (
+                    <div className="absolute inset-0 bg-orange-500/10 flex items-center justify-center z-10 backdrop-blur-[2px] transition-all">
+                      <div className="flex flex-col items-center gap-2 animate-pulse">
+                        <AlertTriangle className="w-12 h-12 text-orange-400" />
+                        <p className="text-orange-400 font-bold tracking-widest uppercase text-xs">Distraction Detected</p>
+                        <button 
+                          onClick={async () => {
+                            await fetch('/api/study/distraction/recover', { method: 'POST' });
+                            // Fetch updated session
+                            const res = await fetch('/api/study/session/current');
+                            if (res.ok) setActiveSession(await res.json());
+                          }}
+                          className="mt-2 px-4 py-1.5 bg-orange-500/20 border border-orange-500/40 rounded-full text-[10px] text-orange-400 hover:bg-orange-500/30 transition-all"
+                        >
+                          Manual Resume
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-32 h-32 border-2 border-blue-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className={`text-6xl font-light tracking-wider mb-2 tabular-nums transition-all ${activeSession.is_distracted ? 'text-white/20' : 'text-white'}`}>
+                      {formatDuration(sessionElapsed)}
+                    </div>
+                    <div className="text-white/40 text-[10px] uppercase tracking-widest font-bold">Total Session Time</div>
+                  </div>
+                </>
+              )}
+              <div className={`absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-500 ${activeSession ? 'translate-y-0' : 'translate-y-full'}`}></div>
+>>>>>>> Stashed changes
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
+<<<<<<< Updated upstream
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Focus Time</p>
                 <p className="text-2xl">2h 34m</p>
+=======
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1 relative overflow-hidden">
+                <p className="text-white/60 text-sm">Actual Focus Time</p>
+                <p className={`text-3xl font-medium transition-colors ${activeSession?.is_distracted ? 'text-orange-400' : 'text-white'}`}>
+                  {activeSession ? formatDuration(focusElapsed) : '00:00:00'}
+                </p>
+                <div className="absolute top-0 right-0 p-3 opacity-20">
+                  <Zap className="w-8 h-8 text-blue-400" />
+                </div>
+>>>>>>> Stashed changes
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>

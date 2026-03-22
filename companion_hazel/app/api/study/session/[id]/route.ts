@@ -46,14 +46,28 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { actual_focus_time, is_finished } = body;
+    const { actual_focus_time, actual_focus_seconds, is_finished } = body;
+
+    // Refine update logic to be more robust and Type-safe
+    const updateData: any = {
+      end_time: is_finished ? new Date() : undefined,
+    };
+
+    if (actual_focus_time !== undefined) {
+      updateData.actual_focus_time = typeof actual_focus_time === 'string' ? parseInt(actual_focus_time) : actual_focus_time;
+    } else if (actual_focus_seconds !== undefined) {
+      // Calculate minutes for the legacy field if only seconds are provided
+      const seconds = typeof actual_focus_seconds === 'string' ? parseInt(actual_focus_seconds) : actual_focus_seconds;
+      updateData.actual_focus_time = Math.floor(seconds / 60);
+    }
+
+    if (actual_focus_seconds !== undefined) {
+      updateData.actual_focus_seconds = typeof actual_focus_seconds === 'string' ? parseInt(actual_focus_seconds) : actual_focus_seconds;
+    }
 
     const session = await prisma.studySession.update({
       where: { id },
-      data: {
-        actual_focus_time: actual_focus_time !== undefined ? parseInt(actual_focus_time) : undefined,
-        end_time: is_finished ? new Date() : undefined,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(session);
