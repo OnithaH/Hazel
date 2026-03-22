@@ -181,7 +181,7 @@ export async function PATCH(req: Request) {
     };
 
     // Sync with Google Calendar
-    const refreshToken = existingReminder.robot.user.google_refresh_token;
+    const refreshToken = existingReminder.robot?.user?.google_refresh_token;
     if (refreshToken && existingReminder.google_event_id) {
       const auth = await getGoogleAuthClient(refreshToken);
       await updateGoogleCalendarEvent(auth, existingReminder.google_event_id, {
@@ -247,7 +247,7 @@ export async function DELETE(req: Request) {
     }
 
     // Sync deletion with Google Calendar
-    const refreshToken = existingReminder.robot.user.google_refresh_token;
+    const refreshToken = existingReminder.robot?.user?.google_refresh_token;
     if (refreshToken && existingReminder.google_event_id) {
       const auth = await getGoogleAuthClient(refreshToken);
       await deleteGoogleCalendarEvent(auth, existingReminder.google_event_id);
