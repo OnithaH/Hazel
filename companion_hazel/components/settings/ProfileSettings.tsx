@@ -1,19 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import SectionWrapper from './SectionWrapper';
 import { User } from 'lucide-react';
 
-const ProfileSettings = () => {
-    const [profile, setProfile] = useState({
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        bio: ''
-    });
+interface ProfileSettingsProps {
+    profile: {
+        fullName: string;
+        email: string;
+        bio: string;
+    };
+    onChange: (name: string, value: string) => void;
+}
 
+const ProfileSettings = ({ profile, onChange }: ProfileSettingsProps) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setProfile(prev => ({ ...prev, [name]: value }));
+        onChange(name, value);
     };
 
     return (
@@ -36,9 +39,10 @@ const ProfileSettings = () => {
                         type="email"
                         name="email"
                         value={profile.email}
-                        onChange={handleChange}
-                        className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                        readOnly
+                        className="w-full bg-black/5 border border-white/5 rounded-xl px-4 py-3 text-sm text-white/50 cursor-not-allowed focus:outline-none transition-colors"
                     />
+                    <p className="text-[10px] text-gray-500 mt-1 ml-1">Email is managed via Account Settings</p>
                 </div>
 
                 <div className="group">

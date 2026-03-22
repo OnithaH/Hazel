@@ -1,17 +1,63 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 
 export default function ScheduleSessionPage() {
-  const [selectedDuration, setSelectedDuration] = useState('2h');
+  const router = useRouter();
+  const [selectedDuration, setSelectedDuration] = useState('1h');
   const [focusGoal, setFocusGoal] = useState('');
   const [focusShield, setFocusShield] = useState(false);
   const [focusTracking, setFocusTracking] = useState(true);
   const [needPhone, setNeedPhone] = useState(false);
+  const [breakActivity, setBreakActivity] = useState<'GAME' | 'BREATHE'>('GAME');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const durations = ['30m', '1h', '1h 30m', '2h', '3h'];
+
+  const parseDuration = (d: string) => {
+    if (d === '30m') return 30;
+    if (d === '1h') return 60;
+    if (d === '1h 30m') return 90;
+    if (d === '2h') return 120;
+    if (d === '3h') return 180;
+    return 60;
+  };
+
+  const handleSchedule = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/study/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          duration: parseDuration(selectedDuration),
+          focus_goal: focusGoal,
+          phone_detection_enabled: !needPhone,
+          focus_shield_enabled: focusShield || focusTracking, // Mapping focusTracking to focus_shield for now
+          break_activity: breakActivity
+        }),
+      });
+
+      if (res.ok) {
+        // Change robot mode to STUDY
+        await fetch('/api/robot/mode', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'STUDY' })
+        });
+        router.push('/study_mode');
+      } else {
+        alert("Failed to schedule session. " + await res.text());
+      }
+    } catch (error) {
+      console.error("Session scheduling failed", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-[#101828] to-black text-white p-8 pt-28 font-arimo">
@@ -49,7 +95,9 @@ export default function ScheduleSessionPage() {
               <label className="text-white/60 text-[16px] leading-[24px] translate-y-[-2.2px]">Date</label>
               <input
                 type="date"
+                defaultValue={new Date().toISOString().split('T')[0]}
                 className="w-full h-[61.6px] bg-white/5 border-[0.8px] border-white/10 rounded-[14px] px-5 text-white/60 focus:outline-none focus:border-[#2B7FFF]/40 transition-colors"
+                readOnly
               />
             </div>
             
@@ -58,10 +106,12 @@ export default function ScheduleSessionPage() {
               <input
                 type="time"
                 className="w-full h-[61.6px] bg-white/5 border-[0.8px] border-white/10 rounded-[14px] px-5 text-white/60 focus:outline-none focus:border-[#2B7FFF]/40 transition-colors"
-                defaultValue="14:34"
+                defaultValue={new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}
+                readOnly
               />
             </div>
           </div>
+          <p className="text-[12px] text-white/30">Note: Sessions currently start immediately upon scheduling.</p>
         </div>
 
         {/* Duration */}
@@ -110,15 +160,24 @@ export default function ScheduleSessionPage() {
           
           <div className="bg-white/5 border-[0.8px] border-white/10 rounded-[14px] p-[20.8px] pb-[21.6px] flex flex-col gap-[16px]">
             
-            {/* Focus Shield (Disabled/Iconic state based on image) */}
-            <div className="flex items-center gap-[8px]">
-               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 2.5L2.5 5.83333V9.16667C2.5 13.7917 5.70833 18.0667 10 19.1667C14.2917 18.0667 17.5 13.7917 17.5 9.16667V5.83333L10 2.5Z" stroke="#51A2FF" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
-               </svg>
+            {/* Focus Shield Toggle */}
+            <label className="flex items-center gap-[12px] cursor-pointer">
+              <div 
+                className={`w-[24px] h-[24px] flex items-center justify-center border transition-colors ${
+                  focusShield ? 'bg-[#2B7FFF] border-[#2B7FFF]' : 'bg-transparent border-white/40 rounded-[4px]'
+                }`}
+                onClick={() => setFocusShield(!focusShield)}
+              >
+                  {focusShield && (
+                      <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                  )}
+              </div>
                <span className="text-[18px] leading-[28px] text-white translate-y-[-1.4px]">Focus Shield</span>
-            </div>
+            </label>
 
-            {/* Focus Tracking Toggle */}
+            {/* Focus Tracking Toggle (Internal visualization) */}
             <label className="flex items-center gap-[12px] cursor-pointer">
               <div 
                 className={`w-[24px] h-[24px] flex items-center justify-center border transition-colors ${
@@ -132,7 +191,7 @@ export default function ScheduleSessionPage() {
                       </svg>
                   )}
               </div>
-              <span className="text-white/60 text-[16px] leading-[24px] translate-y-[-2.2px]">Focus Tracking</span>
+              <span className="text-white/60 text-[16px] leading-[24px] translate-y-[-2.2px]">Focus Tracking (AI Visual)</span>
             </label>
             
           </div>
@@ -145,21 +204,29 @@ export default function ScheduleSessionPage() {
                 <circle cx="12" cy="12" r="10" stroke="#FDC700" strokeWidth="2"/>
                 <path d="M12 6V12L16 14" stroke="#FDC700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
              </svg>
-            <h2 className="text-[20px] leading-[28px] translate-y-[-2.2px]">Break Preferences</h2>
+            <h2 className="text-[20px] leading-[28px] translate-y-[-2.2px]">Break Activity</h2>
           </div>
           
           <div className="flex gap-[24px]">
-             {/* Play Games dropdown stand-in */}
             <div className="flex flex-col gap-[12px] flex-1">
-              <div className="w-full h-[48.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[10px] flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                  <span className="text-[20px] leading-[28px] text-white">Play Games</span>
+              <div 
+                onClick={() => setBreakActivity('GAME')}
+                className={`w-full h-[48.8px] border-[0.8px] rounded-[10px] flex items-center justify-center cursor-pointer transition-all ${
+                  breakActivity === 'GAME' ? 'bg-[#FDC700]/20 border-[#FDC700]/40 text-[#FDC700]' : 'bg-white/5 border-white/10 text-white'
+                } hover:bg-white/10`}
+              >
+                  <span className="text-[18px] leading-[28px]">Play Games</span>
               </div>
             </div>
             
-            {/* Breathing Exercises dropdown stand-in */}
             <div className="flex flex-col gap-[12px] flex-1">
-              <div className="w-full h-[48.8px] bg-white/5 border-[0.8px] border-white/10 rounded-[10px] flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                  <span className="text-[20px] leading-[28px] text-white">Breathing Exercises</span>
+              <div 
+                onClick={() => setBreakActivity('BREATHE')}
+                className={`w-full h-[48.8px] border-[0.8px] rounded-[10px] flex items-center justify-center cursor-pointer transition-all ${
+                  breakActivity === 'BREATHE' ? 'bg-[#FDC700]/20 border-[#FDC700]/40 text-[#FDC700]' : 'bg-white/5 border-white/10 text-white'
+                } hover:bg-white/10`}
+              >
+                  <span className="text-[18px] leading-[28px]">Breathing Exercises</span>
               </div>
             </div>
           </div>
@@ -184,16 +251,23 @@ export default function ScheduleSessionPage() {
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center py-[24px]">
-          <button className="w-[112.34px] h-[57.6px] bg-white/5 border-[0.8px] border-white/10 rounded-[14px] text-[16px] leading-[24px] text-white hover:bg-white/10 transition-all">
+          <Link 
+            href="/study_mode"
+            className="w-[112.34px] h-[57.6px] bg-white/5 border-[0.8px] border-white/10 rounded-[14px] text-[16px] leading-[24px] text-white hover:bg-white/10 transition-all flex items-center justify-center"
+          >
             Cancel
-          </button>
+          </Link>
           
-          <button className="w-[185.18px] h-[57.6px] bg-gradient-to-r from-[#2B7FFF] to-[#AD46FF] rounded-[14px] text-[16px] leading-[24px] text-white shadow-[0px_10px_15px_-3px_rgba(43,127,255,0.2),0px_4px_6px_-4px_rgba(43,127,255,0.2)] hover:opacity-90 transition-all">
-             Schedule Session
+          <button 
+            onClick={handleSchedule}
+            disabled={isSubmitting}
+            className={`w-[185.18px] h-[57.6px] bg-gradient-to-r from-[#2B7FFF] to-[#AD46FF] rounded-[14px] text-[16px] leading-[24px] text-white shadow-[0px_10px_15px_-3px_rgba(43,127,255,0.2),0px_4px_6px_-4px_rgba(43,127,255,0.2)] hover:opacity-90 transition-all flex items-center justify-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+             {isSubmitting ? 'Scheduling...' : 'Schedule Session'}
           </button>
         </div>
         
       </div>
     </div>
   );
-}
+}

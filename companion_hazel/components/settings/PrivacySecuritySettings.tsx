@@ -17,34 +17,33 @@ const PrivacyToggle = ({ label, checked, onChange }: { label: string, checked: b
     </div>
 );
 
-const PrivacySecuritySettings = () => {
-    const [settings, setSettings] = React.useState({
-        PrivacyTurn: true,
-        cameraAccess: true,
-        microphoneAccess: false,
-    });
-
-    const toggleSetting = (key: keyof typeof settings) => {
-        setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+interface PrivacySecuritySettingsProps {
+    settings: {
+        privacyTurn: boolean;
+        cameraAccess: boolean;
+        microphoneAccess: boolean;
     };
+    onChange: (key: string, value: boolean) => void;
+}
 
+const PrivacySecuritySettings = ({ settings, onChange }: PrivacySecuritySettingsProps) => {
     return (
         <SectionWrapper title="Privacy & Security" icon={Shield}>
             <div className="space-y-3">
                 <PrivacyToggle
                     label="Privacy Turn"
-                    checked={settings.PrivacyTurn}
-                    onChange={() => toggleSetting('PrivacyTurn')}
+                    checked={settings.privacyTurn}
+                    onChange={() => onChange('privacyTurn', !settings.privacyTurn)}
                 />
                 <PrivacyToggle
                     label="Allow Camera Access"
                     checked={settings.cameraAccess}
-                    onChange={() => toggleSetting('cameraAccess')}
+                    onChange={() => onChange('cameraAccess', !settings.cameraAccess)}
                 />
                 <PrivacyToggle
                     label="Allow Microphone Access"
                     checked={settings.microphoneAccess}
-                    onChange={() => toggleSetting('microphoneAccess')}
+                    onChange={() => onChange('microphoneAccess', !settings.microphoneAccess)}
                 />
             </div>
         </SectionWrapper>
