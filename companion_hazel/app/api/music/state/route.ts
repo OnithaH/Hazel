@@ -93,7 +93,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    
+
     // The Dashboard or Pi can update the state
     if (body.nowPlaying !== undefined) {
       const isNewSong = global.musicState.nowPlaying?.title !== body.nowPlaying?.title;
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
           const prompt = `Classify this song into exactly ONE of these genres: Pop, Ballet, Rock, Jazz, Classical. If it doesn't fit perfectly, pick the closest one. Reply with ONLY the genre word. Song: "${body.nowPlaying.title}" by "${body.nowPlaying.artist}"`;
           const result = await model.generateContent(prompt);
           const genreText = result.response.text().trim();
-          
+
           const validGenres = ["Pop", "Ballet", "Rock", "Jazz", "Classical"];
           const matchedGenre = validGenres.find(g => genreText.includes(g)) || "Pop";
           global.musicState.genre = matchedGenre;
