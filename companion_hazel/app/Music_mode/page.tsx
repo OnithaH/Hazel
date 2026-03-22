@@ -6,9 +6,10 @@ interface Song {
   title?: string;
   name?: string;
   videoId: string;
-  artist?: string;
-  duration?: string;
+  artist?: string | { name: string };
+  duration?: string | number | null;
   thumbnail?: string;
+  thumbnails?: { url: string }[];
   currentTime?: number;
   totalTime?: number;
 }
@@ -63,7 +64,7 @@ export default function MusicModePage() {
   const [nowPlaying, setNowPlaying] = useState<Song | null>(null);
   const [queue, setQueue] = useState<Song[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
   const [progress, setProgress] = useState(0);
@@ -315,7 +316,7 @@ export default function MusicModePage() {
                     {nowPlaying?.name || nowPlaying?.title || "No song playing"}
                   </div>
                   <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)" }}>
-                    {nowPlaying?.artist || "YouTube Music"}
+                    {typeof nowPlaying?.artist === 'string' ? nowPlaying.artist : nowPlaying?.artist?.name || "YouTube Music"}
                   </div>
                 </div>
               </div>
@@ -512,7 +513,7 @@ export default function MusicModePage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: "14px", color: "#fff", marginBottom: "5px" }}>{song.title || song.name}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{song.artist || "Unknown Artist"}</span>
+                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{typeof song.artist === 'string' ? song.artist : song.artist?.name || "Unknown Artist"}</span>
                       <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>•</span>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(173,70,255,0.18)", border: "0.8px solid rgba(173,70,255,0.28)", borderRadius: "7px", padding: "2px 8px 2px 6px" }}>
                         <span style={{ fontSize: "11px", color: "#C27AFF" }}>Hazel Queue</span>
@@ -545,11 +546,12 @@ export default function MusicModePage() {
             </form>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {searchResults.length > 0 ? searchResults.map((result: any, idx: number) => (
+              {searchResults.length > 0 ? searchResults.map((result: Song, idx: number) => (
                 <div key={idx} className="row-item" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px", cursor: "pointer" }}
                   onClick={async () => {
                     // Send an enqueue_song command with the song payload
-                    const newSong = { title: result.name, videoId: result.videoId, artist: result.artist?.name, thumbnail: result.thumbnails?.[0]?.url };
+                    const artistName = typeof result.artist === 'string' ? result.artist : result.artist?.name;
+                    const newSong = { title: result.name, videoId: result.videoId, artist: artistName, thumbnail: result.thumbnails?.[0]?.url };
                     await fetch("/api/music/state", { method: "POST", headers: { "Content-Type": "application/json"}, body: JSON.stringify({ command: "enqueue_song", song: newSong }) });
                   }}
                 >
@@ -561,7 +563,7 @@ export default function MusicModePage() {
                     )}
                     <div>
                       <div style={{ fontSize: "14px", color: "#fff", marginBottom: "3px" }}>{result.name}</div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{result.artist?.name || "Unknown"}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{typeof result.artist === 'string' ? result.artist : result.artist?.name || "Unknown"}</div>
                     </div>
                   </div>
                   <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(43,127,255,0.15)", border: "0.8px solid rgba(43,127,255,0.3)" }}>
