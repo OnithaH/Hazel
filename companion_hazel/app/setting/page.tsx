@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationsSettings from '@/components/settings/NotificationsSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
@@ -9,22 +9,50 @@ import AromaPillarsSettings from '@/components/settings/AromaPillarsSettings';
 import PrivacySecuritySettings from '@/components/settings/PrivacySecuritySettings';
 import AboutSection from '@/components/settings/AboutSection';
 import { Settings, Save, CheckCircle2 } from 'lucide-react';
+import axios from 'axios';
 
 export default function SettingsPage() {
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const [profile, setProfile] = useState({
+        fullName: '',
+        email: '',
+        bio: ''
+    });
 
-    const handleSave = () => {
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await axios.get('/api/user/profile');
+                const { name, email } = response.data;
+                setProfile(prev => ({
+                    ...prev,
+                    fullName: name || '',
+                    email: email || ''
+                }));
+            } catch (error) {
+                console.error("Failed to fetch profile:", error);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleSave = async () => {
         setSaveStatus('saving');
 
-        // Simulate API save delay
-        setTimeout(() => {
+        try {
+            await axios.patch('/api/user/profile', {
+                name: profile.fullName,
+            });
+            
             setSaveStatus('saved');
-
-            // Reset status after a few seconds
             setTimeout(() => {
                 setSaveStatus('idle');
             }, 3000);
-        }, 1500);
+        } catch (error) {
+            console.error("Failed to save profile:", error);
+            setSaveStatus('idle');
+        }
     };
 
     return (
@@ -42,7 +70,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-6">
-                    <ProfileSettings />
+                    <ProfileSettings profile={profile} setProfile={setProfile} />
                     <NotificationsSettings />
                     <AppearanceSettings />
                     <AudioSettings />

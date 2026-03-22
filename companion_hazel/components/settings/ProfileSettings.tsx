@@ -1,16 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import SectionWrapper from './SectionWrapper';
 import { User } from 'lucide-react';
 
-const ProfileSettings = () => {
-    const [profile, setProfile] = useState({
-        fullName: 'John Doe',
-        email: 'john@example.com',
-        bio: ''
-    });
+interface ProfileSettingsProps {
+    profile: {
+        fullName: string;
+        email: string;
+        bio: string;
+    };
+    setProfile: React.Dispatch<React.SetStateAction<{
+        fullName: string;
+        email: string;
+        bio: string;
+    }>>;
+}
 
+const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, setProfile }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setProfile(prev => ({ ...prev, [name]: value }));

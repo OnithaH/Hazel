@@ -64,6 +64,8 @@ export async function GET() {
     }
 
     return NextResponse.json({
+      name: user.name,
+      email: user.email,
       weekly_study_goal: user.weekly_study_goal,
       privacy_mode_enabled: user.privacy_mode_enabled,
     });
@@ -78,7 +80,7 @@ export async function GET() {
  * /api/user/profile:
  *   patch:
  *     summary: Update user profile settings
- *     description: Allows updating the user's weekly study goal or toggling privacy mode.
+ *     description: Allows updating the user's name, weekly study goal, or toggling privacy mode.
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -87,6 +89,8 @@ export async function GET() {
  *           schema:
  *             type: object
  *             properties:
+ *               name:
+ *                 type: string
  *               weekly_study_goal:
  *                 type: integer
  *               privacy_mode_enabled:
@@ -125,11 +129,12 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { weekly_study_goal, privacy_mode_enabled } = body;
+    const { name, weekly_study_goal, privacy_mode_enabled } = body;
 
     const user = await prisma.user.update({
       where: { clerk_id: userId },
       data: {
+        name: typeof name === 'string' ? name : undefined,
         weekly_study_goal: typeof weekly_study_goal === 'number' ? weekly_study_goal : undefined,
         privacy_mode_enabled: typeof privacy_mode_enabled === 'boolean' ? privacy_mode_enabled : undefined,
       },

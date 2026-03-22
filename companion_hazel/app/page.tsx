@@ -6,10 +6,28 @@ import {
   Activity,
   Clock
 } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
 
 
 export default function DashboardPage() {
+  const { user } = useUser();
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('/api/user/profile');
+        if (response.data.name) {
+          setUserName(response.data.name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => setTimer(t => t + 1), 1000);
@@ -46,15 +64,15 @@ export default function DashboardPage() {
       <main className="max-w-[1240px] mx-auto mt-10 px-8">
         {/* Header */}
         <div className="mb-8 pl-1">
-          <h1 className="text-3xl font-medium mb-3">Welcome Back, User</h1>
-          <p className="text-white/40 text-sm">Here's what's happening with Hazel today</p>
+          <h1 className="text-3xl font-medium mb-3">Welcome Back, {userName || user?.firstName || 'User'}</h1>
+          <p className="text-white/40 text-sm">Here&apos;s what&apos;s happening with Hazel today</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Left Column (Wider) */}
           <div className="lg:col-span-2 bg-[#12141C] border border-white/5 rounded-2xl p-6 flex flex-col">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-lg font-medium">Today's Session Breakdown</h2>
+              <h2 className="text-lg font-medium">Today&apos;s Session Breakdown</h2>
               <span className="px-4 py-1.5 bg-[#1e293b]/50 text-blue-400 text-xs font-medium rounded-full">In Progress</span>
             </div>
 
@@ -65,7 +83,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <h3 className="text-xs font-medium text-white/80 mb-5">Today's Activity Breakdown</h3>
+              <h3 className="text-xs font-medium text-white/80 mb-5">Today&apos;s Activity Breakdown</h3>
               <div className="space-y-4">
                 {activities.map((act) => (
                   <div className="flex items-center gap-4 text-sm" key={act.label}>
