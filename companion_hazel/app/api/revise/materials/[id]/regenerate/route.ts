@@ -9,8 +9,6 @@ import { generateQuestions } from "@/lib/gemini";
  *   post:
  *     summary: Re-generate questions for a material
  *     description: Generates a new set of 10 questions using the stored source content for the given material ID.
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
