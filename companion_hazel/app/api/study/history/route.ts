@@ -55,15 +55,26 @@ export async function GET() {
     });
 
     // Formatting response to match requirements
-    const formattedSessions = sessions.map((session: any) => ({
-      id: session.id,
-      date: session.start_time,
-      duration: session.actual_focus_time ?? (session.end_time ? Math.floor((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / 60000) : session.scheduled_duration),
-      actual_focus_time: session.actual_focus_time,
-      distractions_count: session._count?.distractions || 0,
-      break_used: session.break_used,
-      end_time: session.end_time,
-    }));
+    const formattedSessions = sessions.map((session: any) => {
+      const startTime = new Date(session.start_time).getTime();
+      const endTime = session.end_time ? new Date(session.end_time).getTime() : null;
+      
+      // Calculate duration in minutes with float precision
+      let duration = session.scheduled_duration;
+      if (endTime) {
+        duration = (endTime - startTime) / 60000;
+      }
+
+      return {
+        id: session.id,
+        date: session.start_time,
+        duration: duration,
+        actual_focus_time: session.actual_focus_time,
+        distractions_count: session._count?.distractions || 0,
+        break_used: session.break_used,
+        end_time: session.end_time,
+      };
+    });
 
     return NextResponse.json(formattedSessions);
   } catch (error) {

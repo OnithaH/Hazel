@@ -41,6 +41,7 @@ export default function StudyModePage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [breakActivity, setBreakActivity] = useState<'GAME' | 'BREATHE'>('GAME');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   const aromas = ['Peppermint', 'Lemon', 'Lavender'];
 
@@ -54,30 +55,37 @@ export default function StudyModePage() {
   // Timer and Polling logic
   useEffect(() => {
     let pollingInterval: NodeJS.Timeout | null = null;
+    const isActive = (currentSession && !currentSession.end_time) || isStarting;
 
-    if (currentSession && !currentSession.end_time) {
-      const startTime = new Date(currentSession.start_time).getTime();
-      
+    if (isActive) {
+      // Priority: server start_time > optimistic start_time > now
+      const startTime = currentSession
+        ? new Date(currentSession.start_time).getTime()
+        : (startTimeRef.current || Date.now());
+
       const updateTimer = () => {
-        const now = new Date().getTime();
+        const now = Date.now();
         setElapsedSeconds(Math.floor((now - startTime) / 1000));
       };
 
       updateTimer(); // initial call
       timerRef.current = setInterval(updateTimer, 1000);
 
-      // Add polling for session updates (distractions)
-      pollingInterval = setInterval(fetchCurrentSession, 5000);
+      if (currentSession) {
+        // Add polling for session updates (distractions)
+        pollingInterval = setInterval(fetchCurrentSession, 5000);
+      }
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
       setElapsedSeconds(0);
+      startTimeRef.current = null;
     }
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (pollingInterval) clearInterval(pollingInterval);
     };
-  }, [currentSession?.id, currentSession?.end_time]); // Dependency on id and end_time
+  }, [currentSession?.id, currentSession?.end_time, isStarting]); // Added isStarting dependency
 
   const fetchCurrentSession = async () => {
     try {
@@ -108,10 +116,12 @@ export default function StudyModePage() {
           if (date.toDateString() === today.toDateString()) dateLabel = 'Today';
           else if (date.toDateString() === yesterday.toDateString()) dateLabel = 'Yesterday';
 
+          const timeLabel = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
           return {
             id: session.id,
-            date: dateLabel,
-            time: formatDuration(session.duration * 60), // session.duration is in minutes
+            date: `${dateLabel}, ${timeLabel}`,
+            time: `Duration: ${formatDuration(Math.round(session.duration * 60))}`, 
             distractions_count: session.distractions_count
           };
         });
@@ -138,6 +148,7 @@ export default function StudyModePage() {
 
   const startSession = async (activityType: 'GAME' | 'BREATHE' | 'NONE' = 'NONE') => {
     setIsStarting(true);
+    startTimeRef.current = Date.now(); // Capturing start time for optimistic timer
     try {
       const res = await fetch('/api/study/session', {
         method: 'POST',
@@ -224,11 +235,10 @@ export default function StudyModePage() {
             <p className="text-white/60">Enhanced focus and learning environment</p>
           </div>
 
-          <div className={`flex items-center gap-3 px-6 py-3 rounded-full border transition-all ${
-            currentSession 
-              ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' 
+          <div className={`flex items-center gap-3 px-6 py-3 rounded-full border transition-all ${currentSession
+              ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
               : 'bg-white/5 border-white/10 text-white/40'
-          }`}>
+            }`}>
             <div className={`w-2 h-2 rounded-full ${currentSession ? 'bg-blue-500 animate-pulse' : 'bg-white/20'}`}></div>
             <span>{currentSession ? 'Study Mode Active' : 'Idle'}</span>
           </div>
@@ -263,17 +273,17 @@ export default function StudyModePage() {
 
             {/* Focus Tracking Area */}
             <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group">
-              <div className={`flex flex-col items-center justify-center transition-all duration-1000 ${currentSession ? 'opacity-100 scale-110' : 'opacity-40'}`}>
-                <p className={`text-6xl font-mono font-bold tracking-tighter tabular-nums ${currentSession ? 'text-blue-400' : 'text-blue-400/20'}`}>
+              <div className={`flex flex-col items-center justify-center transition-all duration-1000 ${(currentSession || isStarting) ? 'opacity-100 scale-110' : 'opacity-40'}`}>
+                <p className={`text-6xl font-mono font-bold tracking-tighter tabular-nums ${(currentSession || isStarting) ? 'text-blue-400' : 'text-blue-400/20'}`}>
                   {formatDuration(elapsedSeconds)}
                 </p>
-                {currentSession && (
+                {(currentSession || isStarting) && (
                   <p className="text-xs font-mono text-blue-400/60 uppercase tracking-[0.2em] mt-2 animate-pulse">
                     Focusing
                   </p>
                 )}
               </div>
-              <div className={`absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-500 ${currentSession ? 'translate-y-0' : 'translate-y-full'}`}></div>
+              <div className={`absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 transition-transform duration-500 ${(currentSession || isStarting) ? 'translate-y-0' : 'translate-y-full'}`}></div>
             </div>
 
             {/* Stats */}
@@ -283,7 +293,7 @@ export default function StudyModePage() {
                   <RefreshCcw className="w-4 h-4" /> Actual Focus Time
                 </p>
                 <p className="text-3xl font-medium tracking-tight">
-                  {currentSession ? formatDuration(actualFocusTime) : '0s'}
+                  {(currentSession || isStarting) ? formatDuration(actualFocusTime) : '0s'}
                 </p>
                 {distractionCount > 0 && (
                   <p className="text-[10px] text-red-400/60 font-mono">-{formatDuration(penaltySeconds)} distraction penalty</p>
@@ -313,11 +323,10 @@ export default function StudyModePage() {
                     key={aroma}
                     onClick={() => setSelectedAroma(aroma)}
                     disabled={!!currentSession}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all border ${
-                      selectedAroma === aroma
+                    className={`flex-1 py-2 rounded-lg text-xs transition-all border ${selectedAroma === aroma
                         ? 'bg-pink-500/20 border-pink-500/40 text-pink-400'
                         : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                    } disabled:opacity-30 disabled:cursor-not-allowed`}
+                      } disabled:opacity-30 disabled:cursor-not-allowed`}
                   >
                     {aroma}
                   </button>
@@ -333,25 +342,23 @@ export default function StudyModePage() {
               </div>
               <p className="text-white/40 text-xs">Chosen activity will trigger on robot during distractions</p>
               <div className="grid grid-cols-2 gap-2">
-                <button 
+                <button
                   onClick={() => setBreakActivity('GAME')}
                   disabled={!!currentSession || isStarting}
-                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${
-                    breakActivity === 'GAME' 
-                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' 
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${breakActivity === 'GAME'
+                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
                       : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                  } disabled:opacity-30 disabled:cursor-not-allowed`}
+                    } disabled:opacity-30 disabled:cursor-not-allowed`}
                 >
-                   {isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
+                  {isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
                 </button>
-                <button 
+                <button
                   onClick={() => setBreakActivity('BREATHE')}
                   disabled={!!currentSession || isStarting}
-                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${
-                    breakActivity === 'BREATHE' 
-                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' 
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 border ${breakActivity === 'BREATHE'
+                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
                       : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                  } disabled:opacity-30 disabled:cursor-not-allowed`}
+                    } disabled:opacity-30 disabled:cursor-not-allowed`}
                 >
                   {isStarting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
                 </button>
@@ -404,8 +411,8 @@ export default function StudyModePage() {
                       {item.distractions_count} distractions
                     </p>
                   </div>
-                  <Link 
-                    href={`/study_session?id=${item.id}`} 
+                  <Link
+                    href={`/study_session?id=${item.id}`}
                     className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all group-hover:bg-blue-500/20 group-hover:border-blue-500/40 group-hover:text-blue-400"
                   >
                     View Details
@@ -422,4 +429,4 @@ export default function StudyModePage() {
       </div>
     </div>
   );
-}
+}
