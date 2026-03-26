@@ -15,11 +15,25 @@ export default function SettingsPage() {
     const { user, isLoaded } = useUser();
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [fullName, setFullName] = useState('');
+    const [bio, setBio] = useState('');
 
     useEffect(() => {
         if (isLoaded && user) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFullName(user.fullName || '');
+
+            // Fetch additional profile data (bio, etc.) from our API
+            const fetchProfile = async () => {
+                try {
+                    const response = await fetch('/api/user/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.bio) setBio(data.bio);
+                    }
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                }
+            };
+            fetchProfile();
         }
     }, [isLoaded, user, user?.fullName]);
 
@@ -38,6 +52,15 @@ export default function SettingsPage() {
                 firstName,
                 lastName
             });
+
+            // 2. Update bio in our database
+            const response = await fetch('/api/user/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bio })
+            });
+
+            if (!response.ok) throw new Error('Failed to update profile in database');
 
             setSaveStatus('saved');
             setTimeout(() => setSaveStatus('idle'), 3000);
@@ -63,7 +86,12 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-6">
-                    <ProfileSettings fullName={fullName} onFullNameChange={setFullName} />
+                    <ProfileSettings 
+                        fullName={fullName} 
+                        onFullNameChange={setFullName}
+                        bio={bio}
+                        onBioChange={setBio}
+                    />
                     <NotificationsSettings />
                     <AppearanceSettings />
                     <AudioSettings />

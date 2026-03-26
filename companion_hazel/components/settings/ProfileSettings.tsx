@@ -8,13 +8,14 @@ import { useUser } from '@clerk/nextjs';
 interface ProfileSettingsProps {
     fullName: string;
     onFullNameChange: (value: string) => void;
+    bio: string;
+    onBioChange: (value: string) => void;
 }
 
-const ProfileSettings = ({ fullName, onFullNameChange }: ProfileSettingsProps) => {
+const ProfileSettings = ({ fullName, onFullNameChange, bio, onBioChange }: ProfileSettingsProps) => {
     const { user, isLoaded } = useUser();
     const [profile, setProfile] = useState({
-        email: 'john@example.com',
-        bio: ''
+        email: 'john@example.com'
     });
 
     useEffect(() => {
@@ -31,6 +32,8 @@ const ProfileSettings = ({ fullName, onFullNameChange }: ProfileSettingsProps) =
         const { name, value } = e.target;
         if (name === 'fullName') {
             onFullNameChange(value);
+        } else if (name === 'bio') {
+            onBioChange(value);
         } else {
             setProfile(prev => ({ ...prev, [name]: value }));
         }
@@ -67,7 +70,7 @@ const ProfileSettings = ({ fullName, onFullNameChange }: ProfileSettingsProps) =
                         rows={3}
                         name="bio"
                         placeholder="Tell us about yourself..."
-                        value={profile.bio}
+                        value={bio}
                         onChange={handleChange}
                         className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors resize-none"
                     />
