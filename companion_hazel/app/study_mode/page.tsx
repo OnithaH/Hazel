@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2 } from 'lucide-react';
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -11,21 +11,96 @@ interface BreathingExercise {
 }
 
 export default function StudyModePage() {
-  const [selectedAroma, setSelectedAroma] = useState('Peppermint');
+  const [selectedDuration, setSelectedDuration] = useState('1hr');
   const [isTracking, setIsTracking] = useState(false);
 
-  // Real Data states
-  const [isTriggeringBreak, setIsTriggeringBreak] = useState(false);
+  // Timer and Tracking states
+  const [selectedBreakOption, setSelectedBreakOption] = useState<'GAME' | 'BREATHE' | null>(null);
   const [breathingExercises, setBreathingExercises] = useState<BreathingExercise[]>([]);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [targetSeconds, setTargetSeconds] = useState(0);
+  const [focusSeconds, setFocusSeconds] = useState(0);
+  const [distractionsCount, setDistractionsCount] = useState(0);
+  const [history, setHistory] = useState([
+    { date: 'Today', time: '2h 34m 0s', focus: '87%', distractions: '3 distractions' },
+    { date: 'Yesterday', time: '3h 12m 0s', focus: '92%', distractions: '2 distractions' },
+    { date: 'Dec 19', time: '1h 45m 0s', focus: '78%', distractions: '5 distractions' },
+    { date: 'Dec 18', time: '2h 15m 0s', focus: '85%', distractions: '4 distractions' },
+  ]);
 
-  const aromas = ['Peppermint', 'Lemon', 'Lavender'];
+  const durations = ['30 min', '1hr', '1hr 30 min', '2hr', '2hr 30 min', '3hrs'];
 
-  const historyData = [
-    { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
-    { date: 'Yesterday', time: '3h 12m', focus: '92%', distractions: '2 distractions' },
-    { date: 'Dec 19', time: '1h 45m', focus: '78%', distractions: '5 distractions' },
-    { date: 'Dec 18', time: '2h 15m', focus: '85%', distractions: '4 distractions' },
-  ];
+  const parseDurationSeconds = (dur: string) => {
+    const map: Record<string, number> = {
+      '30 min': 30,
+      '1hr': 60,
+      '1hr 30 min': 90,
+      '2hr': 120,
+      '2hr 30 min': 150,
+      '3hrs': 180
+    };
+    return (map[dur] || 60) * 60;
+  };
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
+
+  const formatHistoryTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s}s`;
+  };
+
+  const recordSessionToHistory = React.useCallback(() => {
+    if (elapsedSeconds > 0) {
+      const newEntry = {
+        date: 'Just Now',
+        time: formatHistoryTime(focusSeconds),
+        focus: '100%',
+        distractions: `${distractionsCount} distractions`
+      };
+      setHistory(prev => [newEntry, ...prev]);
+    }
+  }, [elapsedSeconds, focusSeconds, distractionsCount]);
+
+  useEffect(() => {
+    let interval: any;
+
+    if (isTracking && elapsedSeconds < targetSeconds) {
+      interval = setInterval(() => {
+        setElapsedSeconds((prev) => prev + 1);
+        setFocusSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if (isTracking && elapsedSeconds >= targetSeconds) {
+      setIsTracking(false);
+      recordSessionToHistory();
+    }
+
+    return () => clearInterval(interval);
+  }, [isTracking, elapsedSeconds, targetSeconds, recordSessionToHistory]);
+
+  const handleToggleTracking = () => {
+    if (!isTracking) {
+      if (!selectedBreakOption) {
+        alert("Please select a break option (Game or Breathe) before starting.");
+        return;
+      }
+      const seconds = parseDurationSeconds(selectedDuration);
+      setTargetSeconds(seconds);
+      setElapsedSeconds(0);
+      setFocusSeconds(0);
+      setDistractionsCount(0);
+      setIsTracking(true);
+    } else {
+      setIsTracking(false);
+      recordSessionToHistory();
+    }
+  };
 
   useEffect(() => {
     // Connect the breathing exercises API
@@ -43,29 +118,7 @@ export default function StudyModePage() {
     fetchBreathingExercises();
   }, []);
 
-  const handleTriggerBreak = async (type: 'GAME' | 'BREATHE') => {
-    setIsTriggeringBreak(true);
-    try {
-      // Trigger the break on the server
-      const res = await fetch('/api/study/trigger-break', {
-        method: 'POST',
-      });
-      
-      if (!res.ok) {
-        // Show error but don't strictly crash, as local mockup DB might lack an active session
-        const errorText = await res.text();
-        console.warn("Trigger break response:", errorText);
-      }
-      
-      alert(`Break triggered! Starting ${type} mode on your robot.`);
-      
-    } catch (error) {
-      console.error(error);
-      alert("Failed to trigger break");
-    } finally {
-      setIsTriggeringBreak(false);
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
@@ -90,17 +143,30 @@ export default function StudyModePage() {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl">Focus Tracking</h2>
               <button
-                onClick={() => setIsTracking(!isTracking)}
-                className="px-6 py-3 bg-blue-500/20 border border-blue-500/40 rounded-2xl flex items-center gap-2 text-blue-400 hover:bg-blue-500/30 transition-all"
+                onClick={handleToggleTracking}
+                className={`px-6 py-3 border rounded-2xl flex items-center gap-2 transition-all ${
+                  isTracking 
+                    ? 'bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30' 
+                    : 'bg-blue-500/20 border-blue-500/40 text-blue-400 hover:bg-blue-500/30'
+                }`}
               >
-                <Play className="w-5 h-5" />
-                Start Tracking
+                <Play className={`w-5 h-5 ${isTracking ? 'fill-current' : ''}`} />
+                {isTracking ? 'Stop Tracking' : 'Start Tracking'}
               </button>
             </div>
 
             {/* Video/Eye Tracking Area */}
-            <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden">
-              <Eye className="w-16 h-16 text-blue-400/20" />
+            <div className="h-64 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group">
+              {isTracking ? (
+                <div className="text-center space-y-2 animate-pulse">
+                  <p className="text-blue-400/60 text-sm font-medium uppercase tracking-widest">Active Session</p>
+                  <p className="text-6xl font-mono text-white tracking-tighter shadow-blue-500/20 drop-shadow-2xl">
+                    {formatTime(elapsedSeconds)}
+                  </p>
+                </div>
+              ) : (
+                <Eye className="w-16 h-16 text-blue-400/20" />
+              )}
               <div className="absolute bottom-0 left-0 right-0 h-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500"></div>
             </div>
 
@@ -108,35 +174,36 @@ export default function StudyModePage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Focus Time</p>
-                <p className="text-2xl">2h 34m</p>
+                <p className="text-2xl">{isTracking ? formatTime(focusSeconds) : '0h 0m 0s'}</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
-                <p className="text-2xl">3</p>
+                <p className="text-2xl">{distractionsCount}</p>
               </div>
             </div>
           </div>
 
           {/* Right Sidebar Cards */}
           <div className="space-y-4">
-            {/* Aroma Pillars */}
-            <div className="bg-linear-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6 space-y-3">
+            {/* Session Time Duration */}
+            <div className="bg-linear-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-pink-400" />
-                <h3 className="text-base">Aroma Pillars</h3>
+                <Clock className="w-5 h-5 text-purple-400" />
+                <h3 className="text-base">Session Duration</h3>
               </div>
-              <p className="text-white/60 text-sm">Current: {selectedAroma}</p>
-              <div className="flex gap-2">
-                {aromas.map((aroma) => (
+              <p className="text-white/60 text-sm">Selected: {selectedDuration}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {durations.map((duration) => (
                   <button
-                    key={aroma}
-                    onClick={() => setSelectedAroma(aroma)}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
-                      ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
+                    key={duration}
+                    onClick={() => setSelectedDuration(duration)}
+                    disabled={isTracking}
+                    className={`py-2 rounded-lg text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${selectedDuration === duration
+                      ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400'
                       : 'bg-white/5 border border-white/10 text-white/60'
                       }`}
                   >
-                    {aroma}
+                    {duration}
                   </button>
                 ))}
               </div>
@@ -148,21 +215,34 @@ export default function StudyModePage() {
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 <h3 className="text-base">Take a Break?</h3>
               </div>
-              <p className="text-white/60 text-sm">You have been focused for 2h</p>
+              {selectedBreakOption && (
+                <p className="text-orange-400/60 text-sm text-left font-medium">
+                  {selectedBreakOption === 'GAME' ? 'Chosen: Game' : 'Chosen: Breathing Activity'}
+                </p>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <button 
-                  onClick={() => handleTriggerBreak('GAME')}
-                  disabled={isTriggeringBreak}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                  onClick={() => setSelectedBreakOption('GAME')}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedBreakOption === 'GAME'
+                      ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                  }`}
                 >
-                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
+                  Game
                 </button>
                 <button 
-                  onClick={() => handleTriggerBreak('BREATHE')}
-                  disabled={isTriggeringBreak}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                  onClick={() => setSelectedBreakOption('BREATHE')}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedBreakOption === 'BREATHE'
+                      ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                  }`}
                 >
-                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
+                  Breathe
                 </button>
               </div>
               {breathingExercises.length > 0 && (
@@ -194,7 +274,7 @@ export default function StudyModePage() {
           <h2 className="text-2xl">Study History</h2>
 
           <div className="space-y-4">
-            {historyData.map((item, index) => (
+            {history.map((item, index) => (
               <div
                 key={index}
                 className="flex justify-between items-center bg-[#1C1E26] rounded-xl p-4 transition-all"
