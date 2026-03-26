@@ -57,16 +57,23 @@ export default function StudyModePage() {
   };
 
   const recordSessionToHistory = React.useCallback(() => {
-    if (elapsedSeconds > 0) {
+    // Only record if session was at least 5 seconds long
+    if (focusSeconds >= 5) {
       const newEntry = {
         date: 'Just Now',
         time: formatHistoryTime(focusSeconds),
         focus: '100%',
         distractions: `${distractionsCount} distractions`
       };
+      
       setHistory(prev => [newEntry, ...prev]);
+      
+      // Reset current session tracking states for next use
+      setElapsedSeconds(0);
+      setFocusSeconds(0);
+      setDistractionsCount(0);
     }
-  }, [elapsedSeconds, focusSeconds, distractionsCount]);
+  }, [focusSeconds, distractionsCount]);
 
   useEffect(() => {
     let interval: any;
