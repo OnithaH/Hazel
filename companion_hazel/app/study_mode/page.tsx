@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Shield, Sparkles, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2 } from 'lucide-react';
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -11,14 +11,14 @@ interface BreathingExercise {
 }
 
 export default function StudyModePage() {
-  const [selectedAroma, setSelectedAroma] = useState('Peppermint');
+  const [selectedDuration, setSelectedDuration] = useState('1hr');
   const [isTracking, setIsTracking] = useState(false);
 
   // Real Data states
-  const [isTriggeringBreak, setIsTriggeringBreak] = useState(false);
+  const [selectedBreakOption, setSelectedBreakOption] = useState<'GAME' | 'BREATHE' | null>(null);
   const [breathingExercises, setBreathingExercises] = useState<BreathingExercise[]>([]);
 
-  const aromas = ['Peppermint', 'Lemon', 'Lavender'];
+  const durations = ['30 min', '1hr', '1hr 30 min', '2hr', '2hr 30 min', '3hrs'];
 
   const historyData = [
     { date: 'Today', time: '2h 34m', focus: '87%', distractions: '3 distractions' },
@@ -43,29 +43,7 @@ export default function StudyModePage() {
     fetchBreathingExercises();
   }, []);
 
-  const handleTriggerBreak = async (type: 'GAME' | 'BREATHE') => {
-    setIsTriggeringBreak(true);
-    try {
-      // Trigger the break on the server
-      const res = await fetch('/api/study/trigger-break', {
-        method: 'POST',
-      });
-      
-      if (!res.ok) {
-        // Show error but don't strictly crash, as local mockup DB might lack an active session
-        const errorText = await res.text();
-        console.warn("Trigger break response:", errorText);
-      }
-      
-      alert(`Break triggered! Starting ${type} mode on your robot.`);
-      
-    } catch (error) {
-      console.error(error);
-      alert("Failed to trigger break");
-    } finally {
-      setIsTriggeringBreak(false);
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
@@ -119,24 +97,24 @@ export default function StudyModePage() {
 
           {/* Right Sidebar Cards */}
           <div className="space-y-4">
-            {/* Aroma Pillars */}
-            <div className="bg-linear-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl p-6 space-y-3">
+            {/* Session Time Duration */}
+            <div className="bg-linear-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-pink-400" />
-                <h3 className="text-base">Aroma Pillars</h3>
+                <Clock className="w-5 h-5 text-purple-400" />
+                <h3 className="text-base">Session Duration</h3>
               </div>
-              <p className="text-white/60 text-sm">Current: {selectedAroma}</p>
-              <div className="flex gap-2">
-                {aromas.map((aroma) => (
+              <p className="text-white/60 text-sm">Selected: {selectedDuration}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {durations.map((duration) => (
                   <button
-                    key={aroma}
-                    onClick={() => setSelectedAroma(aroma)}
-                    className={`flex-1 py-2 rounded-lg text-xs transition-all ${selectedAroma === aroma
-                      ? 'bg-pink-500/20 border border-pink-500/40 text-pink-400'
+                    key={duration}
+                    onClick={() => setSelectedDuration(duration)}
+                    className={`py-2 rounded-lg text-sm transition-all ${selectedDuration === duration
+                      ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400'
                       : 'bg-white/5 border border-white/10 text-white/60'
                       }`}
                   >
-                    {aroma}
+                    {duration}
                   </button>
                 ))}
               </div>
@@ -148,21 +126,32 @@ export default function StudyModePage() {
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 <h3 className="text-base">Take a Break?</h3>
               </div>
-              <p className="text-white/60 text-sm">You have been focused for 2h</p>
+              {selectedBreakOption && (
+                <p className="text-orange-400/60 text-sm text-left font-medium">
+                  {selectedBreakOption === 'GAME' ? 'Chosen: Game' : 'Chosen: Breathing Activity'}
+                </p>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <button 
-                  onClick={() => handleTriggerBreak('GAME')}
-                  disabled={isTriggeringBreak}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                  onClick={() => setSelectedBreakOption('GAME')}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 ${
+                    selectedBreakOption === 'GAME'
+                      ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                  }`}
                 >
-                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Game'}
+                  Game
                 </button>
                 <button 
-                  onClick={() => handleTriggerBreak('BREATHE')}
-                  disabled={isTriggeringBreak}
-                  className="py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                  onClick={() => setSelectedBreakOption('BREATHE')}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 ${
+                    selectedBreakOption === 'BREATHE'
+                      ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                  }`}
                 >
-                  {isTriggeringBreak ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Breathe'}
+                  Breathe
                 </button>
               </div>
               {breathingExercises.length > 0 && (
