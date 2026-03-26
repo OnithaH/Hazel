@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import {
   Trophy,
   Activity,
@@ -9,6 +10,7 @@ import {
 
 
 export default function DashboardPage() {
+  const { user } = useUser();
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function DashboardPage() {
       <main className="max-w-[1240px] mx-auto mt-10 px-8">
         {/* Header */}
         <div className="mb-8 pl-1">
-          <h1 className="text-3xl font-medium mb-3">Welcome Back, User</h1>
+          <h1 className="text-3xl font-medium mb-3">Welcome Back, {user?.firstName || 'User'}</h1>
           <p className="text-white/40 text-sm">Here's what's happening with Hazel today</p>
         </div>
 

@@ -21,6 +21,8 @@ import prisma from "@/lib/prisma";
  *                   type: integer
  *                 privacy_mode_enabled:
  *                   type: boolean
+ *                 bio:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:
@@ -66,6 +68,7 @@ export async function GET() {
     return NextResponse.json({
       weekly_study_goal: user.weekly_study_goal,
       privacy_mode_enabled: user.privacy_mode_enabled,
+      bio: user.bio,
     });
   } catch (error) {
     console.error("[USER_PROFILE_GET]", error);
@@ -78,7 +81,7 @@ export async function GET() {
  * /api/user/profile:
  *   patch:
  *     summary: Update user profile settings
- *     description: Allows updating the user's weekly study goal or toggling privacy mode.
+ *     description: Allows updating the user's weekly study goal, bio or toggling privacy mode.
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -91,6 +94,8 @@ export async function GET() {
  *                 type: integer
  *               privacy_mode_enabled:
  *                 type: boolean
+ *               bio:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User profile updated successfully
@@ -107,6 +112,8 @@ export async function GET() {
  *                   type: string
  *                 name:
  *                   type: string
+ *                 bio:
+ *                   type: string
  *                 weekly_study_goal:
  *                   type: integer
  *                 privacy_mode_enabled:
@@ -115,7 +122,7 @@ export async function GET() {
  *         description: Unauthorized
  *       500:
  *         description: Internal server error
- */
+ * */
 export async function PATCH(req: Request) {
   try {
     const { userId } = await auth();
@@ -125,19 +132,41 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { weekly_study_goal, privacy_mode_enabled } = body;
+    const { weekly_study_goal, privacy_mode_enabled, bio } = body;
 
-    const user = await prisma.user.update({
+    // We use upsert to ensure the user exists before updating
+    // If we need to create, we fetch Clerk data
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      return new NextResponse("User not found in Clerk", { status: 404 });
+    }
+
+    const email = clerkUser.emailAddresses[0]?.emailAddress || "";
+    const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
+
+    const user = await prisma.user.upsert({
       where: { clerk_id: userId },
-      data: {
+      update: {
         weekly_study_goal: typeof weekly_study_goal === 'number' ? weekly_study_goal : undefined,
         privacy_mode_enabled: typeof privacy_mode_enabled === 'boolean' ? privacy_mode_enabled : undefined,
+        bio: typeof bio === 'string' ? bio : undefined,
+      },
+      create: {
+        clerk_id: userId,
+        email: email,
+        name: name || null,
+        weekly_study_goal: typeof weekly_study_goal === 'number' ? weekly_study_goal : 15,
+        privacy_mode_enabled: typeof privacy_mode_enabled === 'boolean' ? privacy_mode_enabled : false,
+        bio: typeof bio === 'string' ? bio : null,
       },
     });
 
     return NextResponse.json(user);
   } catch (error) {
     console.error("[USER_PROFILE_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse(
+      error instanceof Error ? error.message : "Internal Error", 
+      { status: 500 }
+    );
   }
 }
