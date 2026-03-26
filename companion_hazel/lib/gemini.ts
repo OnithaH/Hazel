@@ -2,11 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const generateQuestions = async (fileContent: string | Buffer, mimeType: string) => {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not defined in environment variables");
+  if (!apiKey || apiKey === "GEMINI_API_KEY") {
+    throw new Error("Hazel's AI brain is not yet connected. Please add your Gemini API key to the .env file.");
   }
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
     Analyze the following study material. 
