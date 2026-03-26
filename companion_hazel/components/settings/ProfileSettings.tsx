@@ -1,15 +1,27 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionWrapper from './SectionWrapper';
 import { User } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 
 const ProfileSettings = () => {
+    const { user, isLoaded } = useUser();
     const [profile, setProfile] = useState({
         fullName: 'John Doe',
         email: 'john@example.com',
         bio: ''
     });
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            setProfile(prev => ({
+                ...prev,
+                fullName: user.fullName || '',
+                email: user.primaryEmailAddress?.emailAddress || ''
+            }));
+        }
+    }, [isLoaded, user?.id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
