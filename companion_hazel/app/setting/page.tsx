@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import NotificationsSettings from '@/components/settings/NotificationsSettings';
 import AppearanceSettings from '@/components/settings/AppearanceSettings';
@@ -8,23 +8,44 @@ import AudioSettings from '@/components/settings/AudioSettings';
 import AromaPillarsSettings from '@/components/settings/AromaPillarsSettings';
 import PrivacySecuritySettings from '@/components/settings/PrivacySecuritySettings';
 import AboutSection from '@/components/settings/AboutSection';
-import { Settings, Save, CheckCircle2 } from 'lucide-react';
+import { Settings, CheckCircle2 } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 
 export default function SettingsPage() {
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const { user, isLoaded } = useUser();
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const [fullName, setFullName] = useState('');
 
-    const handleSave = () => {
+    useEffect(() => {
+        if (isLoaded && user) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setFullName(user.fullName || '');
+        }
+    }, [isLoaded, user, user?.fullName]);
+
+    const handleSave = async () => {
+        if (!user) return;
+        
         setSaveStatus('saving');
 
-        // Simulate API save delay
-        setTimeout(() => {
-            setSaveStatus('saved');
+        try {
+            // Split name into first and last name for Clerk
+            const nameParts = fullName.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
 
-            // Reset status after a few seconds
-            setTimeout(() => {
-                setSaveStatus('idle');
-            }, 3000);
-        }, 1500);
+            await user.update({
+                firstName,
+                lastName
+            });
+
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        }
     };
 
     return (
@@ -42,7 +63,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-6">
-                    <ProfileSettings />
+                    <ProfileSettings fullName={fullName} onFullNameChange={setFullName} />
                     <NotificationsSettings />
                     <AppearanceSettings />
                     <AudioSettings />
@@ -65,6 +86,8 @@ export default function SettingsPage() {
                         w-full max-w-md flex items-center justify-center gap-2 font-semibold py-3 px-8 rounded-xl shadow-lg transition-all transform active:scale-[0.98]
                         ${saveStatus === 'saved'
                             ? 'bg-green-500 text-white hover:bg-green-600 shadow-green-500/20'
+                            : saveStatus === 'error'
+                            ? 'bg-red-500 text-white hover:bg-red-600 shadow-red-500/20'
                             : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/20 hover:scale-[1.02]'
                         }
                     `}
@@ -78,6 +101,10 @@ export default function SettingsPage() {
                         <>
                             <CheckCircle2 className="w-5 h-5" />
                             <span>Changes Saved</span>
+                        </>
+                    ) : saveStatus === 'error' ? (
+                        <>
+                            <span>Error Saving</span>
                         </>
                     ) : (
                         <>
