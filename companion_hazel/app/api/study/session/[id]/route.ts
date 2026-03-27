@@ -32,6 +32,23 @@ import prisma from "@/lib/prisma";
  *         description: Unauthorized
  *       500:
  *         description: Internal server error
+ *   delete:
+ *     summary: Delete a study session
+ *     description: Permanently removes a study session record.
+ *     tags: [Study]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
  */
 export async function PATCH(
   req: Request,
@@ -59,6 +76,30 @@ export async function PATCH(
     return NextResponse.json(session);
   } catch (error) {
     console.error("[STUDY_SESSION_PATCH]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { id } = await params;
+
+    await prisma.studySession.delete({
+      where: { id },
+    });
+
+    return new NextResponse("Session deleted", { status: 200 });
+  } catch (error) {
+    console.error("[STUDY_SESSION_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

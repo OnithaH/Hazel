@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { ensureUserAndRobot } from "@/lib/userSync";
 
 /**
  * @swagger
@@ -27,18 +28,26 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: {
-        robots: true,
-      },
-    });
+    const user = await ensureUserAndRobot(userId);
 
     if (!user || user.robots.length === 0) {
       return new NextResponse("No robot found for this user", { status: 404 });
     }
 
     const robotId = user.robots[0].id;
+
+    // Auto-delete sessions older than 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    await prisma.studySession.deleteMany({
+      where: {
+        robot_id: robotId,
+        start_time: {
+          lt: thirtyDaysAgo,
+        },
+      },
+    });
 
     const sessions = await prisma.studySession.findMany({
       where: {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock } from 'lucide-react';
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -21,12 +21,9 @@ export default function StudyModePage() {
   const [targetSeconds, setTargetSeconds] = useState(0);
   const [focusSeconds, setFocusSeconds] = useState(0);
   const [distractionsCount, setDistractionsCount] = useState(0);
-  const [history, setHistory] = useState([
-    { date: 'Today', time: '2h 34m 0s', focus: '87%', distractions: '3 distractions' },
-    { date: 'Yesterday', time: '3h 12m 0s', focus: '92%', distractions: '2 distractions' },
-    { date: 'Dec 19', time: '1h 45m 0s', focus: '78%', distractions: '5 distractions' },
-    { date: 'Dec 18', time: '2h 15m 0s', focus: '85%', distractions: '4 distractions' },
-  ]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const durations = ['30 min', '1hr', '1hr 30 min', '2hr', '2hr 30 min', '3hrs'];
 
@@ -56,10 +53,34 @@ export default function StudyModePage() {
     return `${h}h ${m}m ${s}s`;
   };
 
+  const fetchHistory = React.useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      const res = await fetch('/api/study/history');
+      if (res.ok) {
+        const data = await res.json();
+        const formatted = data.map((session: any) => ({
+          id: session.id,
+          date: new Date(session.date).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+          time: formatHistoryTime(session.actual_focus_time || 0),
+          distractions: `${session.distractions_count} distractions`,
+          focus: '100%'
+        }));
+        setHistory(formatted);
+      }
+    } catch (error) {
+      console.error("Failed to fetch history", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
   const recordSessionToHistory = React.useCallback(() => {
     // Only record if session was at least 5 seconds long
     if (focusSeconds >= 5) {
+      // 1. Immediate UI Feedback
       const newEntry = {
+        id: currentSessionId, // This might be null if background start is still pending
         date: 'Just Now',
         time: formatHistoryTime(focusSeconds),
         focus: '100%',
@@ -67,13 +88,53 @@ export default function StudyModePage() {
       };
       
       setHistory(prev => [newEntry, ...prev]);
+
+      // 2. Background Persistence
+      if (currentSessionId) {
+        fetch(`/api/study/session/${currentSessionId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actual_focus_time: focusSeconds,
+            is_finished: true
+          })
+        })
+        .then(res => {
+          if (!res.ok) console.error("Background finish failed:", res.status);
+        })
+        .catch(err => console.error("Background sync failed:", err));
+      } else {
+        console.warn("Skipping background sync: No currentSessionId available (session might still be starting)");
+      }
       
-      // Reset current session tracking states for next use
+      // Reset current session tracking states
       setElapsedSeconds(0);
       setFocusSeconds(0);
       setDistractionsCount(0);
+      setCurrentSessionId(null);
+    } else {
+       // Reset states if session was too short
+       setElapsedSeconds(0);
+       setFocusSeconds(0);
+       setDistractionsCount(0);
+       setCurrentSessionId(null);
     }
-  }, [focusSeconds, distractionsCount]);
+  }, [focusSeconds, distractionsCount, currentSessionId]);
+
+  const handleDeleteSession = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this study session?")) return;
+    
+    try {
+      const res = await fetch(`/api/study/session/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setHistory(prev => prev.filter(item => item.id !== id));
+      }
+    } catch (error) {
+      console.error("Failed to delete session", error);
+    }
+  };
 
   useEffect(() => {
     let interval: any;
@@ -97,17 +158,57 @@ export default function StudyModePage() {
         alert("Please select a break option (Game or Breathe) before starting.");
         return;
       }
+
+      // 1. IMMEDIATE UI RESPONSE
       const seconds = parseDurationSeconds(selectedDuration);
       setTargetSeconds(seconds);
       setElapsedSeconds(0);
       setFocusSeconds(0);
       setDistractionsCount(0);
       setIsTracking(true);
+
+      // 2. BACKGROUND API START
+      const durMap: Record<string, number> = {
+        '30 min': 30, '1hr': 60, '1hr 30 min': 90, '2hr': 120, '2hr 30 min': 150, '3hrs': 180
+      };
+      const minutes = durMap[selectedDuration] || 60;
+
+      fetch('/api/study/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          duration: minutes,
+          break_activity: selectedBreakOption,
+          phone_detection_enabled: false,
+          focus_shield_enabled: false
+        })
+      })
+      .then(async res => {
+        if (res.ok) return res.json();
+        const errorText = await res.text();
+        return Promise.reject(`${res.status} ${errorText}`);
+      })
+      .then(data => {
+        setCurrentSessionId(data.id);
+        // If the user already stopped and created a "Just Now" entry, update it with the ID
+        setHistory(prev => prev.map(item => 
+          item.date === 'Just Now' && !item.id ? { ...item, id: data.id } : item
+        ));
+      })
+      .catch(err => {
+         console.error(`Background start failed: ${err}`);
+      });
+
     } else {
+      // 1. IMMEDIATE UI RESPONSE
       setIsTracking(false);
       recordSessionToHistory();
     }
   };
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   useEffect(() => {
     // Connect the breathing exercises API
@@ -278,26 +379,51 @@ export default function StudyModePage() {
 
         {/* Study History */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-          <h2 className="text-2xl">Study History</h2>
+          <h2 className="text-2xl">Study History (Last 30 Days)</h2>
 
           <div className="space-y-4">
-            {history.map((item, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center bg-[#1C1E26] rounded-xl p-4 transition-all"
-              >
-                <div className="flex items-center gap-16">
-                  <div>
-                    <p className="text-base">{item.date}</p>
-                    <p className="text-white/60 text-sm">{item.time}</p>
-                  </div>
-                  <p className="text-white/60 text-[13px]">{item.distractions}</p>
+            {history.length === 0 ? (
+              isLoadingHistory ? (
+                <div className="text-center py-10">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
+                  <p className="text-white/40 text-sm">Loading history...</p>
                 </div>
-                <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
-                  View Details
-                </Link>
-              </div>
-            ))}
+              ) : (
+                <div className="text-center py-10 bg-[#1C1E26] rounded-xl border border-dashed border-white/5">
+                  <p className="text-white/40 text-sm">No study history yet. Start a session to see your progress!</p>
+                </div>
+              )
+            ) : (
+              history.map((item, index) => (
+                <div
+                  key={item.id || index}
+                  className="flex justify-between items-center bg-[#1C1E26] rounded-xl p-4 transition-all"
+                >
+                  <div className="flex items-center gap-16">
+                    <div>
+                      <p className="text-base">{item.date}</p>
+                      <p className="text-white/60 text-sm">{item.time}</p>
+                    </div>
+                    <p className="text-white/60 text-[13px]">{item.distractions}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
+                      View Details
+                    </Link>
+                    <button 
+                      onClick={() => item.id && handleDeleteSession(item.id)}
+                      disabled={!item.id}
+                      className={`p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-all ${
+                        !item.id ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      title={item.id ? "Delete Session" : "Syncing..."}
+                    >
+                      {item.id ? <Trash2 className="w-4 h-4" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
