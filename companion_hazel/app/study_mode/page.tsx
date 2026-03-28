@@ -115,17 +115,17 @@ export default function StudyModePage() {
       setDistractionsCount(0);
       setActiveSessionId(null);
     } else {
-       // Reset states if session was too short
-       setElapsedSeconds(0);
-       setFocusSeconds(0);
-       setDistractionsCount(0);
-       setActiveSessionId(null);
+      // Reset states if session was too short
+      setElapsedSeconds(0);
+      setFocusSeconds(0);
+      setDistractionsCount(0);
+      setActiveSessionId(null);
     }
   }, [focusSeconds, distractionsCount, activeSessionId]);
 
   const handleDeleteSession = async (id: string) => {
     if (!confirm("Are you sure you want to delete this study session?")) return;
-    
+
     try {
       const res = await fetch(`/api/study/session/${id}`, {
         method: 'DELETE'
@@ -197,7 +197,7 @@ export default function StudyModePage() {
           });
 
           // Sync "Just Now" entry if it exists (started stopping before ID came back)
-          setHistory(prev => prev.map(item => 
+          setHistory(prev => prev.map(item =>
             item.date === 'Just Now' && !item.id ? { ...item, id: sessionData.id } : item
           ));
 
@@ -244,7 +244,7 @@ export default function StudyModePage() {
 
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-28">
+    <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white p-8 pt-10">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -267,27 +267,22 @@ export default function StudyModePage() {
               <h2 className="text-2xl">Focus Tracking</h2>
               <button
                 onClick={handleToggleTracking}
-                className={`px-6 py-3 border rounded-2xl flex items-center gap-2 transition-all ${
-                  isTracking 
-                    ? 'bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30' 
+                className={`px-6 py-3 border rounded-2xl flex items-center gap-2 transition-all ${isTracking
+                    ? 'bg-red-500/20 border-red-500/40 text-red-400 hover:bg-red-500/30'
                     : 'bg-blue-500/20 border-blue-500/40 text-blue-400 hover:bg-blue-500/30'
-                }`}
+                  }`}
               >
                 <Play className={`w-5 h-5 ${isTracking ? 'fill-current' : ''}`} />
                 {isTracking ? 'Stop Tracking' : 'Start Tracking'}
               </button>
 
-              {isTracking && (
+              {isTracking && isOnBreak && (
                 <button
-                  onClick={() => setIsOnBreak(!isOnBreak)}
-                  className={`px-6 py-3 border rounded-2xl flex items-center gap-2 transition-all ${
-                    isOnBreak 
-                      ? 'bg-green-500/20 border-green-500/40 text-green-400 hover:bg-green-500/30' 
-                      : 'bg-orange-500/20 border-orange-500/40 text-orange-400 hover:bg-orange-500/30'
-                  }`}
+                  onClick={() => setIsOnBreak(false)}
+                  className="px-6 py-3 border border-green-500/40 rounded-2xl flex items-center gap-2 transition-all bg-green-500/20 text-green-400 hover:bg-green-500/30"
                 >
                   <Clock className="w-5 h-5" />
-                  {isOnBreak ? 'Return to Study' : 'Take a Break'}
+                  Return to Study
                 </button>
               )}
             </div>
@@ -316,10 +311,6 @@ export default function StudyModePage() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
                 <p className="text-2xl">{distractionsCount}</p>
-              </div>
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
-                <p className="text-white/60 text-sm">Break Time</p>
-                <p className="text-2xl">{isTracking ? formatTime(breakSeconds) : '0h 0m 0s'}</p>
               </div>
             </div>
           </div>
@@ -363,25 +354,23 @@ export default function StudyModePage() {
               )}
 
               <div className="grid grid-cols-2 gap-2">
-                <button 
+                <button
                   onClick={() => setSelectedBreakOption('GAME')}
                   disabled={isTracking}
-                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    selectedBreakOption === 'GAME'
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${selectedBreakOption === 'GAME'
                       ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
                       : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   Game
                 </button>
-                <button 
+                <button
                   onClick={() => setSelectedBreakOption('BREATHE')}
                   disabled={isTracking}
-                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    selectedBreakOption === 'BREATHE'
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${selectedBreakOption === 'BREATHE'
                       ? 'bg-orange-500/20 border border-orange-500/40 text-orange-400'
                       : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   Breathe
                 </button>
@@ -472,12 +461,11 @@ export default function StudyModePage() {
                     <Link href={`/study_session/${item.id}`} className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
                       View Details
                     </Link>
-                    <button 
+                    <button
                       onClick={() => item.id && handleDeleteSession(item.id)}
                       disabled={!item.id}
-                      className={`p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-all ${
-                        !item.id ? 'opacity-30 cursor-not-allowed' : ''
-                      }`}
+                      className={`p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-all ${!item.id ? 'opacity-30 cursor-not-allowed' : ''
+                        }`}
                       title={item.id ? "Delete Session" : "Syncing..."}
                     >
                       {item.id ? <Trash2 className="w-4 h-4" /> : <Loader2 className="w-4 h-4 animate-spin" />}
