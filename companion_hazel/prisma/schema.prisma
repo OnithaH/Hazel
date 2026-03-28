@@ -42,6 +42,7 @@ model Robot {
   reminders           Reminder[]
   musicGenreMappings  MusicGenreMapping[]
   modeUsageLogs       ModeUsageLog[]
+  musicState          MusicState?
 }
 
 model StudySession {
@@ -170,4 +171,17 @@ model ModeUsageLog {
   mode       String
   start_time DateTime @default(now())
   end_time   DateTime?
+}
+
+model MusicState {
+  id           String   @id @default(uuid())
+  robot_id     String   @unique
+  robot        Robot    @relation(fields: [robot_id], references: [id])
+  nowPlaying   Json?    // Stores current song info
+  queue        Json     @default("[]") // Stores the queue array
+  command      String?  
+  song         Json?    // Song associated with command
+  aromaChamber String?
+  genre        String?
+  updated_at   DateTime @updatedAt
 }
