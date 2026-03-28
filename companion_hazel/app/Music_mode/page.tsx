@@ -25,7 +25,7 @@ const genres = [
   { name: "Pop", scent: "Citrus", gradient: "linear-gradient(135deg, rgb(246, 51, 154) 0%, rgb(173, 70, 255) 50%, rgb(43, 127, 255) 100%)", c1: "246, 51, 154", c2: "173, 70, 255", c3: "43, 127, 255", light: "251, 100, 182" },
   { name: "Ballet", scent: "Lavender", gradient: "linear-gradient(135deg, rgb(253, 165, 213) 0%, rgb(218, 178, 255) 50%, rgb(142, 197, 255) 100%)", c1: "253, 165, 213", c2: "218, 178, 255", c3: "142, 197, 255", light: "255, 220, 240" },
   { name: "Rock", scent: "Peppermint", gradient: "linear-gradient(135deg, rgb(251, 44, 54) 0%, rgb(255, 105, 0) 50%, rgb(240, 177, 0) 100%)", c1: "251, 44, 54", c2: "255, 105, 0", c3: "240, 177, 0", light: "255, 150, 100" },
-  { name: "Jazz", scent: "Vanilla", gradient: "linear-gradient(135deg, rgb(43, 127, 255) 0%, rgb(173, 70, 255) 50%, rgb(246, 51, 154) 100%)", c1: "43, 127, 255", c2: "173, 70, 255", c3: "246, 51, 154", light: "100, 150, 255" },
+  { name: "Jazz", scent: "Vanilla", gradient: "linear-gradient(135deg, rgb(80, 20, 210) 0%, rgb(20, 150, 210) 50%, rgb(250, 180, 50) 100%)", c1: "80, 20, 210", c2: "20, 150, 210", c3: "250, 180, 50", light: "100, 200, 255" },
   { name: "Classical", scent: "Chamomile", gradient: "linear-gradient(135deg, rgb(163, 179, 255) 0%, rgb(142, 197, 255) 50%, rgb(83, 234, 253) 100%)", c1: "163, 179, 255", c2: "142, 197, 255", c3: "83, 234, 253", light: "200, 220, 255" },
 ];
 
@@ -33,7 +33,7 @@ const scentPairs = [
   { genre: "Pop", scent: "Citrus", dot: "rgb(246, 51, 154)", intensity: 100 },
   { genre: "Ballet", scent: "Lavender", dot: "rgb(253, 165, 213)", intensity: 62 },
   { genre: "Rock", scent: "Peppermint", dot: "rgb(251, 44, 54)", intensity: 48 },
-  { genre: "Jazz", scent: "Vanilla", dot: "rgb(43, 127, 255)", intensity: 75 },
+  { genre: "Jazz", scent: "Vanilla", dot: "rgb(80, 20, 210)", intensity: 75 },
 ];
 
 const upNextSongs = [
