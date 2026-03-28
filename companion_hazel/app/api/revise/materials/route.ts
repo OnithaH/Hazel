@@ -8,8 +8,6 @@ import prisma from "@/lib/prisma";
  *   get:
  *     summary: Fetch all revision materials for the user
  *     description: Returns a list of all study materials uploaded by the authenticated user, including the question count.
- *     security:
- *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: List of revision materials.
@@ -28,6 +26,9 @@ export async function GET(req: NextRequest) {
     const materials = await prisma.revisionMaterial.findMany({
       where: {
         user_id: userId,
+        expires_at: {
+          gt: new Date(),
+        },
       },
       orderBy: {
         uploaded_at: "desc",

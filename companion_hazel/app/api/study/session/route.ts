@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { ensureUserAndRobot } from "@/lib/userSync";
 
 /**
  * @swagger
@@ -46,13 +47,10 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: { robots: true },
-    });
+    const user = await ensureUserAndRobot(userId);
 
     if (!user || user.robots.length === 0) {
-      return new NextResponse("Robot not found", { status: 404 });
+      return new NextResponse("Failed to synchronize user/robot", { status: 500 });
     }
 
     const body = await req.json();
@@ -82,7 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(session);
   } catch (error) {
-    console.error("[STUDY_SESSION_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error("[STUDY_SESSION_POST] Critical error:", error);
+    return new NextResponse(`Internal Error: ${error instanceof Error ? error.message : String(error)}`, { status: 500 });
   }
 }

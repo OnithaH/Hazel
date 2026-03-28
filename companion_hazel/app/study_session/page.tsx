@@ -32,11 +32,6 @@ export default function StudySessionDetails() {
     { icon: Clock, color: 'blue', title: 'Session ended', time: '4:34 PM' },
   ];
 
-  const materials = [
-    { subject: 'Mathematics - Chapter 5', pages: 'Pages\n45-67', time: '45 mins' },
-    { subject: 'Physics - Thermodynamics', pages: 'Pages\n120-145', time: '50 mins' },
-    { subject: 'Chemistry - Organic Compounds', pages: 'Pages\n80-102', time: '39 mins' },
-  ];
 
   return (
     <div className="min-h-screen bg-[#0F1117] text-white p-8 pt-28 font-sans">
@@ -231,30 +226,6 @@ export default function StudySessionDetails() {
           </div>
         </div>
 
-        {/* Materials Studied */}
-        <div className="bg-[#1C1E26] border border-white/5 rounded-2xl p-6">
-          <h2 className="text-base font-medium mb-5">Materials Studied</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {materials.map((material, index) => (
-              <div key={index} className="bg-[#262833] rounded-xl p-5 flex flex-col justify-between h-auto">
-                <div className="flex items-start gap-3 mb-6">
-                  <div className="w-9 h-9 bg-[#1D2B4D] rounded-lg flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4 text-[#60A5FA]" />
-                  </div>
-                  <div className="pt-0.5">
-                    <p className="text-[13px] font-medium text-white/90 mb-2 leading-tight">{material.subject}</p>
-                    <p className="text-[11px] text-white/40 whitespace-pre-line leading-relaxed">{material.pages}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-auto border-none pt-0">
-                  <span className="text-white/40 text-[11px] font-medium">Study Time</span>
-                  <span className="text-[#60A5FA] text-[13px] font-medium">{material.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

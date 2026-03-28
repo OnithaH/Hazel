@@ -14,6 +14,7 @@ model User {
   clerk_id              String   @unique // Shared Account ID
   email                 String   @unique
   name                  String?
+  bio                   String?
   weekly_study_goal     Int      @default(15)
   is_premium            Boolean  @default(false)
   privacy_mode_enabled  Boolean  @default(false)

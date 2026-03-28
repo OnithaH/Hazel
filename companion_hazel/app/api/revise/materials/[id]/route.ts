@@ -8,8 +8,6 @@ import prisma from "@/lib/prisma";
  *   delete:
  *     summary: Delete a revision material
  *     description: Permanently deletes a revision material and all its associated questions for the authenticated user.
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

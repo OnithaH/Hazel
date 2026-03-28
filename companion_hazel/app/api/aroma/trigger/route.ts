@@ -38,6 +38,7 @@ export async function POST(req: Request) {
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
+
     }
 
     const { chamber_number, scent_name } = await req.json();
