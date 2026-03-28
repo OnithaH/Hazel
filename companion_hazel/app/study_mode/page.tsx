@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2 } from 'lucide-react';
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2, Smartphone } from 'lucide-react';
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -13,9 +13,11 @@ interface BreathingExercise {
 export default function StudyModePage() {
   const [selectedDuration, setSelectedDuration] = useState('1hr');
   const [isTracking, setIsTracking] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // Timer and Tracking states
   const [selectedBreakOption, setSelectedBreakOption] = useState<'GAME' | 'BREATHE' | null>(null);
+  const [needPhone, setNeedPhone] = useState<boolean | null>(null);
   const [breathingExercises, setBreathingExercises] = useState<BreathingExercise[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [targetSeconds, setTargetSeconds] = useState(0);
@@ -23,7 +25,6 @@ export default function StudyModePage() {
   const [breakSeconds, setBreakSeconds] = useState(0);
   const [isOnBreak, setIsOnBreak] = useState(false);
   const [distractionsCount, setDistractionsCount] = useState(0);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
@@ -77,52 +78,50 @@ export default function StudyModePage() {
     }
   }, []);
 
-  const recordSessionToHistory = React.useCallback(() => {
+  const recordSessionToHistory = React.useCallback(async () => {
     // Only record if session was at least 5 seconds long
     if (focusSeconds >= 5) {
-      // 1. Immediate UI Feedback
+      if (activeSessionId) {
+        try {
+          await fetch(`/api/study/session/${activeSessionId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              actual_focus_time: focusSeconds,
+              break_time_seconds: breakSeconds,
+              is_finished: true
+            }),
+          });
+        } catch (error) {
+          console.error("Failed to update session in DB", error);
+        }
+      }
+
       const newEntry = {
-        id: currentSessionId, // This might be null if background start is still pending
+        id: activeSessionId,
         date: 'Just Now',
         time: formatHistoryTime(focusSeconds),
         focus: '100%',
         distractions: `${distractionsCount} distractions`
       };
-      
+
       setHistory(prev => [newEntry, ...prev]);
 
-      // 2. Background Persistence
-      if (currentSessionId) {
-        fetch(`/api/study/session/${currentSessionId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            actual_focus_time: focusSeconds,
-            break_time_seconds: breakSeconds,
-            is_finished: true
-          })
-        })
-        .then(res => {
-          if (!res.ok) console.error("Background finish failed:", res.status);
-        })
-        .catch(err => console.error("Background sync failed:", err));
-      } else {
-        console.warn("Skipping background sync: No currentSessionId available (session might still be starting)");
-      }
-      
-      // Reset current session tracking states
+      // Reset current session tracking states for next use
       setElapsedSeconds(0);
       setFocusSeconds(0);
+      setBreakSeconds(0);
+      setIsOnBreak(false);
       setDistractionsCount(0);
-      setCurrentSessionId(null);
+      setActiveSessionId(null);
     } else {
        // Reset states if session was too short
        setElapsedSeconds(0);
        setFocusSeconds(0);
        setDistractionsCount(0);
-       setCurrentSessionId(null);
+       setActiveSessionId(null);
     }
-  }, [focusSeconds, distractionsCount, currentSessionId]);
+  }, [focusSeconds, distractionsCount, activeSessionId]);
 
   const handleDeleteSession = async (id: string) => {
     if (!confirm("Are you sure you want to delete this study session?")) return;
@@ -159,59 +158,66 @@ export default function StudyModePage() {
     return () => clearInterval(interval);
   }, [isTracking, elapsedSeconds, targetSeconds, recordSessionToHistory]);
 
-  const handleToggleTracking = () => {
+  const handleToggleTracking = async () => {
     if (!isTracking) {
       if (!selectedBreakOption) {
         alert("Please select a break option (Game or Breathe) before starting.");
         return;
       }
+      if (needPhone === null) {
+        alert("Please select if you need your phone during the session.");
+        return;
+      }
 
-      // 1. IMMEDIATE UI RESPONSE
-      const seconds = parseDurationSeconds(selectedDuration);
-      setTargetSeconds(seconds);
-      setElapsedSeconds(0);
-      setFocusSeconds(0);
-      setBreakSeconds(0);
-      setIsOnBreak(false);
-      setDistractionsCount(0);
-      setIsTracking(true);
+      try {
+        const seconds = parseDurationSeconds(selectedDuration);
 
-      // 2. BACKGROUND API START
-      const durMap: Record<string, number> = {
-        '30 min': 30, '1hr': 60, '1hr 30 min': 90, '2hr': 120, '2hr 30 min': 150, '3hrs': 180
-      };
-      const minutes = durMap[selectedDuration] || 60;
+        // Start session in DB
+        const sessionRes = await fetch('/api/study/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            duration: seconds / 60,
+            break_activity: selectedBreakOption,
+            phone_detection_enabled: !needPhone, // Inverted: Need Phone = Detection Disabled
+            focus_shield_enabled: false,
+            focus_goal: "Quick Session from Study Mode",
+          }),
+        });
 
-      fetch('/api/study/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          duration: minutes,
-          break_activity: selectedBreakOption,
-          phone_detection_enabled: false,
-          focus_shield_enabled: false
-        })
-      })
-      .then(async res => {
-        if (res.ok) return res.json();
-        const errorText = await res.text();
-        return Promise.reject(`${res.status} ${errorText}`);
-      })
-      .then(data => {
-        setCurrentSessionId(data.id);
-        // If the user already stopped and created a "Just Now" entry, update it with the ID
-        setHistory(prev => prev.map(item => 
-          item.date === 'Just Now' && !item.id ? { ...item, id: data.id } : item
-        ));
-      })
-      .catch(err => {
-         console.error(`Background start failed: ${err}`);
-      });
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          setActiveSessionId(sessionData.id);
 
+          // Update Robot Mode
+          await fetch('/api/robot/mode', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: 'STUDY' }),
+          });
+
+          // Sync "Just Now" entry if it exists (started stopping before ID came back)
+          setHistory(prev => prev.map(item => 
+            item.date === 'Just Now' && !item.id ? { ...item, id: sessionData.id } : item
+          ));
+
+          setTargetSeconds(seconds);
+          setElapsedSeconds(0);
+          setFocusSeconds(0);
+          setBreakSeconds(0);
+          setIsOnBreak(false);
+          setDistractionsCount(0);
+          setIsTracking(true);
+        } else {
+          alert("Failed to start session on server.");
+        }
+      } catch (error) {
+        console.error("Error starting session:", error);
+      }
     } else {
       // 1. IMMEDIATE UI RESPONSE
       setIsTracking(false);
-      recordSessionToHistory();
+      await recordSessionToHistory();
     }
   };
 
@@ -385,6 +391,35 @@ export default function StudyModePage() {
                   {breathingExercises.length} breathing exercises loaded
                 </div>
               )}
+            </div>
+            {/* Phone Requirement */}
+            <div className="bg-linear-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-3">
+                <Smartphone className="w-5 h-5 text-blue-400" />
+                <h3 className="text-base">Use Phone During Session?</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setNeedPhone(true)}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${needPhone === true
+                    ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400'
+                    : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                >
+                  Yes, I need it
+                </button>
+                <button
+                  onClick={() => setNeedPhone(false)}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${needPhone === false
+                    ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400'
+                    : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                >
+                  No, I don't
+                </button>
+              </div>
             </div>
           </div>
         </div>
