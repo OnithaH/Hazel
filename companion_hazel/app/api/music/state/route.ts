@@ -5,54 +5,43 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-declare global {
-  var musicState: any;
-}
-
-// Simple in-memory state manager to bridge the Dashboard and the Raspberry Pi.
-// In production with multiple robots, this should be tracked in a database or Redis.
-global.musicState = global.musicState || {
-  nowPlaying: null,
-  queue: [],
-  command: null, // "play", "pause", "skip_next", "skip_previous"
-  aromaChamber: null,
-  genre: null,
-};
-
 /**
  * @swagger
  * /api/music/state:
  *   get:
  *     summary: Get current music state
- *     description: Returns the in-memory music state including what is currently playing, the queue, and any pending commands.
+ *     description: Returns the music state from the database including what is currently playing, the queue, and any pending commands.
  *     tags: [Music]
- *     responses:
- *       200:
- *         description: Music state successfully retrieved.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 nowPlaying:
- *                   type: object
- *                   nullable: true
- *                 queue:
- *                   type: array
- *                   items:
- *                     type: object
- *                 command:
- *                   type: string
- *                   nullable: true
- *                 aromaChamber:
- *                   type: string
- *                   nullable: true
- *                 genre:
- *                   type: string
- *                   nullable: true
  */
 export async function GET() {
-  return NextResponse.json(global.musicState);
+  try {
+    const robot = await prisma.robot.findFirst({
+      include: { musicState: true }
+    });
+    if (!robot) return NextResponse.json({ error: "No robot found in database. Create a robot first." }, { status: 404 });
+
+    let state = robot.musicState;
+    if (!state) {
+      state = await prisma.musicState.create({
+        data: {
+          robot_id: robot.id,
+          queue: []
+        }
+      });
+    }
+
+    return NextResponse.json({
+      nowPlaying: state.nowPlaying,
+      queue: state.queue,
+      command: state.command,
+      aromaChamber: state.aromaChamber,
+      genre: state.genre,
+      song: state.song
+    });
+  } catch (error) {
+    console.error("GET /api/music/state Error:", error);
+    return NextResponse.json({ error: "Failed to fetch state" }, { status: 500 });
+  }
 }
 
 /**
@@ -62,83 +51,82 @@ export async function GET() {
  *     summary: Update music state or send a command
  *     description: Used by the Dashboard to send commands or enqueue songs, and by the Raspberry Pi to sync its playback status.
  *     tags: [Music]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nowPlaying:
- *                 type: object
- *                 description: Set by the Raspberry Pi to indicate the currently playing song.
- *               command:
- *                 type: string
- *                 description: Command for the Raspberry Pi (e.g., 'play', 'pause', 'next', 'enqueue_song').
- *               song:
- *                 type: object
- *                 description: Song object to be enqueued.
- *               queue:
- *                 type: array
- *                 description: Allows overwriting the current queue state.
- *               clearCommand:
- *                 type: boolean
- *                 description: Set to true by the Raspberry Pi to acknowledge receipt of a command.
- *     responses:
- *       200:
- *         description: State successfully updated.
- *       400:
- *         description: Invalid payload submitted.
  */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // The Dashboard or Pi can update the state
+    const robot = await prisma.robot.findFirst({ include: { musicState: true } });
+    if (!robot) return NextResponse.json({ error: "No robot found" }, { status: 404 });
+
+    let state = robot.musicState;
+    if (!state) {
+      state = await prisma.musicState.create({
+        data: { robot_id: robot.id, queue: [] }
+      });
+    }
+
+    const updates: any = {};
+
+    // Handle enqueue_song internally so the queue is immediately updated in the DB
+    if (body.command === "enqueue_song" && body.song) {
+      const currentQueue = Array.isArray(state.queue) ? state.queue : [];
+      updates.queue = [...currentQueue, body.song];
+    } else if (body.command !== undefined) {
+      updates.command = body.command;
+      if (body.song !== undefined) updates.song = body.song;
+    }
+
+    // Process currently playing update from the Pi
     if (body.nowPlaying !== undefined) {
-      const isNewSong = global.musicState.nowPlaying?.title !== body.nowPlaying?.title;
-      global.musicState.nowPlaying = body.nowPlaying;
+      const isNewSong = (state.nowPlaying as any)?.title !== body.nowPlaying?.title;
+      updates.nowPlaying = body.nowPlaying;
 
       if (isNewSong && body.nowPlaying?.title && process.env.GEMINI_API_KEY) {
-        // Use Gemini to detect genre automatically!
+        // Use Gemini to detect genre automatically
         try {
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const prompt = `Classify this song into exactly ONE of these genres: Pop, Ballet, Rock, Jazz, Classical. If it doesn't fit perfectly, pick the closest one. Reply with ONLY the genre word. Song: "${body.nowPlaying.title}" by "${body.nowPlaying.artist}"`;
+          const prompt = `Classify this song into exactly ONE of these genres: Pop, Ballet, Rock, Jazz, Classical. If it doesn't fit perfectly, pick the closest one. Reply with ONLY the genre word. Song: "${body.nowPlaying.title}" by "${body.nowPlaying.artist || 'Unknown'}"`;
           const result = await model.generateContent(prompt);
           const genreText = result.response.text().trim();
 
           const validGenres = ["Pop", "Ballet", "Rock", "Jazz", "Classical"];
           const matchedGenre = validGenres.find(g => genreText.includes(g)) || "Pop";
-          global.musicState.genre = matchedGenre;
+          updates.genre = matchedGenre;
 
           // Find the aroma mapping from DB
           const mapping = await prisma.musicGenreMapping.findFirst({
-            where: { genre_name: matchedGenre }
+            where: { genre_name: matchedGenre, robot_id: robot.id }
           });
-          global.musicState.aromaChamber = mapping?.scent_name || "Citrus";
+          updates.aromaChamber = mapping?.scent_name || "Citrus";
         } catch (e) {
           console.error("Gemini genre detection failed", e);
         }
       }
     }
 
-    if (body.command !== undefined) {
-      global.musicState.command = body.command;
-      if (body.song !== undefined) global.musicState.song = body.song;
+    // Allow Pi or Dashboard to override the queue if they explicitly send it
+    if (body.queue !== undefined && body.command !== "enqueue_song") {
+      updates.queue = body.queue;
     }
-    if (body.queue !== undefined) global.musicState.queue = body.queue;
-    if (body.aromaChamber !== undefined) global.musicState.aromaChamber = body.aromaChamber;
-    if (body.genre !== undefined) global.musicState.genre = body.genre;
+    
+    if (body.aromaChamber !== undefined) updates.aromaChamber = body.aromaChamber;
+    if (body.genre !== undefined) updates.genre = body.genre;
 
-    // Acknowledge command receipt and clear it if the Pi is polling and reading it
+    // Acknowledge command receipt
     if (body.clearCommand) {
-      global.musicState.command = null;
-      global.musicState.song = null;
+      updates.command = null;
+      updates.song = null;
     }
 
-    return NextResponse.json(global.musicState);
+    const updatedState = await prisma.musicState.update({
+      where: { id: state.id },
+      data: updates
+    });
+
+    return NextResponse.json(updatedState);
   } catch (error) {
+    console.error("POST /api/music/state Error:", error);
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 }
-
