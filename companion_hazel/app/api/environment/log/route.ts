@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getApiAuth } from '@/lib/api-auth';
 
 /**
  * @swagger
@@ -29,31 +30,20 @@ import prisma from '@/lib/prisma';
  *       201:
  *         description: Log created successfully
  *       401:
- *         description: Missing secret
- *       403:
- *         description: Invalid secret
+ *         description: Missing or invalid secret
  *       500:
  *         description: Server error
  */
 export async function POST(req: Request) {
   try {
-    // 1. Extract the secret from headers
-    const secret = req.headers.get('x-robot-secret');
-
-    if (!secret) {
-      return NextResponse.json({ error: 'Missing robot secret' }, { status: 401 });
-    }
-
-    // 2. Identify the robot in the database
-    const robot = await prisma.robot.findUnique({
-      where: { secret_key: secret },
-    });
+    // 1. Unified Auth: Detect the robot
+    const { robot } = await getApiAuth(req);
 
     if (!robot) {
-      return NextResponse.json({ error: 'Invalid robot secret' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized: Invalid session or robot secret' }, { status: 401 });
     }
 
-    // 3. Extract sensor data from the body
+    // 2. Extract sensor data from the body
     const body = await req.json();
     const { temperature, humidity } = body;
 
@@ -61,7 +51,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing temperature or humidity' }, { status: 400 });
     }
 
-    // 4. Create the environment log record
+    // 3. Create the environment log record
     const log = await prisma.environmentLog.create({
       data: {
         robot_id: robot.id,
