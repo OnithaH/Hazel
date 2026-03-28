@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-<<<<<<< Updated upstream
-import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2 } from 'lucide-react';
-=======
-import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Smartphone } from 'lucide-react';
->>>>>>> Stashed changes
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2, Smartphone } from 'lucide-react';
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -27,7 +23,6 @@ export default function StudyModePage() {
   const [targetSeconds, setTargetSeconds] = useState(0);
   const [focusSeconds, setFocusSeconds] = useState(0);
   const [distractionsCount, setDistractionsCount] = useState(0);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
@@ -59,7 +54,6 @@ export default function StudyModePage() {
     return `${h}h ${m}m ${s}s`;
   };
 
-<<<<<<< Updated upstream
   const fetchHistory = React.useCallback(async () => {
     setIsLoadingHistory(true);
     try {
@@ -82,11 +76,6 @@ export default function StudyModePage() {
     }
   }, []);
 
-  const recordSessionToHistory = React.useCallback(() => {
-    // Only record if session was at least 5 seconds long
-    if (focusSeconds >= 5) {
-      // 1. Immediate UI Feedback
-=======
   const recordSessionToHistory = React.useCallback(async () => {
     // Only record if session was at least 5 seconds long
     if (focusSeconds >= 5) {
@@ -104,10 +93,8 @@ export default function StudyModePage() {
           console.error("Failed to update session in DB", error);
         }
       }
-
->>>>>>> Stashed changes
       const newEntry = {
-        id: currentSessionId, // This might be null if background start is still pending
+        id: activeSessionId, // This might be null if background start is still pending
         date: 'Just Now',
         time: formatHistoryTime(focusSeconds),
         focus: '100%',
@@ -116,38 +103,19 @@ export default function StudyModePage() {
 
       setHistory(prev => [newEntry, ...prev]);
 
-<<<<<<< Updated upstream
-      // 2. Background Persistence
-      if (currentSessionId) {
-        fetch(`/api/study/session/${currentSessionId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            actual_focus_time: focusSeconds,
-            is_finished: true
-          })
-        })
-        .then(res => {
-          if (!res.ok) console.error("Background finish failed:", res.status);
-        })
-        .catch(err => console.error("Background sync failed:", err));
-      } else {
-        console.warn("Skipping background sync: No currentSessionId available (session might still be starting)");
-      }
-      
-      // Reset current session tracking states
+      // Reset current session tracking states for next use
       setElapsedSeconds(0);
       setFocusSeconds(0);
       setDistractionsCount(0);
-      setCurrentSessionId(null);
+      setActiveSessionId(null);
     } else {
        // Reset states if session was too short
        setElapsedSeconds(0);
        setFocusSeconds(0);
        setDistractionsCount(0);
-       setCurrentSessionId(null);
+       setActiveSessionId(null);
     }
-  }, [focusSeconds, distractionsCount, currentSessionId]);
+  }, [focusSeconds, distractionsCount, activeSessionId]);
 
   const handleDeleteSession = async (id: string) => {
     if (!confirm("Are you sure you want to delete this study session?")) return;
@@ -163,15 +131,6 @@ export default function StudyModePage() {
       console.error("Failed to delete session", error);
     }
   };
-=======
-      // Reset current session tracking states for next use
-      setElapsedSeconds(0);
-      setFocusSeconds(0);
-      setDistractionsCount(0);
-      setActiveSessionId(null);
-    }
-  }, [focusSeconds, distractionsCount, activeSessionId]);
->>>>>>> Stashed changes
 
   useEffect(() => {
     let interval: any;
@@ -195,49 +154,6 @@ export default function StudyModePage() {
         alert("Please select a break option (Game or Breathe) before starting.");
         return;
       }
-<<<<<<< Updated upstream
-
-      // 1. IMMEDIATE UI RESPONSE
-      const seconds = parseDurationSeconds(selectedDuration);
-      setTargetSeconds(seconds);
-      setElapsedSeconds(0);
-      setFocusSeconds(0);
-      setDistractionsCount(0);
-      setIsTracking(true);
-
-      // 2. BACKGROUND API START
-      const durMap: Record<string, number> = {
-        '30 min': 30, '1hr': 60, '1hr 30 min': 90, '2hr': 120, '2hr 30 min': 150, '3hrs': 180
-      };
-      const minutes = durMap[selectedDuration] || 60;
-
-      fetch('/api/study/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          duration: minutes,
-          break_activity: selectedBreakOption,
-          phone_detection_enabled: false,
-          focus_shield_enabled: false
-        })
-      })
-      .then(async res => {
-        if (res.ok) return res.json();
-        const errorText = await res.text();
-        return Promise.reject(`${res.status} ${errorText}`);
-      })
-      .then(data => {
-        setCurrentSessionId(data.id);
-        // If the user already stopped and created a "Just Now" entry, update it with the ID
-        setHistory(prev => prev.map(item => 
-          item.date === 'Just Now' && !item.id ? { ...item, id: data.id } : item
-        ));
-      })
-      .catch(err => {
-         console.error(`Background start failed: ${err}`);
-      });
-
-=======
       if (needPhone === null) {
         alert("Please select if you need your phone during the session.");
         return;
@@ -270,6 +186,11 @@ export default function StudyModePage() {
             body: JSON.stringify({ mode: 'STUDY' }),
           });
 
+          // Sync "Just Now" entry if it exists (started stopping before ID came back)
+          setHistory(prev => prev.map(item => 
+            item.date === 'Just Now' && !item.id ? { ...item, id: sessionData.id } : item
+          ));
+
           setTargetSeconds(seconds);
           setElapsedSeconds(0);
           setFocusSeconds(0);
@@ -281,7 +202,6 @@ export default function StudyModePage() {
       } catch (error) {
         console.error("Error starting session:", error);
       }
->>>>>>> Stashed changes
     } else {
       // 1. IMMEDIATE UI RESPONSE
       setIsTracking(false);
