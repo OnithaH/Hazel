@@ -4,12 +4,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
-  '/api/aroma(.*)',
-  '/api/environment(.*)',
-  '/api/user/robot(.*)',
-  '/api/hazel-chat(.*)',
-  '/api/reminders(.*)',
-  '/api/robot-details(.*)'
+  '/api(.*)', // Support all robot-facing APIs for the team
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
