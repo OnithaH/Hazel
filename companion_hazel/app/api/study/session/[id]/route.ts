@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -55,9 +55,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -70,7 +70,7 @@ export async function GET(
       },
     });
 
-    if (!session) {
+    if (!session || session.robot_id !== robot.id) {
       return new NextResponse("Session not found", { status: 404 });
     }
 
@@ -86,13 +86,23 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const { id } = await params;
+
+    // Verify ownership
+    const existingSession = await prisma.studySession.findUnique({
+      where: { id },
+    });
+
+    if (!existingSession || existingSession.robot_id !== robot.id) {
+      return new NextResponse("Session not found", { status: 404 });
+    }
+
     const body = await req.json();
     const { actual_focus_time, is_finished, notes, break_time_seconds } = body;
 
@@ -118,13 +128,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const { id } = await params;
+
+    // Verify ownership
+    const existingSession = await prisma.studySession.findUnique({
+      where: { id },
+    });
+
+    if (!existingSession || existingSession.robot_id !== robot.id) {
+      return new NextResponse("Session not found", { status: 404 });
+    }
 
     await prisma.studySession.delete({
       where: { id },

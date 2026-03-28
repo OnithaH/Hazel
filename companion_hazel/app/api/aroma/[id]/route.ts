@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getApiAuth } from '@/lib/api-auth';
 
 /**
  * @swagger
@@ -40,7 +41,26 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user, robot } = await getApiAuth(req);
+
+    if (!user || !robot) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Verify ownership before update
+    const existingConfig = await prisma.aromaConfiguration.findFirst({
+      where: { 
+        id: id,
+        robot_id: robot.id
+      },
+    });
+
+    if (!existingConfig) {
+      return NextResponse.json({ error: 'Unauthorized or configuration not found' }, { status: 404 });
+    }
+
     const body = await req.json();
     const { intensity, color_hex, scent_name, isActive } = body;
 

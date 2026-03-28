@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -34,11 +34,10 @@ import prisma from "@/lib/prisma";
  */
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
-
     }
 
     const { chamber_number, scent_name } = await req.json();
@@ -47,16 +46,7 @@ export async function POST(req: Request) {
       return new NextResponse("chamber_number or scent_name is required", { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: { robots: true },
-    });
-
-    if (!user || user.robots.length === 0) {
-      return new NextResponse("Robot not found", { status: 404 });
-    }
-
-    const robotId = user.robots[0].id;
+    const robotId = robot.id;
 
     // Verify the configuration exists
     const config = await prisma.aromaConfiguration.findFirst({

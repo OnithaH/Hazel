@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { ensureUserAndRobot } from "@/lib/userSync";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -20,21 +19,15 @@ import { ensureUserAndRobot } from "@/lib/userSync";
  *       500:
  *         description: Internal server error
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const user = await ensureUserAndRobot(userId);
-
-    if (!user || user.robots.length === 0) {
-      return new NextResponse("No robot found for this user", { status: 404 });
-    }
-
-    const robotId = user.robots[0].id;
+    const robotId = robot.id;
 
     // Auto-delete sessions older than 30 days
     const thirtyDaysAgo = new Date();
