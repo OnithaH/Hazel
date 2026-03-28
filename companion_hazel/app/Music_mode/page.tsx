@@ -22,18 +22,18 @@ interface MusicState {
 }
 
 const genres = [
-  { name: "Pop", scent: "Citrus", gradient: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)" },
-  { name: "Ballet", scent: "Lavender", gradient: "linear-gradient(135deg, #FDA5D5 0%, #DAB2FF 50%, #8EC5FF 100%)" },
-  { name: "Rock", scent: "Peppermint", gradient: "linear-gradient(135deg, #FB2C36 0%, #FF6900 50%, #F0B100 100%)" },
-  { name: "Jazz", scent: "Vanilla", gradient: "linear-gradient(135deg, #2B7FFF 0%, #AD46FF 50%, #F6339A 100%)" },
-  { name: "Classical", scent: "Chamomile", gradient: "linear-gradient(135deg, #A3B3FF 0%, #8EC5FF 50%, #53EAFD 100%)" },
+  { name: "Pop", scent: "Citrus", gradient: "linear-gradient(135deg, rgb(246, 51, 154) 0%, rgb(173, 70, 255) 50%, rgb(43, 127, 255) 100%)", c1: "246, 51, 154", c2: "173, 70, 255", c3: "43, 127, 255", light: "251, 100, 182" },
+  { name: "Ballet", scent: "Lavender", gradient: "linear-gradient(135deg, rgb(253, 165, 213) 0%, rgb(218, 178, 255) 50%, rgb(142, 197, 255) 100%)", c1: "253, 165, 213", c2: "218, 178, 255", c3: "142, 197, 255", light: "255, 220, 240" },
+  { name: "Rock", scent: "Peppermint", gradient: "linear-gradient(135deg, rgb(251, 44, 54) 0%, rgb(255, 105, 0) 50%, rgb(240, 177, 0) 100%)", c1: "251, 44, 54", c2: "255, 105, 0", c3: "240, 177, 0", light: "255, 150, 100" },
+  { name: "Jazz", scent: "Vanilla", gradient: "linear-gradient(135deg, rgb(80, 20, 210) 0%, rgb(20, 150, 210) 50%, rgb(250, 180, 50) 100%)", c1: "80, 20, 210", c2: "20, 150, 210", c3: "250, 180, 50", light: "100, 200, 255" },
+  { name: "Classical", scent: "Chamomile", gradient: "linear-gradient(135deg, rgb(163, 179, 255) 0%, rgb(142, 197, 255) 50%, rgb(83, 234, 253) 100%)", c1: "163, 179, 255", c2: "142, 197, 255", c3: "83, 234, 253", light: "200, 220, 255" },
 ];
 
 const scentPairs = [
-  { genre: "Pop", scent: "Citrus", dot: "#F6339A", intensity: 100 },
-  { genre: "Ballet", scent: "Lavender", dot: "#C27AFF", intensity: 62 },
-  { genre: "Rock", scent: "Peppermint", dot: "#FF6900", intensity: 48 },
-  { genre: "Jazz", scent: "Vanilla", dot: "#2B7FFF", intensity: 75 },
+  { genre: "Pop", scent: "Citrus", dot: "rgb(246, 51, 154)", intensity: 100 },
+  { genre: "Ballet", scent: "Lavender", dot: "rgb(253, 165, 213)", intensity: 62 },
+  { genre: "Rock", scent: "Peppermint", dot: "rgb(251, 44, 54)", intensity: 48 },
+  { genre: "Jazz", scent: "Vanilla", dot: "rgb(80, 20, 210)", intensity: 75 },
 ];
 
 const upNextSongs = [
@@ -44,9 +44,9 @@ const upNextSongs = [
 ];
 
 const playlists = [
-  { name: "Focus Beats", tracks: 45, iconBg: "rgba(43,127,255,0.2)", iconBorder: "rgba(43,127,255,0.4)", iconColor: "#51A2FF" },
-  { name: "Chill Vibes", tracks: 32, iconBg: "rgba(173,70,255,0.2)", iconBorder: "rgba(173,70,255,0.4)", iconColor: "#C27AFF" },
-  { name: "Study Sessions", tracks: 56, iconBg: "rgba(246,51,154,0.2)", iconBorder: "rgba(246,51,154,0.4)", iconColor: "#FB64B6" },
+  { name: "Focus Beats", tracks: 45, iconBg: "rgba(var(--c3-rgb),0.2)", iconBorder: "rgba(var(--c3-rgb),0.4)", iconColor: "#51A2FF" },
+  { name: "Chill Vibes", tracks: 32, iconBg: "rgba(var(--c2-rgb),0.2)", iconBorder: "rgba(var(--c2-rgb),0.4)", iconColor: "rgb(var(--c2-rgb))" },
+  { name: "Study Sessions", tracks: 56, iconBg: "rgba(var(--c1-rgb),0.2)", iconBorder: "rgba(var(--c1-rgb),0.4)", iconColor: "rgb(var(--light-rgb))" },
   { name: "Workout Energy", tracks: 28, iconBg: "rgba(255,105,0,0.2)", iconBorder: "rgba(255,105,0,0.4)", iconColor: "#FF8904" },
 ];
 
@@ -109,7 +109,15 @@ export default function MusicModePage() {
       }
     }, 2000);
 
-    return () => clearInterval(interval);
+    const currGenre = genres[activeGenre] || genres[0];
+  const rgbTheme = {
+    "--c1-rgb": currGenre.c1,
+    "--c2-rgb": currGenre.c2,
+    "--c3-rgb": currGenre.c3,
+    "--light-rgb": currGenre.light,
+  } as React.CSSProperties;
+
+  return () => clearInterval(interval);
   }, []);
 
   const sendCommand = async (cmd: string) => {
@@ -133,6 +141,21 @@ export default function MusicModePage() {
       setSearchResults(data.results || []);
     } catch (err) { }
     setIsSearching(false);
+  };
+
+  const removeSongFromQueue = async (indexToRemove: number) => {
+    const updatedQueue = queue.filter((_, idx) => idx !== indexToRemove);
+    setQueue(updatedQueue); // Optimistic UI update
+    
+    try {
+      await fetch("/api/music/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ queue: updatedQueue }),
+      });
+    } catch (err) {
+      console.error("Failed to remove song", err);
+    }
   };
 
   useEffect(() => {
@@ -165,8 +188,16 @@ export default function MusicModePage() {
   const totalSecsRem = Math.floor(totalSecs % 60);
   const durationStr = `${totalMins}:${totalSecsRem.toString().padStart(2, "0")}`;
 
+  const currGenre = genres[activeGenre] || genres[0];
+  const rgbTheme = {
+    "--c1-rgb": currGenre.c1,
+    "--c2-rgb": currGenre.c2,
+    "--c3-rgb": currGenre.c3,
+    "--light-rgb": currGenre.light,
+  } as React.CSSProperties;
+
   return (
-    <div style={{ background: "linear-gradient(135deg, #000000 0%, #0d1b2a 50%, #000000 100%)", minHeight: "100vh", fontFamily: "'Arimo', sans-serif", color: "#fff", overflowX: "hidden" }}>
+    <div style={{ ...rgbTheme, background: "linear-gradient(135deg, #000000 0%, #0d1b2a 50%, #000000 100%)", minHeight: "100vh", fontFamily: "'Arimo', sans-serif", color: "#fff", overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
@@ -176,8 +207,8 @@ export default function MusicModePage() {
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulse-dot {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(246,51,154,0.7); }
-          50%       { box-shadow: 0 0 0 7px rgba(246,51,154,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(var(--c1-rgb),0.7); }
+          50%       { box-shadow: 0 0 0 7px rgba(var(--c1-rgb),0); }
         }
         @keyframes shimmer {
           0%   { background-position: -200% center; }
@@ -249,7 +280,7 @@ export default function MusicModePage() {
         .card-lift:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
 
         .shimmer-bar {
-          background: linear-gradient(90deg, #F6339A 0%, #AD46FF 35%, #2B7FFF 65%, #F6339A 100%);
+          background: linear-gradient(90deg, rgb(var(--c1-rgb)) 0%, rgb(var(--c2-rgb)) 35%, rgb(var(--c3-rgb)) 65%, rgb(var(--c1-rgb)) 100%);
           background-size: 200% auto;
           animation: shimmer 2.5s linear infinite;
         }
@@ -259,7 +290,7 @@ export default function MusicModePage() {
           width: 14px; height: 14px; border-radius: 50%; background: white;
           position: absolute; top: 50%; transform: translate(-50%, -50%);
           opacity: 0; transition: opacity 0.2s ease;
-          box-shadow: 0 0 10px rgba(246,51,154,0.9); pointer-events: none;
+          box-shadow: 0 0 10px rgba(var(--c1-rgb),0.9); pointer-events: none;
         }
         .progress-track:hover .progress-thumb { opacity: 1; }
 
@@ -278,8 +309,8 @@ export default function MusicModePage() {
             <h1 style={{ fontSize: "40px", fontWeight: 400, lineHeight: "48px", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Music Mode</h1>
             <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", margin: 0 }}>Gesture-controlled music with multi-sensory experience</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "13px 26px", borderRadius: "100px", background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.35)", flexShrink: 0 }}>
-            <div className="pulse-dot" style={{ width: "9px", height: "9px", borderRadius: "50%", background: "#F6339A" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "13px 26px", borderRadius: "100px", background: "rgba(var(--c1-rgb),0.15)", border: "0.8px solid rgba(var(--c1-rgb),0.35)", flexShrink: 0 }}>
+            <div className="pulse-dot" style={{ width: "9px", height: "9px", borderRadius: "50%", background: "rgb(var(--c1-rgb))" }} />
             <span style={{ fontSize: "15px" }}>Music Mode Active</span>
           </div>
         </div>
@@ -288,11 +319,11 @@ export default function MusicModePage() {
         <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
 
           {/* Player Card */}
-          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.09) 0%, rgba(173,70,255,0.05) 50%, rgba(43,127,255,0.05) 100%)", border: "0.8px solid rgba(246,51,154,0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(var(--c1-rgb),0.09) 0%, rgba(var(--c2-rgb),0.05) 50%, rgba(var(--c3-rgb),0.05) 100%)", border: "0.8px solid rgba(var(--c1-rgb),0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Album area */}
             <div style={{ position: "relative", borderRadius: "18px", overflow: "hidden", flexGrow: 1, minHeight: "340px", background: "rgba(0,0,0,0.5)", border: "0.8px solid rgba(255,255,255,0.07)" }}>
-              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 50%, #2B7FFF 100%)", filter: "blur(70px)" }} />
+              <div className="glow-bg" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgb(var(--c1-rgb)) 0%, rgb(var(--c2-rgb)) 50%, rgb(var(--c3-rgb)) 100%)", filter: "blur(70px)" }} />
               <div style={{ position: "absolute", bottom: "32px", left: 0, right: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: "2.5px", height: "64px", paddingInline: "28px" }}>
                 {(mounted ? bars : Array(40).fill(8)).map((h, i) => (
                   <div key={i} style={{ flex: 1, maxHeight: "64px", height: `${isPlaying ? h : 7}px`, background: `rgba(255,255,255,${isPlaying ? 0.28 : 0.11})`, borderRadius: "3px 3px 0 0", transition: `height ${0.13 + (i % 6) * 0.022}s ease` }} />
@@ -326,10 +357,10 @@ export default function MusicModePage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)", minWidth: "34px" }}>{timeStr}</span>
-                <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "8px", background: "rgba(173,70,255,0.2)", border: "0.8px solid rgba(173,70,255,0.4)" }}>
+                <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "8px", background: "rgba(var(--c2-rgb),0.2)", border: "0.8px solid rgba(var(--c2-rgb),0.4)" }}>
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <line x1="2" y1="6" x2="10" y2="6" stroke="#C27AFF" strokeWidth="1.5" strokeLinecap="round"/>
-                    <line x1="6" y1="2" x2="6" y2="10" stroke="#C27AFF" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="2" y1="6" x2="10" y2="6" stroke="rgb(var(--c2-rgb))" strokeWidth="1.5" strokeLinecap="round"/>
+                    <line x1="6" y1="2" x2="6" y2="10" stroke="rgb(var(--c2-rgb))" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </button>
                 <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)" }}>{durationStr}</span>
@@ -339,7 +370,7 @@ export default function MusicModePage() {
                   const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
                   setProgress(((e.clientX - rect.left) / rect.width) * 100);
                 }}>
-                <div style={{ width: `${progress}%`, height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, #F6339A 0%, #AD46FF 100%)", transition: "width 0.1s linear" }} />
+                <div style={{ width: `${progress}%`, height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, rgb(var(--c1-rgb)) 0%, rgb(var(--c2-rgb)) 100%)", transition: "width 0.1s linear" }} />
                 <div className="progress-thumb" style={{ left: `${progress}%` }} />
               </div>
             </div>
@@ -359,7 +390,7 @@ export default function MusicModePage() {
                 </svg>
               </button>
               <button onClick={() => sendCommand("play_pause")} className="ctrl-btn play-btn"
-                style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", paddingLeft: isPlaying ? 0 : "4px", boxShadow: isPlaying ? "0 0 30px rgba(246,51,154,0.55)" : "0 0 18px rgba(246,51,154,0.3)" }}>
+                style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, rgb(var(--c1-rgb)) 0%, rgb(var(--c2-rgb)) 100%)", paddingLeft: isPlaying ? 0 : "4px", boxShadow: isPlaying ? "0 0 30px rgba(var(--c1-rgb),0.55)" : "0 0 18px rgba(var(--c1-rgb),0.3)" }}>
                 {isPlaying
                   ? <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="4.5" height="16" rx="1.5" fill="white"/><rect x="13.5" y="3" width="4.5" height="16" rx="1.5" fill="white"/></svg>
                   : <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 3l14 8.5L5 20V3z" fill="white"/></svg>
@@ -385,10 +416,10 @@ export default function MusicModePage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
             {/* Gesture Controls */}
-            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(173,70,255,0.1) 0%, rgba(173,70,255,0.04) 100%)", border: "0.8px solid rgba(173,70,255,0.22)", borderRadius: "20px", padding: "24px" }}>
+            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(var(--c2-rgb),0.1) 0%, rgba(var(--c2-rgb),0.04) 100%)", border: "0.8px solid rgba(var(--c2-rgb),0.22)", borderRadius: "20px", padding: "24px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 2c0 0 0 2.2 0 5.5 0 0 1.6-3.2 4.2-3.2v6.4c0 2.7-2.1 4.3-4.2 4.3S4.8 13.4 4.8 10.7V5.8c0-1.1.7-1.8 1.6-1.8S9 4.7 9 5.8" stroke="#C27AFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 2c0 0 0 2.2 0 5.5 0 0 1.6-3.2 4.2-3.2v6.4c0 2.7-2.1 4.3-4.2 4.3S4.8 13.4 4.8 10.7V5.8c0-1.1.7-1.8 1.6-1.8S9 4.7 9 5.8" stroke="rgb(var(--c2-rgb))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span style={{ fontSize: "15px", color: "#fff" }}>Gesture Controls</span>
               </div>
@@ -403,25 +434,25 @@ export default function MusicModePage() {
             </div>
 
             {/* ── Aroma Match — rich, fills remaining height ── */}
-            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(246,51,154,0.1) 0%, rgba(246,51,154,0.04) 100%)", border: "0.8px solid rgba(246,51,154,0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column", gap: "18px", overflow: "hidden", position: "relative" }}>
+            <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(var(--c1-rgb),0.1) 0%, rgba(var(--c1-rgb),0.04) 100%)", border: "0.8px solid rgba(var(--c1-rgb),0.22)", borderRadius: "20px", padding: "24px", flexGrow: 1, display: "flex", flexDirection: "column", gap: "18px", overflow: "hidden", position: "relative" }}>
 
               {/* Floating scent orbs */}
               <div style={{ position: "absolute", top: "16px", right: "16px", pointerEvents: "none" }}>
-                <div className="scent-orb-1" style={{ width: "56px", height: "56px", borderRadius: "50%", background: "radial-gradient(circle, rgba(246,51,154,0.35) 0%, rgba(246,51,154,0) 70%)", filter: "blur(8px)" }} />
+                <div className="scent-orb-1" style={{ width: "56px", height: "56px", borderRadius: "50%", background: "radial-gradient(circle, rgba(var(--c1-rgb),0.35) 0%, rgba(var(--c1-rgb),0) 70%)", filter: "blur(8px)" }} />
               </div>
               <div style={{ position: "absolute", top: "40px", right: "44px", pointerEvents: "none" }}>
-                <div className="scent-orb-2" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "radial-gradient(circle, rgba(173,70,255,0.3) 0%, rgba(173,70,255,0) 70%)", filter: "blur(6px)" }} />
+                <div className="scent-orb-2" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "radial-gradient(circle, rgba(var(--c2-rgb),0.3) 0%, rgba(var(--c2-rgb),0) 70%)", filter: "blur(6px)" }} />
               </div>
               <div style={{ position: "absolute", top: "28px", right: "68px", pointerEvents: "none" }}>
-                <div className="scent-orb-3" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "radial-gradient(circle, rgba(251,100,182,0.25) 0%, rgba(251,100,182,0) 70%)", filter: "blur(4px)" }} />
+                <div className="scent-orb-3" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "radial-gradient(circle, rgba(var(--light-rgb),0.25) 0%, rgba(var(--light-rgb),0) 70%)", filter: "blur(4px)" }} />
               </div>
 
               {/* Header */}
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ width: "32px", height: "32px", borderRadius: "10px", background: "rgba(246,51,154,0.2)", border: "0.8px solid rgba(246,51,154,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "10px", background: "rgba(var(--c1-rgb),0.2)", border: "0.8px solid rgba(var(--c1-rgb),0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="#FB64B6" strokeWidth="1.3"/>
-                    <path d="M8 4v4l2.5 2.5" stroke="#FB64B6" strokeWidth="1.3" strokeLinecap="round"/>
+                    <path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="rgb(var(--light-rgb))" strokeWidth="1.3"/>
+                    <path d="M8 4v4l2.5 2.5" stroke="rgb(var(--light-rgb))" strokeWidth="1.3" strokeLinecap="round"/>
                   </svg>
                 </div>
                 <div>
@@ -431,16 +462,16 @@ export default function MusicModePage() {
               </div>
 
               {/* Active scent hero */}
-              <div style={{ background: "rgba(246,51,154,0.1)", border: "0.8px solid rgba(246,51,154,0.25)", borderRadius: "14px", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
+              <div style={{ background: "rgba(var(--c1-rgb),0.1)", border: "0.8px solid rgba(var(--c1-rgb),0.25)", borderRadius: "14px", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
                 {/* Scent icon */}
-                <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, rgba(246,51,154,0.4) 0%, rgba(173,70,255,0.3) 100%)", border: "0.8px solid rgba(246,51,154,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, rgba(var(--c1-rgb),0.4) 0%, rgba(var(--c2-rgb),0.3) 100%)", border: "0.8px solid rgba(var(--c1-rgb),0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 60%)" }} />
                   <span style={{ fontSize: "22px" }}>{genres[activeGenre]?.scent === "Citrus" ? "🍊" : genres[activeGenre]?.scent === "Lavender" ? "🪴" : genres[activeGenre]?.scent === "Peppermint" ? "🌿" : "✨"}</span>
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                     <span style={{ fontSize: "17px", color: "#fff", fontWeight: 500 }}>{genres[activeGenre]?.scent || "Citrus"}</span>
-                    <span style={{ fontSize: "10px", color: "#FB64B6", background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.3)", borderRadius: "100px", padding: "2px 8px", fontWeight: 500 }}>ACTIVE</span>
+                    <span style={{ fontSize: "10px", color: "rgb(var(--light-rgb))", background: "rgba(var(--c1-rgb),0.15)", border: "0.8px solid rgba(var(--c1-rgb),0.3)", borderRadius: "100px", padding: "2px 8px", fontWeight: 500 }}>ACTIVE</span>
                   </div>
                   <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Matched to {genres[activeGenre]?.name || "Pop"} genre</div>
                 </div>
@@ -450,10 +481,10 @@ export default function MusicModePage() {
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                   <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Diffusion Intensity</span>
-                  <span style={{ fontSize: "12px", color: "#FB64B6", fontWeight: 500 }}>100%</span>
+                  <span style={{ fontSize: "12px", color: "rgb(var(--light-rgb))", fontWeight: 500 }}>100%</span>
                 </div>
                 <div style={{ height: "7px", borderRadius: "100px", background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-                  <div style={{ width: "100%", height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, #F6339A, #FB64B6)", boxShadow: "0 0 10px rgba(246,51,154,0.5)" }} />
+                  <div style={{ width: "100%", height: "100%", borderRadius: "100px", background: "linear-gradient(90deg, rgb(var(--c1-rgb)), rgb(var(--light-rgb)))", boxShadow: "0 0 10px rgba(var(--c1-rgb),0.5)" }} />
                 </div>
               </div>
 
@@ -466,7 +497,7 @@ export default function MusicModePage() {
                       <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: pair.dot, flexShrink: 0, boxShadow: `0 0 5px ${pair.dot}` }} />
                       <span style={{ fontSize: "12px", color: i === 0 ? "#fff" : "rgba(255,255,255,0.5)", width: "58px", flexShrink: 0 }}>{pair.genre}</span>
                       <div style={{ flex: 1, height: "4px", borderRadius: "100px", background: "rgba(255,255,255,0.08)" }}>
-                        <div style={{ width: `${pair.intensity}%`, height: "100%", borderRadius: "100px", background: i === 0 ? `linear-gradient(90deg, ${pair.dot}, #FB64B6)` : pair.dot, opacity: i === 0 ? 1 : 0.5, transition: "width 0.8s ease" }} />
+                        <div style={{ width: `${pair.intensity}%`, height: "100%", borderRadius: "100px", background: i === 0 ? `linear-gradient(90deg, ${pair.dot}, rgb(var(--light-rgb)))` : pair.dot, opacity: i === 0 ? 1 : 0.5, transition: "width 0.8s ease" }} />
                       </div>
                       <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", width: "28px", textAlign: "right", flexShrink: 0 }}>{pair.scent.slice(0, 3)}</span>
                     </div>
@@ -503,7 +534,7 @@ export default function MusicModePage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {queue.length > 0 ? queue.slice(0, 4).map((song, idx) => (
                 <div key={idx} className="row-item" style={{ background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "13px 14px", display: "flex", alignItems: "center", gap: "13px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "11px", background: "linear-gradient(135deg, #F6339A 0%, #AD46FF 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(246,51,154,0.32)" }}>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "11px", background: "linear-gradient(135deg, rgb(var(--c1-rgb)) 0%, rgb(var(--c2-rgb)) 100%)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(var(--c1-rgb),0.32)" }}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M6 13.5V4l8-2v8.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                       <circle cx="4" cy="13.5" r="2.2" stroke="white" strokeWidth="1.4" fill="none"/>
@@ -515,12 +546,15 @@ export default function MusicModePage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{typeof song.artist === 'string' ? song.artist : song.artist?.name || "Unknown Artist"}</span>
                       <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px" }}>•</span>
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(173,70,255,0.18)", border: "0.8px solid rgba(173,70,255,0.28)", borderRadius: "7px", padding: "2px 8px 2px 6px" }}>
-                        <span style={{ fontSize: "11px", color: "#C27AFF" }}>Hazel Queue</span>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(var(--c2-rgb),0.18)", border: "0.8px solid rgba(var(--c2-rgb),0.28)", borderRadius: "7px", padding: "2px 8px 2px 6px" }}>
+                        <span style={{ fontSize: "11px", color: "rgb(var(--c2-rgb))" }}>Hazel Queue</span>
                       </div>
                     </div>
                   </div>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.38)", flexShrink: 0 }}>{song.duration || "--:--"}</span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.38)", flexShrink: 0, marginRight: "8px" }}>{song.duration || "--:--"}</span>
+                  <button onClick={(e) => { e.stopPropagation(); removeSongFromQueue(idx); }} className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(255,50,50,0.15)", border: "0.8px solid rgba(255,50,50,0.3)" }}>
+                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff5555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
                 </div>
               )) : (
                 <div style={{ padding: "20px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>No songs in queue</div>
@@ -540,7 +574,7 @@ export default function MusicModePage() {
                 placeholder="Search songs..."
                 style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "0.8px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "10px 14px", color: "#fff", fontSize: "14px", outline: "none" }}
               />
-              <button type="submit" className="ctrl-btn" style={{ background: "rgba(246,51,154,0.15)", border: "0.8px solid rgba(246,51,154,0.3)", borderRadius: "8px", padding: "0 16px", color: "#F6339A", fontSize: "14px" }}>
+              <button type="submit" className="ctrl-btn" style={{ background: "rgba(var(--c1-rgb),0.15)", border: "0.8px solid rgba(var(--c1-rgb),0.3)", borderRadius: "8px", padding: "0 16px", color: "rgb(var(--c1-rgb))", fontSize: "14px" }}>
                 {isSearching ? "Searching..." : "Search"}
               </button>
             </form>
@@ -559,14 +593,14 @@ export default function MusicModePage() {
                     {result.thumbnails?.[0]?.url ? (
                       <img src={result.thumbnails[0].url} style={{ width: "40px", height: "40px", borderRadius: "8px", objectFit: "cover" }} alt={result.name} />
                     ) : (
-                      <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(43,127,255,0.2)", border: "0.8px solid rgba(43,127,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{color: "#51A2FF"}}>🎵</span></div>
+                      <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(var(--c3-rgb),0.2)", border: "0.8px solid rgba(var(--c3-rgb),0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{color: "#51A2FF"}}>🎵</span></div>
                     )}
                     <div>
                       <div style={{ fontSize: "14px", color: "#fff", marginBottom: "3px" }}>{result.name}</div>
                       <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{typeof result.artist === 'string' ? result.artist : result.artist?.name || "Unknown"}</div>
                     </div>
                   </div>
-                  <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(43,127,255,0.15)", border: "0.8px solid rgba(43,127,255,0.3)" }}>
+                  <button className="ctrl-btn" style={{ width: "26px", height: "26px", borderRadius: "50%", background: "rgba(var(--c3-rgb),0.15)", border: "0.8px solid rgba(var(--c3-rgb),0.3)" }}>
                      <span style={{ fontSize: "14px", color: "#51A2FF", lineHeight: 1 }}>+</span>
                   </button>
                 </div>
