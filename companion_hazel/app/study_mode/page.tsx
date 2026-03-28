@@ -22,6 +22,8 @@ export default function StudyModePage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [targetSeconds, setTargetSeconds] = useState(0);
   const [focusSeconds, setFocusSeconds] = useState(0);
+  const [breakSeconds, setBreakSeconds] = useState(0);
+  const [isOnBreak, setIsOnBreak] = useState(false);
   const [distractionsCount, setDistractionsCount] = useState(0);
   const [history, setHistory] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -86,6 +88,7 @@ export default function StudyModePage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               actual_focus_time: focusSeconds,
+              break_time_seconds: breakSeconds,
               is_finished: true
             }),
           });
@@ -93,8 +96,9 @@ export default function StudyModePage() {
           console.error("Failed to update session in DB", error);
         }
       }
+
       const newEntry = {
-        id: activeSessionId, // This might be null if background start is still pending
+        id: activeSessionId,
         date: 'Just Now',
         time: formatHistoryTime(focusSeconds),
         focus: '100%',
@@ -106,6 +110,8 @@ export default function StudyModePage() {
       // Reset current session tracking states for next use
       setElapsedSeconds(0);
       setFocusSeconds(0);
+      setBreakSeconds(0);
+      setIsOnBreak(false);
       setDistractionsCount(0);
       setActiveSessionId(null);
     } else {
@@ -138,7 +144,11 @@ export default function StudyModePage() {
     if (isTracking && elapsedSeconds < targetSeconds) {
       interval = setInterval(() => {
         setElapsedSeconds((prev) => prev + 1);
-        setFocusSeconds((prev) => prev + 1);
+        if (isOnBreak) {
+          setBreakSeconds((prev) => prev + 1);
+        } else {
+          setFocusSeconds((prev) => prev + 1);
+        }
       }, 1000);
     } else if (isTracking && elapsedSeconds >= targetSeconds) {
       setIsTracking(false);
@@ -194,6 +204,8 @@ export default function StudyModePage() {
           setTargetSeconds(seconds);
           setElapsedSeconds(0);
           setFocusSeconds(0);
+          setBreakSeconds(0);
+          setIsOnBreak(false);
           setDistractionsCount(0);
           setIsTracking(true);
         } else {
@@ -264,6 +276,20 @@ export default function StudyModePage() {
                 <Play className={`w-5 h-5 ${isTracking ? 'fill-current' : ''}`} />
                 {isTracking ? 'Stop Tracking' : 'Start Tracking'}
               </button>
+
+              {isTracking && (
+                <button
+                  onClick={() => setIsOnBreak(!isOnBreak)}
+                  className={`px-6 py-3 border rounded-2xl flex items-center gap-2 transition-all ${
+                    isOnBreak 
+                      ? 'bg-green-500/20 border-green-500/40 text-green-400 hover:bg-green-500/30' 
+                      : 'bg-orange-500/20 border-orange-500/40 text-orange-400 hover:bg-orange-500/30'
+                  }`}
+                >
+                  <Clock className="w-5 h-5" />
+                  {isOnBreak ? 'Return to Study' : 'Take a Break'}
+                </button>
+              )}
             </div>
 
             {/* Video/Eye Tracking Area */}
@@ -290,6 +316,10 @@ export default function StudyModePage() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
                 <p className="text-white/60 text-sm">Distractions</p>
                 <p className="text-2xl">{distractionsCount}</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-1">
+                <p className="text-white/60 text-sm">Break Time</p>
+                <p className="text-2xl">{isTracking ? formatTime(breakSeconds) : '0h 0m 0s'}</p>
               </div>
             </div>
           </div>
@@ -439,7 +469,7 @@ export default function StudyModePage() {
                     <p className="text-white/60 text-[13px]">{item.distractions}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Link href="/study_session" className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
+                    <Link href={`/study_session/${item.id}`} className="px-5 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-medium hover:bg-white/10 transition-all">
                       View Details
                     </Link>
                     <button 
