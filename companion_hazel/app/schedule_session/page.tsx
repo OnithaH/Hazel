@@ -52,7 +52,7 @@ export default function ScheduleSessionPage() {
         body: JSON.stringify({
           duration,
           break_activity: breakActivity,
-          phone_detection_enabled: needPhone,
+          phone_detection_enabled: !needPhone,
           focus_shield_enabled: focusShield,
           focus_goal: focusGoal,
           start_time,
