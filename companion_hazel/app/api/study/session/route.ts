@@ -59,7 +59,8 @@ export async function POST(req: Request) {
       break_activity,
       phone_detection_enabled,
       focus_shield_enabled,
-      focus_goal
+      focus_goal,
+      start_time
     } = body;
 
     if (!duration) {
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
         phone_detection_enabled: !!phone_detection_enabled,
         focus_shield_enabled: !!focus_shield_enabled,
         focus_goal: focus_goal || null,
-        start_time: new Date(),
+        start_time: start_time ? new Date(start_time) : new Date(),
       },
     });
 

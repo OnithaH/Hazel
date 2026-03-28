@@ -7,8 +7,14 @@ import { useRouter } from 'next/navigation';
 
 export default function ScheduleSessionPage() {
   const router = useRouter();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const localDateStr = `${year}-${month}-${day}`;
+
+  const [date, setDate] = useState(localDateStr);
+  const [startTime, setStartTime] = useState(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
   const [selectedDuration, setSelectedDuration] = useState('2h');
   const [focusGoal, setFocusGoal] = useState('');
   const [focusShield, setFocusShield] = useState(false);
@@ -36,6 +42,7 @@ export default function ScheduleSessionPage() {
     setIsSubmitting(true);
     try {
       const duration = parseDuration(selectedDuration);
+      const start_time = new Date(`${date}T${startTime}:00`).toISOString();
       
       const response = await fetch('/api/study/session', {
         method: 'POST',
@@ -48,6 +55,7 @@ export default function ScheduleSessionPage() {
           phone_detection_enabled: needPhone,
           focus_shield_enabled: focusShield,
           focus_goal: focusGoal,
+          start_time,
         }),
       });
 
