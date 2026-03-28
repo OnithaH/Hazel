@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getApiAuth } from '@/lib/api-auth';
 
 /**
  * @swagger
@@ -26,16 +27,22 @@ import prisma from '@/lib/prisma';
  */
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const robotId = searchParams.get('robotId');
+    const { user, robot } = await getApiAuth(req);
 
-    if (!robotId) {
-      return NextResponse.json({ error: 'Missing robotId parameter' }, { status: 400 });
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const { searchParams } = new URL(req.url);
+    const queryRobotId = searchParams.get('robotId');
+
+    // If a specific robotId is requested, verify if the user has access.
+    // Otherwise, use the authenticated robot.id (from getApiAuth).
+    const targetRobotId = queryRobotId || robot.id;
 
     // Fetch the most recent log for this robot
     const latestLog = await prisma.environmentLog.findFirst({
-      where: { robot_id: robotId },
+      where: { robot_id: targetRobotId },
       orderBy: { recorded_at: 'desc' },
     });
 

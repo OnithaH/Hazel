@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getApiAuth } from "@/lib/api-auth";
 import YTMusic from "ytmusic-api";
 
 const ytmusic = new YTMusic();
@@ -49,14 +50,20 @@ let initialized = false;
  *         description: Internal server error from ytmusic-api.
  */
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const query = searchParams.get("q");
-
-  if (!query) {
-    return NextResponse.json({ error: "No query provided" }, { status: 400 });
-  }
-
   try {
+    const { user, robot } = await getApiAuth(req);
+
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get("q");
+
+    if (!query) {
+      return NextResponse.json({ error: "No query provided" }, { status: 400 });
+    }
+
     if (!initialized) {
       await ytmusic.initialize();
       initialized = true;

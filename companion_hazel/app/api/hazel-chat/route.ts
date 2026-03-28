@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getApiAuth } from "@/lib/api-auth";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+    const { user, robot } = await getApiAuth(req);
+
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
     const { message } = await req.json();
     if (!message) return new NextResponse("Missing message", { status: 400 });
@@ -21,26 +24,10 @@ export async function POST(req: Request) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // Using gemini-2.5-flash which was verified to work with this key
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Using gemini-1.5-flash for reliability
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // 1. Context
-    const user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: { robots: true }
-    });
-
-    let robotId = user?.robots[0]?.id;
-    if (user && !robotId) {
-       const allRobots = await prisma.robot.findMany();
-       if (allRobots.length > 0) {
-         await prisma.robot.update({
-           where: { id: allRobots[0].id },
-           data: { user_id: user.id }
-         });
-         robotId = allRobots[0].id;
-       }
-    }
+    const robotId = robot.id;
 
     let envContext = "Sensor data unavailable.";
     if (robotId) {

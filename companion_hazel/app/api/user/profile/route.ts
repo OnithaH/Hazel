@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 import { ensureUserAndRobot } from "@/lib/userSync";
 
 /**
@@ -11,13 +11,15 @@ import { ensureUserAndRobot } from "@/lib/userSync";
  *     description: Retrieves the current user's settings. Automatically creates the user record and links them to the Hazel Master robot on first login.
  *     tags: [User]
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
+    const { user: authUser, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!authUser || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const userId = authUser.clerk_id;
 
     // 1. Unified Sync: Ensure the user exists and is linked to the robot
     const user = await ensureUserAndRobot(userId);
@@ -47,11 +49,13 @@ export async function GET() {
  */
 export async function PATCH(req: Request) {
   try {
-    const { userId } = await auth();
+    const { user: authUser, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!authUser || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const userId = authUser.clerk_id;
 
     const body = await req.json();
     const { weekly_study_goal, privacy_mode_enabled, bio } = body;

@@ -4,51 +4,54 @@ import os
 import json
 
 # --- CONFIGURATION ---
-# Use your Vercel URL for global access
 API_BASE_URL = "https://hazel-ten-psi.vercel.app/api" 
-ROBOT_SECRET = "your-very-secret-key" # Must match your .env ROBOT_SECRET
-CHECK_INTERVAL = 5  # Polling every 5s is safe for Vercel limits
+ROBOT_SECRET = "4aba04ec-2ff1-4ac9-a987-62bf6a25d905" 
+CHECK_INTERVAL = 5 
 
 HEADERS = {
     "Content-Type": "application/json",
     "x-robot-secret": ROBOT_SECRET
 }
 
-CMD_FILE    = "/tmp/hazel_web_cmd.txt"       # Mailbox for Web -> Robot
-STATUS_FILE = "/tmp/hazel_sensor_data.json"  # Mailbox for Robot -> Web
+# Use absolute paths relative to THIS script's location
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CMD_FILE    = os.path.join(SCRIPT_DIR, "robot_commands.txt")
+STATUS_FILE = os.path.join(SCRIPT_DIR, "sensor_data.json")
 
 def sync():
     try:
-        # 1. SEND TELEMETRY (Robot -> Web)
-        # Uploads Battery/Temp data to Vercel so you see it on the dashboard
+        # 1. SEND TELEMETRY
+        # Check if the sensor data file exists
         if os.path.exists(STATUS_FILE):
             with open(STATUS_FILE, "r") as f:
                 payload = json.load(f)
             
-            # Post to: /api/environment/log
-            requests.post(f"{API_BASE_URL}/environment/log", 
-                          json=payload, headers=HEADERS, timeout=5)
+            res = requests.post(f"{API_BASE_URL}/environment/log", 
+                           json=payload, headers=HEADERS, timeout=5)
+            print(f"📡 [POST /log] Status: {res.status_code}")
+        else:
+            print(f"ℹ️ [SKIP] No sensor_data.json found. Skipping telemetry upload.")
 
-        # 2. GET COMMANDS (Web -> Robot)
-        # Checks: /api/aroma
-        response = requests.get(f"{API_BASE_URL}/aroma", headers=HEADERS, timeout=5)
+        # 2. GET COMMANDS
+        res = requests.get(f"{API_BASE_URL}/aroma", headers=HEADERS, timeout=5)
+        print(f"📡 [GET /aroma] Status: {res.status_code}")
         
-        if response.status_code == 200:
-            data = response.json()
-            # If the API returns a list, find the active one
-            # Adjust this logic based on your specific Prisma return structure
+        if res.status_code == 200:
+            data = res.json()
             for aroma in data:
                 if aroma.get("isActive"):
-                    scent = aroma.get("name", "DEFAULT").upper()
+                    scent = aroma.get("scent_name", "DEFAULT").upper()
                     with open(CMD_FILE, "w") as f:
                         f.write(f"AROMA_{scent}")
+                    print(f"✨ [ROBOT] Aroma Command Received: {scent}")
                     break
 
     except Exception as e:
         print(f"📡 Sync Error: {e}")
 
 if __name__ == "__main__":
-    print("🚀 Hazel DB Sync Worker Active (Connecting to Vercel)...")
+    print(f"🚀 Hazel DB Sync Worker Active (Connecting to Vercel...)")
+    print(f"   Secret: {ROBOT_SECRET[:8]}...")
     while True:
         sync()
         time.sleep(CHECK_INTERVAL)

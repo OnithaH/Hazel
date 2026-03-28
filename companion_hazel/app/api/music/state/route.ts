@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
-const prisma = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 /**
@@ -13,14 +13,18 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
  *     description: Returns the music state from the database including what is currently playing, the queue, and any pending commands.
  *     tags: [Music]
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const robot = await prisma.robot.findFirst({
-      include: { musicState: true }
-    });
-    if (!robot) return NextResponse.json({ error: "No robot found in database. Create a robot first." }, { status: 404 });
+    const { user, robot } = await getApiAuth(req);
 
-    let state = robot.musicState;
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    let state = await prisma.musicState.findUnique({
+      where: { robot_id: robot.id }
+    });
+
     if (!state) {
       state = await prisma.musicState.create({
         data: {
@@ -54,12 +58,18 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
+    const { user, robot } = await getApiAuth(req);
+
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const body = await req.json();
 
-    const robot = await prisma.robot.findFirst({ include: { musicState: true } });
-    if (!robot) return NextResponse.json({ error: "No robot found" }, { status: 404 });
+    let state = await prisma.musicState.findUnique({
+      where: { robot_id: robot.id }
+    });
 
-    let state = robot.musicState;
     if (!state) {
       state = await prisma.musicState.create({
         data: { robot_id: robot.id, queue: [] }

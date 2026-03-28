@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -33,8 +32,16 @@ const prisma = new PrismaClient();
  */
 export async function GET(req: Request) {
   try {
-    // In a production system, fetch the mapping for the active robot_id.
-    const mappings = await prisma.musicGenreMapping.findMany();
+    const { user, robot } = await getApiAuth(req);
+
+    if (!user || !robot) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const mappings = await prisma.musicGenreMapping.findMany({
+      where: { robot_id: robot.id }
+    });
+    
     return NextResponse.json({ mappings });
   } catch (error) {
     console.error("Genres API Error:", error);

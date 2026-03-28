@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 /**
  * @swagger
  * /api/games/breathing-exercises:
@@ -17,10 +17,10 @@ import prisma from "@/lib/prisma";
  *       500:
  *         description: Server error
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { user, robot } = await getApiAuth(req);
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 

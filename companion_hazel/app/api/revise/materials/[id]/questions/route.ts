@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -25,7 +26,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user, robot } = await getApiAuth(req);
+    if (!user || !robot) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Verify ownership
+    const material = await prisma.revisionMaterial.findUnique({
+      where: { id: id },
+    });
+
+    if (!material || material.user_id !== user.clerk_id) {
+      return NextResponse.json({ error: "Unauthorized or material not found" }, { status: 404 });
+    }
+
     const questions = await prisma.revisionQuestion.findMany({
       where: {
         material_id: id,
