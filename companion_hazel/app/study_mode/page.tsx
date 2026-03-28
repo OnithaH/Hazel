@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+<<<<<<< Updated upstream
 import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2 } from 'lucide-react';
+=======
+import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Smartphone } from 'lucide-react';
+>>>>>>> Stashed changes
 import Link from 'next/link';
 
 interface BreathingExercise {
@@ -13,9 +17,11 @@ interface BreathingExercise {
 export default function StudyModePage() {
   const [selectedDuration, setSelectedDuration] = useState('1hr');
   const [isTracking, setIsTracking] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // Timer and Tracking states
   const [selectedBreakOption, setSelectedBreakOption] = useState<'GAME' | 'BREATHE' | null>(null);
+  const [needPhone, setNeedPhone] = useState<boolean | null>(null);
   const [breathingExercises, setBreathingExercises] = useState<BreathingExercise[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [targetSeconds, setTargetSeconds] = useState(0);
@@ -53,6 +59,7 @@ export default function StudyModePage() {
     return `${h}h ${m}m ${s}s`;
   };
 
+<<<<<<< Updated upstream
   const fetchHistory = React.useCallback(async () => {
     setIsLoadingHistory(true);
     try {
@@ -79,6 +86,26 @@ export default function StudyModePage() {
     // Only record if session was at least 5 seconds long
     if (focusSeconds >= 5) {
       // 1. Immediate UI Feedback
+=======
+  const recordSessionToHistory = React.useCallback(async () => {
+    // Only record if session was at least 5 seconds long
+    if (focusSeconds >= 5) {
+      if (activeSessionId) {
+        try {
+          await fetch(`/api/study/session/${activeSessionId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              actual_focus_time: focusSeconds,
+              is_finished: true
+            }),
+          });
+        } catch (error) {
+          console.error("Failed to update session in DB", error);
+        }
+      }
+
+>>>>>>> Stashed changes
       const newEntry = {
         id: currentSessionId, // This might be null if background start is still pending
         date: 'Just Now',
@@ -86,9 +113,10 @@ export default function StudyModePage() {
         focus: '100%',
         distractions: `${distractionsCount} distractions`
       };
-      
+
       setHistory(prev => [newEntry, ...prev]);
 
+<<<<<<< Updated upstream
       // 2. Background Persistence
       if (currentSessionId) {
         fetch(`/api/study/session/${currentSessionId}`, {
@@ -135,6 +163,15 @@ export default function StudyModePage() {
       console.error("Failed to delete session", error);
     }
   };
+=======
+      // Reset current session tracking states for next use
+      setElapsedSeconds(0);
+      setFocusSeconds(0);
+      setDistractionsCount(0);
+      setActiveSessionId(null);
+    }
+  }, [focusSeconds, distractionsCount, activeSessionId]);
+>>>>>>> Stashed changes
 
   useEffect(() => {
     let interval: any;
@@ -152,12 +189,13 @@ export default function StudyModePage() {
     return () => clearInterval(interval);
   }, [isTracking, elapsedSeconds, targetSeconds, recordSessionToHistory]);
 
-  const handleToggleTracking = () => {
+  const handleToggleTracking = async () => {
     if (!isTracking) {
       if (!selectedBreakOption) {
         alert("Please select a break option (Game or Breathe) before starting.");
         return;
       }
+<<<<<<< Updated upstream
 
       // 1. IMMEDIATE UI RESPONSE
       const seconds = parseDurationSeconds(selectedDuration);
@@ -199,10 +237,55 @@ export default function StudyModePage() {
          console.error(`Background start failed: ${err}`);
       });
 
+=======
+      if (needPhone === null) {
+        alert("Please select if you need your phone during the session.");
+        return;
+      }
+
+      try {
+        const seconds = parseDurationSeconds(selectedDuration);
+
+        // Start session in DB
+        const sessionRes = await fetch('/api/study/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            duration: seconds / 60,
+            break_activity: selectedBreakOption,
+            phone_detection_enabled: !needPhone, // Inverted: Need Phone = Detection Disabled
+            focus_shield_enabled: false,
+            focus_goal: "Quick Session from Study Mode",
+          }),
+        });
+
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          setActiveSessionId(sessionData.id);
+
+          // Update Robot Mode
+          await fetch('/api/robot/mode', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: 'STUDY' }),
+          });
+
+          setTargetSeconds(seconds);
+          setElapsedSeconds(0);
+          setFocusSeconds(0);
+          setDistractionsCount(0);
+          setIsTracking(true);
+        } else {
+          alert("Failed to start session on server.");
+        }
+      } catch (error) {
+        console.error("Error starting session:", error);
+      }
+>>>>>>> Stashed changes
     } else {
       // 1. IMMEDIATE UI RESPONSE
       setIsTracking(false);
-      recordSessionToHistory();
+      await recordSessionToHistory();
     }
   };
 
@@ -358,6 +441,35 @@ export default function StudyModePage() {
                   {breathingExercises.length} breathing exercises loaded
                 </div>
               )}
+            </div>
+            {/* Phone Requirement */}
+            <div className="bg-linear-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-3">
+                <Smartphone className="w-5 h-5 text-blue-400" />
+                <h3 className="text-base">Use Phone During Session?</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setNeedPhone(true)}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${needPhone === true
+                    ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400'
+                    : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                >
+                  Yes, I need it
+                </button>
+                <button
+                  onClick={() => setNeedPhone(false)}
+                  disabled={isTracking}
+                  className={`py-2.5 rounded-lg text-sm transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${needPhone === false
+                    ? 'bg-blue-500/20 border border-blue-500/40 text-blue-400'
+                    : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10'
+                    }`}
+                >
+                  No, I don't
+                </button>
+              </div>
             </div>
           </div>
         </div>
