@@ -79,6 +79,25 @@ export async function POST(req: Request) {
       },
     });
 
+    // If start_time is in the future, also create a Reminder record for the General mode
+    if (start_time && new Date(start_time) > new Date()) {
+      const startDate = new Date(start_time);
+      // Format time as HH:mm
+      const hours = startDate.getHours().toString().padStart(2, '0');
+      const minutes = startDate.getMinutes().toString().padStart(2, '0');
+      const timeStr = `${hours}:${minutes}`;
+
+      await prisma.reminder.create({
+        data: {
+          robot_id: user.robots[0].id,
+          title: focus_goal || "Study Session",
+          date: startDate,
+          time: timeStr,
+          type: "Study",
+        },
+      });
+    }
+
     return NextResponse.json(session);
   } catch (error) {
     console.error("[STUDY_SESSION_POST] Critical error:", error);

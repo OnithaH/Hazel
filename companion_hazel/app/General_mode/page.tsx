@@ -31,19 +31,11 @@ export default function Page() {
 
   const { data: envData } = useSWR(robotId ? `/api/environment/current?robotId=${robotId}` : null, fetcher, { refreshInterval: 5000 });
   const { data: remindersData } = useSWR(robotId ? `/api/reminders?robotId=${robotId}` : null, fetcher);
-  const { data: upcomingSessionsData } = useSWR(robotId ? `/api/study/session/upcoming?robotId=${robotId}` : null, fetcher);
   const { data: aromaData } = useSWR(robotId ? `/api/aroma?robotId=${robotId}` : null, fetcher);
 
-  // Combine and sort reminders and upcoming sessions
+  // Combine and sort reminders
   const allReminders = [
     ...(remindersData || []).map((r: any) => ({ ...r, displayDate: r.date, displayTime: r.time })),
-    ...(upcomingSessionsData || []).map((s: any) => ({
-      id: s.id,
-      title: s.focus_goal || 'Study Session',
-      displayDate: s.start_time,
-      displayTime: new Date(s.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-      type: 'Study',
-    }))
   ].sort((a: any, b: any) => new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime());
 
   // Sync Mode on Mount
