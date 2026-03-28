@@ -14,9 +14,23 @@ export default function DashboardPage() {
   const [timer, setTimer] = useState(9255); // Starting around 2:34:15
 
   useEffect(() => {
+    // AUTO-SYNC: Ensures the user is in the Prisma database and linked to the robot
+    const syncProfile = async () => {
+      try {
+        await fetch('/api/user/profile');
+        console.log('[SYNC] User profile and robot linked successfully');
+      } catch (err) {
+        console.error('[SYNC] Sync failed:', err);
+      }
+    };
+
+    if (user) {
+      syncProfile();
+    }
+    
     const interval = setInterval(() => setTimer(t => t + 1), 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);

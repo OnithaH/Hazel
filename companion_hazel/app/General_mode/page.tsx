@@ -33,6 +33,11 @@ export default function Page() {
   const { data: remindersData } = useSWR(robotId ? `/api/reminders?robotId=${robotId}` : null, fetcher);
   const { data: aromaData } = useSWR(robotId ? `/api/aroma?robotId=${robotId}` : null, fetcher);
 
+  // Combine and sort reminders
+  const allReminders = [
+    ...(remindersData || []).map((r: any) => ({ ...r, displayDate: r.date, displayTime: r.time })),
+  ].sort((a: any, b: any) => new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime());
+
   // Sync Mode on Mount
   useEffect(() => {
     if (robotId) {
@@ -406,7 +411,7 @@ export default function Page() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-              {remindersData?.map((reminder: any) => (
+              {allReminders.map((reminder: any) => (
                 <div key={reminder.id} className="p-7 bg-[#1A1D27] border border-white/5 rounded-3xl hover:border-green-500/20 transition-all duration-500 group/item hover:-translate-y-1">
                   <div className="flex items-start justify-between mb-6">
                     <div>
@@ -416,6 +421,7 @@ export default function Page() {
                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${
                       reminder.type === 'Meeting' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
                       reminder.type === 'Task' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 
+                      reminder.type === 'Study' ? 'bg-[#2B7FFF]/10 text-[#51A2FF] border-[#2B7FFF]/20' :
                       'bg-pink-500/10 text-pink-400 border-pink-500/20'
                     }`}>
                       {reminder.type}
@@ -423,11 +429,11 @@ export default function Page() {
                   </div>
                   <div className="flex items-center gap-3 text-white/40 text-[11px] font-medium p-3 bg-black/20 rounded-xl">
                     <Clock className="w-3.5 h-3.5 opacity-50" />
-                    <span>{new Date(reminder.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at {reminder.time}</span>
+                    <span>{new Date(reminder.displayDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at {reminder.displayTime}</span>
                   </div>
                 </div>
               ))}
-              {(!remindersData || remindersData.length === 0) && (
+              {allReminders.length === 0 && (
                 <div className="col-span-2 py-20 flex flex-col items-center justify-center bg-white/5 border-2 border-dashed border-white/5 rounded-[32px] transition-colors group/empty">
                   <div className="p-5 bg-white/5 rounded-full mb-6 group-hover/empty:scale-110 transition-transform">
                     <Bell className="w-10 h-10 text-white/10" />

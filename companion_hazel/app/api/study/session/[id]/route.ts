@@ -50,6 +50,37 @@ import prisma from "@/lib/prisma";
  *       500:
  *         description: Internal server error
  */
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const session = await prisma.studySession.findUnique({
+      where: { id },
+      include: {
+        distractions: true,
+      },
+    });
+
+    if (!session) {
+      return new NextResponse("Session not found", { status: 404 });
+    }
+
+    return NextResponse.json(session);
+  } catch (error) {
+    console.error("[STUDY_SESSION_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -63,13 +94,15 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { actual_focus_time, is_finished } = body;
+    const { actual_focus_time, is_finished, notes, break_time_seconds } = body;
 
     const session = await prisma.studySession.update({
       where: { id },
       data: {
         actual_focus_time: actual_focus_time !== undefined ? parseInt(actual_focus_time) : undefined,
         end_time: is_finished ? new Date() : undefined,
+        notes: notes !== undefined ? notes : undefined,
+        break_time_seconds: break_time_seconds !== undefined ? parseInt(break_time_seconds) : undefined,
       },
     });
 

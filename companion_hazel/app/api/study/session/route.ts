@@ -59,7 +59,8 @@ export async function POST(req: Request) {
       break_activity,
       phone_detection_enabled,
       focus_shield_enabled,
-      focus_goal
+      focus_goal,
+      start_time
     } = body;
 
     if (!duration) {
@@ -74,9 +75,28 @@ export async function POST(req: Request) {
         phone_detection_enabled: !!phone_detection_enabled,
         focus_shield_enabled: !!focus_shield_enabled,
         focus_goal: focus_goal || null,
-        start_time: new Date(),
+        start_time: start_time ? new Date(start_time) : new Date(),
       },
     });
+
+    // If start_time is in the future, also create a Reminder record for the General mode
+    if (start_time && new Date(start_time) > new Date()) {
+      const startDate = new Date(start_time);
+      // Format time as HH:mm
+      const hours = startDate.getHours().toString().padStart(2, '0');
+      const minutes = startDate.getMinutes().toString().padStart(2, '0');
+      const timeStr = `${hours}:${minutes}`;
+
+      await prisma.reminder.create({
+        data: {
+          robot_id: user.robots[0].id,
+          title: focus_goal || "Study Session",
+          date: startDate,
+          time: timeStr,
+          type: "Study",
+        },
+      });
+    }
 
     return NextResponse.json(session);
   } catch (error) {

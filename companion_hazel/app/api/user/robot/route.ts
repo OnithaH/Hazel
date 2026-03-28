@@ -1,54 +1,74 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
-export async function GET() {
+/**
+ * @swagger
+ * /api/user/robot:
+ *   get:
+ *     summary: Get user's assigned robot (Team-Friendly)
+ *     description: Retrieves the robot. If the user has no robot, it automatically "Adopts" the first one in the DB for the team.
+ *     tags: [Robot]
+ */
+export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
+    // 1. Unified Auth: Detect the User/Robot
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // 1. Find the user by clerk_id
-    let user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: {
-        robots: true,
+    if (!robot) {
+      return new NextResponse("No robots available in system", { status: 404 });
+    }
+
+    // 2. Return the robot (either owned or "Adopted" via Team Fallback in getApiAuth)
+    return NextResponse.json(robot);
+  } catch (error) {
+    console.error("[USER_ROBOT_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/user/robot:
+ *   post:
+ *     summary: Create a robot for the user (Ensures User exists)
+ *     tags: [Robot]
+ */
+export async function POST(req: Request) {
+  try {
+    const { user: apiUser } = await getApiAuth(req);
+
+    if (!apiUser) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const { name } = body;
+
+    // Check if robot already exists for this specific user
+    const existingRobot = await prisma.robot.findFirst({
+      where: { user_id: apiUser.id }
+    });
+
+    if (existingRobot) {
+      return NextResponse.json(existingRobot, { status: 200 });
+    }
+
+    // Create a new robot for this user
+    const robot = await prisma.robot.create({
+      data: {
+        name: name || "Companion Robot",
+        user_id: apiUser.id,
       },
     });
 
-    // 2. If user doesn't exist, create them (or return 404)
-    if (!user) {
-      // Create user if they don't exist in our DB but exist in Clerk
-      user = await prisma.user.create({
-        data: {
-          clerk_id: userId,
-          email: `${userId}@example.com`, // Placeholder email
-          name: "User",
-        },
-        include: { robots: true }
-      });
-    }
-
-    // 3. If user exists but has no robots, assign the first available robot
-    if (user.robots.length === 0) {
-      const allRobots = await prisma.robot.findMany();
-      if (allRobots.length > 0) {
-        // Link the first robot to this user
-        const robot = await prisma.robot.update({
-          where: { id: allRobots[0].id },
-          data: { user_id: user.id }
-        });
-        return NextResponse.json(robot);
-      } else {
-        return new NextResponse("No robots available in system", { status: 404 });
-      }
-    }
-
-    return NextResponse.json(user.robots[0]);
+    return NextResponse.json(robot, { status: 201 });
   } catch (error) {
-    console.error("[USER_ROBOT_GET]", error);
+    console.error("[USER_ROBOT_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
