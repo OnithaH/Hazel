@@ -38,12 +38,9 @@ export async function ensureUserAndRobot(clerkId: string) {
       const firstRobot = await prisma.robot.findFirst();
       
       if (firstRobot) {
-        console.log(`[USER_SYNC] Linking user ${user.id} to Master Robot: ${firstRobot.id}`);
-        // Link the existing robot to this user
-        await prisma.robot.update({
-          where: { id: firstRobot.id },
-          data: { user_id: user.id }
-        });
+        console.log(`[USER_SYNC] Sharing Master Robot ${firstRobot.id} with user ${user.id}`);
+        // No longer re-assigning user_id to prevent "stealing" the robot from the team lead.
+        // getApiAuth handles the fallback for users without an explicit robot record.
       } else {
         // Only create a robot if THERE ARE ZERO ROBOTS in the entire database
         console.log(`[USER_SYNC] Create Backup Robot (System was empty)`);

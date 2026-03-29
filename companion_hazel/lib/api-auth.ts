@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "./prisma";
+import { ensureUserAndRobot } from "./userSync";
 
 export interface ApiAuthResponse {
   user: any | null;
@@ -38,10 +39,8 @@ export async function getApiAuth(req: Request): Promise<ApiAuthResponse> {
 
   // --- USER PATH ---
   if (userId) {
-    user = await prisma.user.findUnique({
-      where: { clerk_id: userId },
-      include: { robots: true },
-    });
+    // ACTIVE SYNC: Ensure this user exists and is linked to the shared robot
+    user = await ensureUserAndRobot(userId);
 
     // TEAM FALLBACK: If this user has no robots, let them "share" the first one in the DB.
     // This allows all 5 team members to see the same physical robot instantly.
