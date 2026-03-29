@@ -151,10 +151,10 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#07080A] via-[#0D0F1A] to-[#07080A] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#07080A] via-[#0D0F1A] to-[#07080A] text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0 mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
             <h1 className="text-4xl font-normal mb-2 tracking-tight">General Mode</h1>
             <p className="text-white/40">Natural conversations and smart environment control</p>
@@ -166,7 +166,7 @@ export default function Page() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-6 mb-8 animate-in fade-in zoom-in-95 duration-700 delay-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-in fade-in zoom-in-95 duration-700 delay-100">
           <div className="p-7 bg-[#12141C] border border-white/5 rounded-3xl relative overflow-hidden group hover:border-orange-500/30 transition-all duration-500 shadow-2xl">
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-orange-500/10 transition-all" />
             <div className="flex items-center justify-between relative z-10">
@@ -211,9 +211,9 @@ export default function Page() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Chat Section */}
-          <div className="col-span-2 p-8 bg-[#12141C] border border-white/5 rounded-[40px] flex flex-col h-[650px] shadow-2xl animate-in fade-in slide-in-from-left-4 duration-700 delay-200 relative overflow-hidden">
+          <div className="col-span-1 md:col-span-2 p-6 md:p-8 bg-[#12141C] border border-white/5 rounded-[40px] flex flex-col h-[600px] md:h-[650px] shadow-2xl animate-in fade-in slide-in-from-left-4 duration-700 delay-200 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-green-500/5 to-transparent pointer-events-none" />
             
             <div className="flex items-center justify-between mb-8 relative z-10">
@@ -302,7 +302,7 @@ export default function Page() {
           {/* Right Sidebar */}
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700 delay-300">
             {/* Mood Lighting */}
-            <div className="p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl group hover:border-blue-500/20 transition-colors duration-500">
+            <div className="p-6 md:p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl group hover:border-blue-500/20 transition-colors duration-500">
               <div className="flex items-center gap-4 mb-6">
                 <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20 group-hover:scale-110 transition-transform">
                   <Lightbulb className="w-6 h-6 text-blue-400" />
@@ -327,7 +327,7 @@ export default function Page() {
             </div>
 
             {/* Aroma Pulse */}
-            <div className="p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl relative overflow-hidden group hover:border-purple-500/20 transition-colors duration-500">
+            <div className="p-6 md:p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl relative overflow-hidden group hover:border-purple-500/20 transition-colors duration-500">
               <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/5 blur-3xl rounded-full group-hover:bg-purple-500/10" />
               <div className="flex items-center gap-4 mb-6 relative z-10">
                 <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20 group-hover:scale-110 transition-transform">
@@ -360,7 +360,7 @@ export default function Page() {
             </div>
 
             {/* Control Pod */}
-            <div className="p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl">
+            <div className="p-6 md:p-8 bg-[#12141C] border border-white/5 rounded-[40px] shadow-2xl">
               <h3 className="text-xs font-bold uppercase tracking-widest mb-6 text-white/30">System Controls</h3>
               <div className="grid grid-cols-1 gap-3">
                 <button 
@@ -393,9 +393,9 @@ export default function Page() {
         </div>
 
         {/* Dynamic Lists Sections */}
-        <div className="grid grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-700 delay-500 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-700 delay-500 mb-16">
           {/* Reminders Grid */}
-          <div className="col-span-2 p-10 bg-[#12141C] border border-white/5 rounded-[48px] shadow-2xl relative overflow-hidden group">
+          <div className="col-span-1 md:col-span-2 p-6 md:p-10 bg-[#12141C] border border-white/5 rounded-[48px] shadow-2xl relative overflow-hidden group">
             <div className="absolute -top-24 -left-24 w-64 h-64 bg-green-500/5 blur-[100px] rounded-full group-hover:bg-green-500/10 transition-all pointer-events-none" />
             
             <div className="flex items-center justify-between mb-10 relative z-10">
@@ -445,7 +445,7 @@ export default function Page() {
           </div>
 
           {/* Aroma Collection */}
-          <div className="p-10 bg-[#12141C] border border-white/5 rounded-[48px] shadow-2xl relative overflow-hidden group">
+          <div className="p-6 md:p-10 bg-[#12141C] border border-white/5 rounded-[48px] shadow-2xl relative overflow-hidden group">
              <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/5 blur-[100px] rounded-full group-hover:bg-purple-500/10 transition-all pointer-events-none" />
              
              <div className="flex flex-col mb-10 relative z-10">
@@ -493,8 +493,8 @@ export default function Page() {
       {/* --- Modals (Keep them unchanged but apply 2026 aesthetics) --- */}
       {showReminderModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
-          <div className="w-full max-w-xl bg-[#12141C] border border-white/10 rounded-[48px] p-10 relative shadow-[0_0_100px_rgba(34,197,94,0.1)] overflow-hidden">
-            <button onClick={() => setShowReminderModal(false)} className="absolute top-8 right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 border border-white/5 transition-all text-white/40">
+          <div className="w-full max-w-xl bg-[#12141C] border border-white/10 rounded-[48px] p-6 md:p-10 relative shadow-[0_0_100px_rgba(34,197,94,0.1)] overflow-hidden">
+            <button onClick={() => setShowReminderModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 border border-white/5 transition-all text-white/40">
               <X className="w-6 h-6" />
             </button>
             <h2 className="text-4xl font-light mb-2 tracking-tight">New Reminder</h2>
@@ -506,7 +506,7 @@ export default function Page() {
                   <input type="text" value={reminderForm.title} onChange={(e) => setReminderForm({ ...reminderForm, title: e.target.value })} placeholder="Title of your reminder" 
                   className="w-full px-8 py-5 bg-[#0A0B10] border border-white/5 rounded-[24px] text-white placeholder:text-white/10 focus:outline-none focus:border-green-500/30 transition-all font-light" />
                </div>
-               <div className="grid grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-2">Date</label>
                     <input type="date" value={reminderForm.date} onChange={(e) => setReminderForm({ ...reminderForm, date: e.target.value })} 
@@ -541,15 +541,15 @@ export default function Page() {
 
       {showFragranceModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
-           <div className="w-full max-w-xl bg-[#12141C] border border-white/10 rounded-[48px] p-10 relative shadow-[0_0_100px_rgba(168,85,247,0.1)] overflow-hidden">
-             <button onClick={() => setShowFragranceModal(false)} className="absolute top-8 right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 border border-white/5 transition-all text-white/40">
+           <div className="w-full max-w-xl bg-[#12141C] border border-white/10 rounded-[48px] p-6 md:p-10 relative shadow-[0_0_100px_rgba(168,85,247,0.1)] overflow-hidden">
+             <button onClick={() => setShowFragranceModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 p-3 bg-white/5 rounded-2xl hover:bg-white/10 border border-white/5 transition-all text-white/40">
                 <X className="w-6 h-6" />
              </button>
              <h2 className="text-4xl font-light mb-2 tracking-tight">Fragrance Engine</h2>
              <p className="text-white/30 text-sm mb-10">Calibrate a new olfactory profile</p>
 
              <div className="space-y-8">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 ml-2">Scent Name</label>
                       <input type="text" value={fragranceForm.name} onChange={(e) => setFragranceForm({...fragranceForm, name: e.target.value})} placeholder="Peppermint" 
