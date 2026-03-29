@@ -52,6 +52,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white`}
         >
+          {/* Automatically syncs Robot Mode with Navigation */}
+          <RouteWatcher />
+
           {/* Persistent Header */}
           <Header />
 

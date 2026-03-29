@@ -58,7 +58,13 @@ export async function PATCH(req: Request) {
       },
     });
 
-    // 2. Start a new mode session
+    // 2. Update the main Robot's current mode
+    await prisma.robot.update({
+      where: { id: robotId },
+      data: { mode: mode.toUpperCase() },
+    });
+
+    // 3. Start a new mode session log
     const newLog = await prisma.modeUsageLog.create({
       data: {
         robot_id: robotId,
