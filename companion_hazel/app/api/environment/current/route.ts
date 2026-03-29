@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getApiAuth } from '@/lib/api-auth';
 
+
 /**
  * @swagger
  * /api/environment/current:
