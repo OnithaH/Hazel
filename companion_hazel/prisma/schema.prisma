@@ -32,6 +32,7 @@ model Robot {
   secret_key   String   @unique @default(uuid())
   user_id      String
   user         User     @relation(fields: [user_id], references: [id])
+  mode         String   @default("GENERAL")
   created_at   DateTime @default(now())
 
   // Data linked to Specific Robot
