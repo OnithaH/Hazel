@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
-import { ensureUserAndRobot } from "@/lib/userSync";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -41,16 +40,10 @@ import { ensureUserAndRobot } from "@/lib/userSync";
  */
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
+    const { user, robot } = await getApiAuth(req);
 
-    if (!userId) {
+    if (!user || !robot) {
       return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const user = await ensureUserAndRobot(userId);
-
-    if (!user || user.robots.length === 0) {
-      return new NextResponse("Failed to synchronize user/robot", { status: 500 });
     }
 
     const body = await req.json();
@@ -69,7 +62,7 @@ export async function POST(req: Request) {
 
     const session = await prisma.studySession.create({
       data: {
-        robot_id: user.robots[0].id,
+        robot_id: robot.id,
         scheduled_duration: duration,
         break_activity,
         phone_detection_enabled: !!phone_detection_enabled,
@@ -89,7 +82,7 @@ export async function POST(req: Request) {
 
       await prisma.reminder.create({
         data: {
-          robot_id: user.robots[0].id,
+          robot_id: robot.id,
           title: focus_goal || "Study Session",
           date: startDate,
           time: timeStr,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 
 /**
  * @swagger
@@ -18,10 +18,12 @@ import prisma from "@/lib/prisma";
  */
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { user, robot } = await getApiAuth(req);
+    if (!user || !robot) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = user.clerk_id;
 
     const materials = await prisma.revisionMaterial.findMany({
       where: {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 import { generateQuestions } from "@/lib/gemini";
 
 /**
@@ -31,11 +31,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const { userId } = await auth();
-    if (!userId) {
+    const { user, robot } = await getApiAuth(req);
+    if (!user || !robot) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { id } = await params;
+    const userId = user.clerk_id;
 
     const materialId = id;
 

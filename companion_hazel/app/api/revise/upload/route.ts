@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { getApiAuth } from "@/lib/api-auth";
 import { generateQuestions } from "@/lib/gemini";
 
 /**
@@ -32,10 +32,12 @@ import { generateQuestions } from "@/lib/gemini";
  */
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { user, robot } = await getApiAuth(req);
+    if (!user || !robot) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = user.clerk_id;
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
