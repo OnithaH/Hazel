@@ -24,7 +24,7 @@ export default function ScheduleSessionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const durations = ['30m', '1h', '1h 30m', '2h', '2h 30m', '3h'];
+  const durations = ['5m', '10m', '30m', '1h', '1h 30m', '2h', '2h 30m', '3h'];
 
   const parseDuration = (durationStr: string): number => {
     if (durationStr.includes('h') && durationStr.includes('m')) {
