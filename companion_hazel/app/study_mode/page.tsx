@@ -28,10 +28,12 @@ export default function StudyModePage() {
   const [history, setHistory] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  const durations = ['30 min', '1hr', '1hr 30 min', '2hr', '2hr 30 min', '3hrs'];
+  const durations = ['5 min', '10 min', '30 min', '1hr', '1hr 30 min', '2hr', '2hr 30 min', '3hrs'];
 
   const parseDurationSeconds = (dur: string) => {
     const map: Record<string, number> = {
+      '5 min': 5,
+      '10 min': 10,
       '30 min': 30,
       '1hr': 60,
       '1hr 30 min': 90,
