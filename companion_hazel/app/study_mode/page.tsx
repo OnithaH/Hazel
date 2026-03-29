@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Shield, AlertTriangle, Calendar, BookOpen, Camera, Eye, Loader2, Clock, Trash2, Smartphone } from 'lucide-react';
 import Link from 'next/link';
+import ModeActivationCard from '@/components/ModeActivationCard';
 
 interface BreathingExercise {
   id: string;
@@ -259,6 +260,16 @@ export default function StudyModePage() {
             <div className="w-2 h-2 bg-blue-500 rounded-full opacity-85"></div>
             <span>Study Mode Active</span>
           </div>
+        </div>
+
+        {/* --- MANUAL MODE ACTIVATION --- */}
+        <div className="mb-8">
+          <ModeActivationCard 
+            targetMode="STUDY"
+            title="Study Mode"
+            description="Hazel will monitor your focus, detect phone usage, and manage your study sessions."
+            colorClass="blue"
+          />
         </div>
 
         {/* Main Content Grid */}
