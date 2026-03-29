@@ -299,12 +299,25 @@ export default function MusicModePage() {
           border-radius: 100px;
           transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+
+        /* Responsive Overrides */
+        @media (max-width: 1024px) {
+          .responsive-padding { padding: 32px 24px 56px !important; }
+          .header-row { flex-direction: column !important; gap: 16px; align-items: stretch !important; }
+          .player-grid { grid-template-columns: 1fr !important; }
+          .genres-grid { grid-template-columns: repeat(3, 1fr) !important; }
+          .bottom-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 640px) {
+          .genres-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .player-controls { gap: 12px !important; }
+        }
       `}</style>
 
-      <div style={{ padding: "52px 40px 72px" }}>
+      <div className="responsive-padding" style={{ padding: "52px 40px 72px" }}>
 
         {/* ── Header ── */}
-        <div className="page-enter" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
+        <div className="page-enter header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
           <div>
             <h1 style={{ fontSize: "40px", fontWeight: 400, lineHeight: "48px", margin: "0 0 10px", letterSpacing: "-0.5px" }}>Music Mode</h1>
             <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", margin: 0 }}>Gesture-controlled music with multi-sensory experience</p>
@@ -316,7 +329,7 @@ export default function MusicModePage() {
         </div>
 
         {/* ── Player Row ── */}
-        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
+        <div className="page-enter player-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", marginBottom: "32px", animationDelay: "80ms" }}>
 
           {/* Player Card */}
           <div className="card-lift" style={{ background: "linear-gradient(135deg, rgba(var(--c1-rgb),0.09) 0%, rgba(var(--c2-rgb),0.05) 50%, rgba(var(--c3-rgb),0.05) 100%)", border: "0.8px solid rgba(var(--c1-rgb),0.2)", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -376,7 +389,7 @@ export default function MusicModePage() {
             </div>
 
             {/* Controls */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}>
+            <div className="player-controls" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px" }}>
               <button className="ctrl-btn" style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", border: "0.8px solid rgba(255,255,255,0.12)" }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M14.5 3.5L7.5 10l7 6.5V3.5z" fill="white"/>
@@ -513,7 +526,7 @@ export default function MusicModePage() {
         {/* ── Genre & RGB Theme ── */}
         <div className="page-enter" style={{ marginBottom: "32px", animationDelay: "160ms" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 400, margin: "0 0 18px", letterSpacing: "-0.3px" }}>Genre &amp; RGB Theme</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "14px" }}>
+          <div className="genres-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "14px" }}>
             {genres.map((g, i) => (
               <button key={g.name} onClick={() => setActiveGenre(i)} className="genre-btn"
                 style={{ background: activeGenre === i ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.04)", border: activeGenre === i ? "0.8px solid rgba(255,255,255,0.3)" : "0.8px solid rgba(255,255,255,0.09)", borderRadius: "18px", padding: "22px 18px", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", color: "#fff", boxShadow: activeGenre === i ? "0 10px 30px rgba(0,0,0,0.35)" : "none" }}>
@@ -526,7 +539,7 @@ export default function MusicModePage() {
         </div>
 
         {/* ── Up Next + Playlists ── */}
-        <div className="page-enter" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", animationDelay: "240ms" }}>
+        <div className="page-enter bottom-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", animationDelay: "240ms" }}>
 
           {/* Up Next */}
           <div className="card-lift" style={{ background: "rgba(255,255,255,0.04)", border: "0.8px solid rgba(255,255,255,0.09)", borderRadius: "20px", padding: "26px" }}>
