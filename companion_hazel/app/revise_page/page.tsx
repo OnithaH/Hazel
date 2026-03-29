@@ -125,12 +125,21 @@ export default function ReviseQAPage() {
       setSelectedMaterial(material);
       setQuestions([]); // Clear previous questions
       
-      // Fetch questions from API
+      // 1. STARTS A ROBOT SESSION (No Focus Tracking for Revise)
+      await axios.post('/api/study/session', {
+        duration: 30, // Default 30 min for revision
+        break_activity: 'BREATHE',
+        phone_detection_enabled: false, 
+        focus_shield_enabled: false,
+        focus_goal: `REVISE:${material.id}`
+      });
+
+      // 2. Fetch questions from API
       const response = await axios.get(`/api/revise/materials/${material.id}/questions`);
       setQuestions(response.data);
     } catch (err) {
-      console.error('Error fetching questions:', err);
-      setError('Failed to fetch questions for this material. Please try again.');
+      console.error('Error starting practice session:', err);
+      setError('Failed to start session. Please try again.');
     } finally {
       setIsFetchingQuestions(false);
     }
