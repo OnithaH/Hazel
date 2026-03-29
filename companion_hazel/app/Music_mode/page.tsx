@@ -13,6 +13,7 @@ interface Song {
   thumbnails?: { url: string }[];
   currentTime?: number;
   totalTime?: number;
+  isPlaying?: boolean;
 }
 
 interface MusicState {
@@ -95,6 +96,9 @@ export default function MusicModePage() {
           const data = await res.json();
           if (data.nowPlaying) {
              setNowPlaying(data.nowPlaying);
+             if (data.nowPlaying.isPlaying !== undefined) {
+                setIsPlaying(data.nowPlaying.isPlaying);
+             }
              if (data.nowPlaying.currentTime !== undefined && data.nowPlaying.totalTime) {
                 setProgress((data.nowPlaying.currentTime / data.nowPlaying.totalTime) * 100);
              }
@@ -122,13 +126,21 @@ export default function MusicModePage() {
   }, []);
 
   const sendCommand = async (cmd: string) => {
+    // Optimistic UI for immediate feedback
     if (cmd === "play_pause") setIsPlaying(!isPlaying);
+    
     try {
-      await fetch("/api/music/state", {
+      const res = await fetch("/api/music/state", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: cmd }),
       });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.nowPlaying && data.nowPlaying.isPlaying !== undefined) {
+          setIsPlaying(data.nowPlaying.isPlaying);
+        }
+      }
     } catch (err) { }
   };
 
