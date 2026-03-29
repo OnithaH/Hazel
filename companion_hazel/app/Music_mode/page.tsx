@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import ModeActivationCard from "@/components/ModeActivationCard";
 
 interface Song {
   title?: string;
@@ -315,6 +316,16 @@ export default function MusicModePage() {
       `}</style>
 
       <div className="responsive-padding" style={{ padding: "52px 40px 72px" }}>
+
+        {/* --- MANUAL MODE ACTIVATION --- */}
+        <div style={{ marginBottom: "32px" }}>
+          <ModeActivationCard 
+            targetMode="MUSIC"
+            title="Music Mode"
+            description="Sync Hazel with your rhythm. Activate Music Mode to enable gesture controls and immersive lighting."
+            colorClass="pink"
+          />
+        </div>
 
         {/* ── Header ── */}
         <div className="page-enter header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>

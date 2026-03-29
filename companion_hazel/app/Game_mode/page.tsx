@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, Gamepad2, TrendingUp, Target, X, Loader2 } from 'lucide-react';
+import ModeActivationCard from '@/components/ModeActivationCard';
 
 interface Game {
   id?: string;
@@ -182,15 +183,25 @@ export default function Page() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-8 py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-normal mb-2">Gaming Mode</h1>
+            <h1 className="text-4xl font-normal mb-2 tracking-tight">Gaming Mode</h1>
             <p className="text-white/60">Mind-refreshing games for focused breaks</p>
           </div>
-          <div className="flex items-center gap-3 px-6 py-3 bg-purple-500/20 border border-purple-500/40 rounded-full">
+          <div className="flex items-center gap-3 px-6 py-3 bg-purple-500/20 border border-purple-500/40 rounded-full shadow-lg shadow-black">
             <Gamepad2 className="w-5 h-5 text-purple-300" />
-            <span>Level 12</span>
+            <span className="text-sm font-medium tracking-wide">Level 12</span>
           </div>
+        </div>
+
+        {/* --- MANUAL MODE ACTIVATION --- */}
+        <div className="mb-12">
+          <ModeActivationCard 
+            targetMode="GAME"
+            title="Gaming Mode"
+            description="Activate Hazel's gaming state for interactive breaks and focus-refreshing play."
+            colorClass="purple"
+          />
         </div>
 
         {/* Stats Grid */}

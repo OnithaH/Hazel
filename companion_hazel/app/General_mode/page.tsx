@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Thermometer, Droplets, Lightbulb, Sparkles, Bell, Clock, X, Send, Plus, Loader2 } from 'lucide-react';
 import useSWR, { mutate } from 'swr';
+import ModeActivationCard from '@/components/ModeActivationCard';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -37,17 +38,6 @@ export default function Page() {
   const allReminders = [
     ...(remindersData || []).map((r: any) => ({ ...r, displayDate: r.date, displayTime: r.time })),
   ].sort((a: any, b: any) => new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime());
-
-  // Sync Mode on Mount
-  useEffect(() => {
-    if (robotId) {
-      fetch('/api/robot/mode', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'GENERAL' }),
-      });
-    }
-  }, [robotId]);
 
   // Scroll to bottom of chat
   useEffect(() => {
@@ -154,7 +144,7 @@ export default function Page() {
     <div className="min-h-screen bg-gradient-to-br from-[#07080A] via-[#0D0F1A] to-[#07080A] text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0 mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0 mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
             <h1 className="text-4xl font-normal mb-2 tracking-tight">General Mode</h1>
             <p className="text-white/40">Natural conversations and smart environment control</p>
@@ -163,6 +153,16 @@ export default function Page() {
             <div className={`w-2 h-2 ${robotId ? 'bg-green-500 animate-pulse' : 'bg-red-500'} rounded-full`} />
             <span className="text-sm font-medium tracking-wide">{robot ? `${robot.name} Active` : 'Robot Offline'}</span>
           </div>
+        </div>
+
+        {/* --- MANUAL MODE ACTIVATION --- */}
+        <div className="mb-8">
+          <ModeActivationCard 
+            targetMode="GENERAL"
+            title="General Mode"
+            description="Hazel will assist you with natural conversation, reminders, and environment tracking."
+            colorClass="green"
+          />
         </div>
 
         {/* Stats Cards */}
